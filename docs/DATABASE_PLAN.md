@@ -1,7 +1,13 @@
-# Database Plan (Draft — no migrations created yet)
+# Database Plan (Draft — superseded)
 
-This is a planning document only. No tables exist yet and no migrations
-have been written. Schema changes must be explained and approved before
+> **Superseded by `docs/DATABASE_SCHEMA.md`**, `docs/RLS_POLICY_MATRIX.md`,
+> and `docs/GIFT_EXCHANGE_FLOW.md`, which document the actual migrations
+> in `supabase/migrations/`. Kept here for history — the draft below was
+> the starting point before the schema grew to include the AI interview,
+> AI suggestions, gift exchange, usage-log, and moderation-report tables.
+
+This was a planning document only, written before any migrations
+existed. Schema changes must be explained and approved before
 implementation (see `CLAUDE.md`).
 
 ## Principles
