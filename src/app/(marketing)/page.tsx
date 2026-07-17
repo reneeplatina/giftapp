@@ -1,4 +1,4 @@
-import { Gift as GiftIcon, Link2, PencilLine, Share2 } from "lucide-react";
+import { Gift as GiftIcon, Link2, PencilLine } from "lucide-react";
 import { Container } from "@/components/container";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,9 +46,6 @@ export default function HomePage() {
               Sign In
             </Button>
           </div>
-          <p className="text-sm text-neutral-500">
-            Completely free — no payments, subscriptions, or ads, ever.
-          </p>
         </div>
 
         <div className="flex justify-center">
@@ -104,14 +101,6 @@ export default function HomePage() {
         </div>
 
         <div className="flex flex-col items-center gap-4 rounded-2xl bg-cream px-6 py-10 text-center">
-          <Share2 className="h-6 w-6 text-neutral-700" aria-hidden="true" />
-          <p className="font-display text-2xl font-semibold text-neutral-900">
-            Free for everyone, always
-          </p>
-          <p className="max-w-md text-sm text-neutral-600">
-            No payments, subscriptions, ads, or shopping carts — just a
-            profile you can share with the people who love you.
-          </p>
           <Button href="/signup">Create My Gift Profile</Button>
         </div>
       </Container>

@@ -44,9 +44,6 @@ export function AppSidebar() {
       <div className="border-t border-neutral-200 px-3 py-3">
         <SignOutButton />
       </div>
-      <div className="px-6 py-6 text-xs text-neutral-500">
-        Free forever. No ads, no payments.
-      </div>
     </aside>
   );
 }
