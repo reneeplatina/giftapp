@@ -27,7 +27,7 @@ export function ForgotPasswordForm({ linkError }: { linkError?: string }) {
       <OtpVerifyForm
         email={state.email}
         title="Enter your reset code"
-        description="Enter the 6-digit code we sent to"
+        description="Enter the code we sent to"
         submitLabel="Verify code"
         verifyAction={verifyRecoveryOtpAction}
         resendAction={requestPasswordResetAction}
@@ -42,7 +42,7 @@ export function ForgotPasswordForm({ linkError }: { linkError?: string }) {
           Forgot password
         </h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Enter your email and we&apos;ll send you a 6-digit code.
+          Enter your email and we&apos;ll send you a verification code.
         </p>
         {linkError === "expired_link" && (
           <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">

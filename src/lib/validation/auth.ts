@@ -41,10 +41,13 @@ export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
 export const verifyOtpSchema = z.object({
   email: z.string().email("Enter a valid email address"),
+  // Supabase's configured OTP token length isn't fixed at 6 digits (it's
+  // a per-project setting), so this only checks it's a plausible numeric
+  // code and leaves the real validation to verifyOtp() server-side.
   code: z
     .string()
     .trim()
-    .regex(/^\d{6}$/, "Enter the 6-digit code from your email"),
+    .regex(/^\d{4,12}$/, "Enter the code from your email"),
 });
 
 export type VerifyOtpValues = z.infer<typeof verifyOtpSchema>;

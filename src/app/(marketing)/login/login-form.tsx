@@ -34,7 +34,7 @@ export function LoginForm({
       <OtpVerifyForm
         email={state.email}
         title="Confirm your email first"
-        description="Enter the 6-digit code we sent to"
+        description="Enter the code we sent to"
         submitLabel="Confirm email"
         verifyAction={verifySignupOtpAction}
         resendAction={resendConfirmationAction}

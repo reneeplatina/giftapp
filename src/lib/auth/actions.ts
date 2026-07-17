@@ -211,7 +211,7 @@ export async function requestPasswordResetAction(
     status: "reset_email_sent",
     email: parsed.data.email,
     message:
-      "If an account exists for that email, we've sent a 6-digit code.",
+      "If an account exists for that email, we've sent a verification code.",
   };
 
   try {
@@ -303,7 +303,7 @@ export async function resendConfirmationAction(
 }
 
 /**
- * Verifies the 6-digit code from the "Confirm signup" email, entered
+ * Verifies the numeric code from the "Confirm signup" email, entered
  * manually by the user. Scanner-resistant alternative to clicking
  * {{ .ConfirmationURL }} — email security scanners that prefetch links
  * can't "click" a code that has to be typed in by hand.
@@ -364,7 +364,7 @@ export async function verifySignupOtpAction(
 }
 
 /**
- * Verifies the 6-digit code from the "Reset Password" email. On success
+ * Verifies the numeric code from the "Reset Password" email. On success
  * this establishes the same authenticated recovery session that clicking
  * the link would have (verifyOtp sets the session cookie via the SSR
  * client), which /reset-password requires before it'll let the user set

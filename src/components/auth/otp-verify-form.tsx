@@ -59,13 +59,13 @@ export function OtpVerifyForm({
         >
           <input type="hidden" name="email" value={email} />
           <TextField
-            label="6-digit code"
+            label="Verification code"
             name="code"
             inputMode="numeric"
             pattern="[0-9]*"
             autoComplete="one-time-code"
-            maxLength={6}
-            placeholder="123456"
+            maxLength={12}
+            placeholder="Enter the code from your email"
             error={state.fieldErrors?.code?.[0]}
           />
           {state.status === "error" && state.message && (
