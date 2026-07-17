@@ -74,7 +74,7 @@ export function PublicProfileView({
         <div className="flex flex-wrap justify-center gap-2">
           <ComingSoonModal
             triggerLabel="Help Me Choose a Gift"
-            triggerIcon={MessageCircleQuestion}
+            triggerIcon={<MessageCircleQuestion className="h-4 w-4" aria-hidden="true" />}
             triggerVariant="primary"
             modalTitle="AI Gift Assistant — coming soon"
             modalDescription={`Soon you'll be able to chat with an AI assistant for personalized gift ideas based on ${profile.basicInfo.displayName}'s profile. For now, browse the wishlist and favorites below.`}

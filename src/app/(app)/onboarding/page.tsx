@@ -30,7 +30,7 @@ export default async function OnboardingPage() {
           </p>
           <ComingSoonModal
             triggerLabel="Build It With AI"
-            triggerIcon={Sparkles}
+            triggerIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
             triggerVariant="outline"
             modalTitle="AI interview coming soon"
             modalDescription="A guided, conversational way to build your profile is planned for a later phase. Choose Fill It Out Myself for now — you can switch to AI once it's ready."

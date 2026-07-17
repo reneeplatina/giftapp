@@ -106,7 +106,7 @@ export default async function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2">
         <ComingSoonModal
           triggerLabel="Continue AI Interview"
-          triggerIcon={MessageCircleQuestion}
+          triggerIcon={<MessageCircleQuestion className="h-4 w-4" aria-hidden="true" />}
           modalTitle="AI interview coming soon"
           modalDescription="A guided, conversational way to build your profile is planned for a later phase. For now, use Edit Profile to fill things in yourself."
         />
@@ -120,7 +120,7 @@ export default async function DashboardPage() {
         </Button>
         <ComingSoonModal
           triggerLabel="Get AI Gift Ideas"
-          triggerIcon={Sparkles}
+          triggerIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
           modalTitle="AI gift ideas coming soon"
           modalDescription="An assistant that suggests gift ideas from your profile is planned for a later phase."
         />
