@@ -9,6 +9,7 @@ import {
   loginSchema,
   resetPasswordSchema,
   signupSchema,
+  verifyOtpSchema,
 } from "@/lib/validation/auth";
 
 export interface AuthActionState {
@@ -41,6 +42,27 @@ function friendlySignInError(message: string): string {
   }
   if (/email not confirmed/i.test(message)) {
     return "Please confirm your email before signing in.";
+  }
+  return message || GENERIC_ERROR;
+}
+
+// GoTrue frequently reports expired and invalid OTPs with the same
+// message ("Token has expired or is invalid") rather than distinguishing
+// them, so this can only be as specific as the server actually is.
+function friendlyOtpError(message: string): string {
+  const expired = /expired/i.test(message);
+  const invalid = /invalid|not found/i.test(message);
+  if (/rate limit|too many/i.test(message)) {
+    return "Too many attempts. Please wait a moment and try again.";
+  }
+  if (expired && invalid) {
+    return "That code is invalid or has expired. Request a new one below.";
+  }
+  if (expired) {
+    return "That code has expired. Request a new one below.";
+  }
+  if (invalid) {
+    return "That code isn't right. Double-check it and try again.";
   }
   return message || GENERIC_ERROR;
 }
@@ -187,8 +209,9 @@ export async function requestPasswordResetAction(
   // registered — never confirm or deny account existence here.
   const successState: AuthActionState = {
     status: "reset_email_sent",
+    email: parsed.data.email,
     message:
-      "If an account exists for that email, we've sent a password reset link.",
+      "If an account exists for that email, we've sent a 6-digit code.",
   };
 
   try {
@@ -274,6 +297,117 @@ export async function resendConfirmationAction(
   } catch (error) {
     if (isNetworkError(error)) {
       return { status: "error", message: NETWORK_ERROR };
+    }
+    throw error;
+  }
+}
+
+/**
+ * Verifies the 6-digit code from the "Confirm signup" email, entered
+ * manually by the user. Scanner-resistant alternative to clicking
+ * {{ .ConfirmationURL }} — email security scanners that prefetch links
+ * can't "click" a code that has to be typed in by hand.
+ *
+ * Per Supabase's own docs and the installed auth-js VerifyEmailOtpParams
+ * type, a signup confirmation OTP is verified with type "email", not
+ * "signup" — "signup" is not a valid value for `resend`'s counterpart use
+ * here, it's specific to `verifyOtp`'s type union but the email-address
+ * signup flow uses "email".
+ */
+export async function verifySignupOtpAction(
+  _prevState: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  const emailInput = formData.get("email");
+  const parsed = verifyOtpSchema.safeParse({
+    email: emailInput,
+    code: formData.get("code"),
+  });
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      email: typeof emailInput === "string" ? emailInput : undefined,
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: parsed.data.email,
+      token: parsed.data.code,
+      type: "email",
+    });
+
+    if (error) {
+      return {
+        status: "error",
+        email: parsed.data.email,
+        message: friendlyOtpError(error.message),
+      };
+    }
+
+    if (data.user) {
+      // Idempotent: a no-op if the profile already exists (e.g. the user
+      // retries after a redirect hiccup, or double-submits the form).
+      await ensureProfileExists(data.user);
+    }
+
+    redirect("/onboarding");
+  } catch (error) {
+    if (isNetworkError(error)) {
+      return { status: "error", email: parsed.data.email, message: NETWORK_ERROR };
+    }
+    throw error;
+  }
+}
+
+/**
+ * Verifies the 6-digit code from the "Reset Password" email. On success
+ * this establishes the same authenticated recovery session that clicking
+ * the link would have (verifyOtp sets the session cookie via the SSR
+ * client), which /reset-password requires before it'll let the user set
+ * a new password.
+ */
+export async function verifyRecoveryOtpAction(
+  _prevState: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  const emailInput = formData.get("email");
+  const parsed = verifyOtpSchema.safeParse({
+    email: emailInput,
+    code: formData.get("code"),
+  });
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      email: typeof emailInput === "string" ? emailInput : undefined,
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.verifyOtp({
+      email: parsed.data.email,
+      token: parsed.data.code,
+      type: "recovery",
+    });
+
+    if (error) {
+      return {
+        status: "error",
+        email: parsed.data.email,
+        message: friendlyOtpError(error.message),
+      };
+    }
+
+    redirect("/reset-password");
+  } catch (error) {
+    if (isNetworkError(error)) {
+      return { status: "error", email: parsed.data.email, message: NETWORK_ERROR };
     }
     throw error;
   }
