@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import {
   Eye,
   ListChecks,
@@ -13,12 +10,13 @@ import { Container } from "@/components/container";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { CopyLinkButton } from "@/components/copy-link-button";
 import { ShareModal } from "@/components/share-modal";
 import { ComingSoonModal } from "@/components/coming-soon-modal";
-import { useProfile } from "@/context/profile-context";
+import { getCurrentProfile, requireAuthUser } from "@/lib/auth/dal";
+import { createClient } from "@/lib/supabase/server";
+import { getSiteUrl } from "@/lib/site-url";
 import type { ProfileStatus } from "@/types/profile";
 
 const STATUS_LABEL: Record<ProfileStatus, string> = {
@@ -33,30 +31,59 @@ const STATUS_VARIANT: Record<ProfileStatus, "success" | "warning" | "outline"> =
   hidden: "outline",
 };
 
-export default function DashboardPage() {
-  const { profile, completionPercent, publicUrl } = useProfile();
-  const [loading, setLoading] = useState(true);
+const KNOWN_SECTION_COUNT = 12;
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 350);
-    return () => clearTimeout(timer);
-  }, []);
+async function getCompletion(profileId: string, introduction: string) {
+  const supabase = await createClient();
+  const [{ count: sectionCount }, { count: wishlistCount }] = await Promise.all([
+    supabase
+      .from("profile_sections")
+      .select("id", { count: "exact", head: true })
+      .eq("profile_id", profileId),
+    supabase
+      .from("wishlist_items")
+      .select("id", { count: "exact", head: true })
+      .eq("profile_id", profileId),
+  ]);
 
-  if (loading) {
+  const checks = [
+    introduction.trim().length > 0,
+    (wishlistCount ?? 0) > 0,
+    ...Array.from({ length: KNOWN_SECTION_COUNT }, (_, i) => i < (sectionCount ?? 0)),
+  ];
+  const filled = checks.filter(Boolean).length;
+  return Math.round((filled / checks.length) * 100);
+}
+
+export default async function DashboardPage() {
+  await requireAuthUser("/dashboard");
+  const profile = await getCurrentProfile();
+
+  if (!profile) {
+    // requireAuthUser() above guarantees a session exists; a missing
+    // profile row here would mean account/profile creation failed
+    // partway through — send them back to finish onboarding.
     return (
-      <Container className="flex flex-col gap-6 py-8">
-        <LoadingSkeleton className="h-8 w-64" aria-label="Loading dashboard" />
-        <LoadingSkeleton className="h-24 w-full" />
-        <LoadingSkeleton className="h-48 w-full" />
+      <Container className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
+        <p className="text-neutral-600">
+          We couldn&apos;t find your profile yet.
+        </p>
+        <Button href="/onboarding">Continue setup</Button>
       </Container>
     );
   }
+
+  const completionPercent = await getCompletion(
+    profile.id,
+    profile.introduction,
+  );
+  const publicUrl = `${getSiteUrl()}/u/${profile.slug}`;
 
   return (
     <Container className="flex flex-col gap-6 py-8">
       <div>
         <h1 className="font-display text-2xl font-semibold text-neutral-900">
-          Welcome back, {profile.basicInfo.displayName}
+          Welcome back, {profile.display_name}
         </h1>
         <p className="mt-1 text-sm text-neutral-600">
           Here&apos;s how your gift profile is coming along.
@@ -65,12 +92,12 @@ export default function DashboardPage() {
 
       <Card className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Badge variant={STATUS_VARIANT[profile.privacy.status]}>
-            {STATUS_LABEL[profile.privacy.status]}
+          <Badge variant={STATUS_VARIANT[profile.status]}>
+            {STATUS_LABEL[profile.status]}
           </Badge>
           <div className="flex flex-wrap gap-2">
             <CopyLinkButton url={publicUrl} />
-            <ShareModal url={publicUrl} title={`${profile.basicInfo.displayName}'s gift profile`} />
+            <ShareModal url={publicUrl} title={`${profile.display_name}'s gift profile`} />
           </div>
         </div>
         <ProgressBar value={completionPercent} label="Profile completeness" />

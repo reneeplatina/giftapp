@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Gift } from "lucide-react";
 import { APP_NAV_ITEMS } from "@/lib/nav";
+import { SignOutButton } from "@/components/sign-out-button";
 import { cn } from "@/lib/utils";
 
 export function AppSidebar() {
@@ -40,6 +41,9 @@ export function AppSidebar() {
           );
         })}
       </nav>
+      <div className="border-t border-neutral-200 px-3 py-3">
+        <SignOutButton />
+      </div>
       <div className="px-6 py-6 text-xs text-neutral-500">
         Free forever. No ads, no payments.
       </div>

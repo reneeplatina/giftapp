@@ -59,6 +59,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       profile_sections: {
         Row: {
@@ -91,6 +92,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       wishlist_items: {
         Row: {
@@ -165,6 +167,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       ai_interview_sessions: {
         Row: {
@@ -197,6 +200,7 @@ export type Database = {
           updated_at?: string;
           completed_at?: string | null;
         };
+        Relationships: [];
       };
       ai_interview_messages: {
         Row: {
@@ -226,6 +230,7 @@ export type Database = {
           structured_updates?: Json | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       ai_suggestions: {
         Row: {
@@ -255,6 +260,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       gift_exchange_requests: {
         Row: {
@@ -302,6 +308,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       ai_usage_events: {
         Row: {
@@ -325,6 +332,7 @@ export type Database = {
           feature_name?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       profile_reports: {
         Row: {
@@ -354,6 +362,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["profile_report_status"];
           created_at?: string;
         };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

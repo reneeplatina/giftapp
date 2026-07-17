@@ -10,10 +10,13 @@ AI assistant to help pick a gift.
 This app is completely free: no payments, subscriptions, ads, affiliate
 links, or shopping carts.
 
-**Project status:** the mobile-first frontend is built using typed mock
-data (no backend wired up yet), and the Supabase database schema exists as
-local migration files (not yet connected to the frontend or a real
-project). See `docs/IMPLEMENTATION_PLAN.md` for what's next.
+**Project status:** authentication (sign-up, sign-in, email confirmation,
+password reset, sign-out, protected routes) is fully implemented in code
+against Supabase Auth, but **no real Supabase project is connected yet** —
+see "Connecting a real Supabase project" below to make it functional.
+`/profile/edit`, `/wishlist`, `/themes`, and `/preview` are auth-protected
+but still show Phase 1's typed mock data. See `docs/IMPLEMENTATION_PLAN.md`
+for what's next.
 
 ## Documentation
 
@@ -23,6 +26,7 @@ project). See `docs/IMPLEMENTATION_PLAN.md` for what's next.
 - `docs/DATABASE_SCHEMA.md` — the actual database schema
 - `docs/RLS_POLICY_MATRIX.md` — Row Level Security policies, table by table
 - `docs/GIFT_EXCHANGE_FLOW.md` — the gift-exchange-request data model
+- `docs/AUTH_FLOW.md` — how sign-up/sign-in/session/exchange-context work
 - `docs/DATABASE_PLAN.md` — early planning draft (superseded, kept for history)
 - `docs/AI_SAFETY.md` — rules for the AI assistant
 - `CLAUDE.md` — permanent engineering rules for this project
@@ -90,6 +94,39 @@ project is linked, regenerate it with:
 ```bash
 supabase gen types typescript --local > src/types/database.ts
 ```
+
+## Connecting a real Supabase project
+
+Without this, every page that needs Supabase (anything under sign-up,
+sign-in, or the authenticated app section) shows a friendly "we couldn't
+reach the server" message instead of working — the public landing page
+and public profile pages work fine either way.
+
+1. Create a project at [supabase.com](https://supabase.com) (free tier is
+   enough for development).
+2. In the project dashboard, go to **Project Settings → API** and copy
+   the **Project URL** and the **anon/public key**.
+3. Copy `.env.example` to `.env.local` (if you haven't already) and fill
+   in `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` with
+   those two values. Leave `SUPABASE_SERVICE_ROLE_KEY` blank — nothing in
+   this codebase uses it yet.
+4. Set `NEXT_PUBLIC_SITE_URL` to `http://localhost:3000` for local dev
+   (this is used to build the email confirmation/reset links Supabase
+   sends).
+5. Apply the migrations to that project: install the
+   [Supabase CLI](https://supabase.com/docs/guides/cli), then run
+   `supabase link --project-ref <your-project-ref>` (found in the same
+   API settings page) followed by `supabase db push`. Alternatively,
+   paste each file in `supabase/migrations/` (in order) into the
+   dashboard's **SQL Editor** and run them one at a time.
+6. In the dashboard under **Authentication → URL Configuration**, add
+   `http://localhost:3000/auth/confirm` as a redirect URL — Supabase
+   rejects confirmation/reset links to URLs that aren't allow-listed.
+7. Restart `npm run dev`. Sign-up/sign-in/password reset should now work
+   end-to-end. By default Supabase requires email confirmation — real
+   emails only send from Supabase's dashboard/CLI-configured mail
+   provider, so for quick local testing you can turn off "Confirm email"
+   under **Authentication → Sign In / Providers → Email** instead.
 
 ## Deployment
 

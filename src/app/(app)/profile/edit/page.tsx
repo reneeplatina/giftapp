@@ -1,4 +1,5 @@
 import { Container } from "@/components/container";
+import { requireAuthUser } from "@/lib/auth/dal";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { BasicInfoSection } from "@/components/profile-builder/basic-info-section";
 import { SizesSection } from "@/components/profile-builder/sizes-section";
@@ -17,7 +18,9 @@ import {
   TECH_AND_GAMING_OPTIONS,
 } from "@/lib/mock/profile";
 
-export default function ProfileEditPage() {
+export default async function ProfileEditPage() {
+  await requireAuthUser("/profile/edit");
+
   return (
     <Container className="flex flex-col gap-6 py-8">
       <div>

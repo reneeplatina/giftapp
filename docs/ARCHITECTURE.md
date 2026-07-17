@@ -34,27 +34,40 @@ docs/                   Product & engineering documentation
 - Public profile pages (`/u/[slug]`) are server-rendered so they work
   without JavaScript-dependent client auth and load fast on mobile.
 - Authenticated pages (`/dashboard`, `/profile/edit`, `/wishlist`,
-  `/themes`, `/preview`) use Supabase Auth via `@supabase/ssr`, with
-  session handled through cookies on the server.
+  `/themes`, `/preview`, `/onboarding`) use Supabase Auth via
+  `@supabase/ssr`, with session handled through cookies on the server.
+  Each protected page calls `requireAuthUser()`
+  (`src/lib/auth/dal.ts`) itself — not the shared layout — since Next's
+  `error.tsx` boundaries don't catch errors thrown by a layout in the
+  same segment, and layouts don't re-render on every client-side
+  navigation.
 - All database access enforces Row Level Security: a profile owner can
   read/write their own data; a public profile is exposed only through a
-  narrow, explicitly public read policy keyed by its share slug.
+  narrow, explicitly public read policy keyed by its share slug. See
+  `docs/RLS_POLICY_MATRIX.md`.
 
 ## Supabase usage
 
-- **Auth**: email/password (and optionally magic link) sign-up/login.
+- **Auth**: email/password sign-up/login, with email confirmation,
+  forgot/reset password, and sign-out. See `docs/AUTH_FLOW.md`.
 - **Postgres**: stores profiles and their structured gift-profile
-  sections (see `docs/DATABASE_PLAN.md`).
-- **Storage**: optional profile photo / theme assets.
+  sections (see `docs/DATABASE_SCHEMA.md`).
+- **Storage**: profile avatars and wishlist item images (private
+  buckets, public reads only for published profiles).
 - Client access patterns:
-  - Browser client (anon key) for authenticated user actions in client
-    components.
-  - Server client (anon key, cookie-bound) for server components/route
-    handlers acting as the signed-in user.
-  - Service-role client (service role key) only for trusted server-side
-    operations that must bypass RLS (e.g. admin tasks) — never used to
-    serve public/browser requests directly, and never imported into any
-    client-bundled code.
+  - Browser client (anon key) — `src/lib/supabase/client.ts` — for
+    Client Components.
+  - Server client (anon key, cookie-bound) —
+    `src/lib/supabase/server.ts` — for Server Components, Server
+    Actions, and Route Handlers acting as the signed-in user.
+  - `src/proxy.ts` (Next.js 16 renamed `middleware.ts` to `proxy.ts`)
+    refreshes the session cookie and does an optimistic
+    redirect-if-unauthenticated on every request — a fast first line of
+    defense, not the actual security boundary.
+  - The service-role key is not used anywhere yet — every auth/database
+    operation in this codebase runs as the signed-in user through RLS.
+    If a future phase needs it (e.g. admin/moderation tooling), it must
+    stay server-only and never be imported into client-bundled code.
 
 ## AI assistant integration
 
@@ -73,9 +86,12 @@ docs/                   Product & engineering documentation
 | Route | Access | Purpose |
 |---|---|---|
 | `/` | Public | Marketing/landing page explaining the app |
-| `/signup` | Public | Create an account |
+| `/signup` | Public | Create an account (supports `?exchange=<token>`) |
 | `/login` | Public | Sign in |
 | `/forgot-password` | Public | Password reset request |
+| `/reset-password` | Requires a recovery session | Set a new password after clicking the reset link |
+| `/auth/confirm` | Public (Route Handler) | Verifies signup/recovery email links |
+| `/onboarding` | Authenticated | Choose AI vs. manual profile building |
 | `/dashboard` | Authenticated | Overview of the user's profile & links |
 | `/profile/edit` | Authenticated | Edit gift-profile content |
 | `/wishlist` | Authenticated | Manage exact wishlist items & dream gifts |
