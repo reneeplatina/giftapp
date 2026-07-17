@@ -1,25 +1,58 @@
-import { Container } from "@/components/container";
+"use client";
 
-export default async function PublicProfilePage({
+import { use } from "react";
+import Link from "next/link";
+import { Gift, SearchX } from "lucide-react";
+import { Container } from "@/components/container";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { PublicProfileView } from "@/components/public-profile/public-profile-view";
+import { useProfile } from "@/context/profile-context";
+
+export default function PublicProfilePage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug } = use(params);
+  const { profile, wishlistItems, theme, publicUrl } = useProfile();
+  const found = profile.basicInfo.slug === slug;
 
   return (
-    <Container className="flex flex-1 flex-col justify-center py-16 text-center">
-      <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
-        Coming soon
-      </p>
-      <h1 className="mt-2 text-2xl font-semibold text-neutral-900">
-        Profile: {slug}
-      </h1>
-      <p className="mt-3 text-base text-neutral-600">
-        Public gift profiles aren&apos;t built yet. Soon this page will show
-        someone&apos;s gift profile, an AI assistant to help pick a gift, and
-        a button to create your own profile.
-      </p>
-    </Container>
+    <div className="flex flex-1 flex-col">
+      <header className="border-b border-neutral-200 bg-white">
+        <Container className="flex h-16 items-center">
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-display text-lg font-semibold text-neutral-900"
+          >
+            <Gift className="h-5 w-5" aria-hidden="true" />
+            Gift Profile
+          </Link>
+        </Container>
+      </header>
+      <main className="flex-1 py-10">
+        <Container>
+          {found ? (
+            <PublicProfileView
+              profile={profile}
+              wishlistItems={wishlistItems}
+              theme={theme}
+              publicUrl={publicUrl}
+            />
+          ) : (
+            <EmptyState
+              icon={SearchX}
+              title="Profile not found"
+              description={`There's no published gift profile at "/u/${slug}". Double-check the link, or create your own.`}
+            >
+              <Button href="/signup" size="sm">
+                Create My Free Profile
+              </Button>
+            </EmptyState>
+          )}
+        </Container>
+      </main>
+    </div>
   );
 }
