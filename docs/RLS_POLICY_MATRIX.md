@@ -92,19 +92,18 @@ Both buckets are private (`public = false`). Path convention
 
 ## How this was tested
 
-Since no live Supabase project was connected (per this phase's
-constraints), policies were verified against a real, throwaway local
-Postgres 16 instance: a minimal stand-in for `auth.users`/`auth.uid()`/
-the `anon`/`authenticated` roles/a bare `storage.objects` table was
-loaded, then every migration file was applied unmodified, then a battery
-of `SET ROLE` / `SET LOCAL request.jwt.claim.sub` tests ran the actual
-policies under each role. All scenarios below passed:
+**First**, against a throwaway local Postgres 16 instance (a minimal
+stand-in for `auth.users`/`auth.uid()`/the `anon`/`authenticated` roles/a
+bare `storage.objects` table), before any real Supabase project existed.
+**Later**, the same category of tests were re-run directly against the
+real "Gift Profile App" Supabase project once it was created, using
+temporary fixture rows that were deleted immediately afterward. Both
+rounds passed:
 
 - Owner reads/updates their own profile, sections, and wishlist.
 - A second authenticated user sees 0 rows of another user's private data
   and cannot update it (0 rows affected).
-- Anonymous `select` on `profiles` fails with a permission error (no
-  grant at all — not just an empty result).
+- Anonymous `select`/`insert` on `profiles` returns/affects 0 rows.
 - `get_public_profile()` on a published profile returns the curated
   object, **omitting** a section explicitly marked private and a
   wishlist item explicitly marked private.
@@ -122,5 +121,35 @@ policies under each role. All scenarios below passed:
   reader can see an avatar object under a published profile but sees 0
   objects under a draft profile's folder.
 
-The throwaway database was dropped immediately after; nothing here ever
-touched a real or remote database.
+### Differences found between the local test and the real project
+
+- **`alter table storage.objects enable row level security` fails on
+  real Supabase** (`must be owner of table objects`) — `storage.objects`
+  is owned by Supabase's own internal storage role and already has RLS
+  enabled by the platform. The migration now skips this line entirely
+  (see `supabase/migrations/20260717000011_storage_buckets.sql`).
+- **Anon and authenticated get default privileges on everything in the
+  `public` schema automatically** — both `EXECUTE` on newly created
+  functions and `SELECT`/`INSERT`/`UPDATE`/`DELETE` on newly created
+  tables, granted directly (not through the `PUBLIC` pseudo-role), the
+  moment each object is created. A vanilla local Postgres instance has
+  no such default. Practically: **RLS itself — not the presence or
+  absence of a `GRANT`** — is the real enforcement boundary on Supabase.
+  A `revoke ... from public` does not remove a direct grant already made
+  to `anon`; each role that shouldn't have a privilege must be revoked
+  explicitly. This surfaced one real gap: `claim_exchange_request()` and
+  `complete_exchange_request()` were callable by `anon` at the grant
+  level (though both already rejected anon internally via a null
+  `auth.uid()` check, so this was not exploitable) — fixed by adding an
+  explicit `revoke execute ... from anon` for both.
+- **Supabase's own security advisor caught two functions missing a
+  pinned `search_path`** (`set_updated_at`, a trigger function; and
+  `check_message_profile_matches_session`, the AI-message consistency
+  trigger) — a hardening best practice my local testing didn't check
+  for. Both now set `search_path = public` explicitly.
+
+After these fixes, `get_advisors(type: "security")` against the real
+project reports only expected/intentional findings: `ai_usage_events`
+has RLS enabled with no policies (by design — service-role only), and
+the five functions meant to be publicly callable are flagged as
+"publicly callable" (also by design).

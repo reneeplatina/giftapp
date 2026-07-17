@@ -49,6 +49,7 @@ create index ai_interview_messages_profile_id_idx on public.ai_interview_message
 create or replace function public.check_message_profile_matches_session()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   if new.profile_id is distinct from (

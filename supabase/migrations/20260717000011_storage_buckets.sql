@@ -9,14 +9,18 @@
 -- profile_id is always the first path segment, and — because
 -- profiles.id == the owning user's auth.uid() — that's also exactly
 -- what an owner-write policy needs to check.
+--
+-- Note: storage.objects already has RLS enabled by Supabase's own
+-- platform setup (it's owned by an internal storage role, not this
+-- migration role), so unlike our own tables we don't (and can't) issue
+-- our own ENABLE ROW LEVEL SECURITY for it here — doing so fails with
+-- "must be owner of table objects" on a real Supabase project.
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values
   ('avatars', 'avatars', false, 5242880, array['image/png', 'image/jpeg', 'image/webp']),
   ('wishlist-images', 'wishlist-images', false, 5242880, array['image/png', 'image/jpeg', 'image/webp'])
 on conflict (id) do nothing;
-
-alter table storage.objects enable row level security;
 
 -- Avatars ---------------------------------------------------------------
 

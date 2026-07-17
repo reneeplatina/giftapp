@@ -196,7 +196,13 @@ begin
 end;
 $$;
 
+-- Supabase grants EXECUTE on new public-schema functions to anon and
+-- authenticated directly (via default privileges), not through the
+-- PUBLIC pseudo-role — so "revoke ... from public" alone does not
+-- revoke anon's access. anon must be revoked explicitly, even though
+-- the function also rejects a null auth.uid() internally as a backstop.
 revoke all on function public.claim_exchange_request(text) from public;
+revoke execute on function public.claim_exchange_request(text) from anon;
 grant execute on function public.claim_exchange_request(text) to authenticated;
 
 -- Marks a claimed request completed once the referred user has created
@@ -246,4 +252,5 @@ end;
 $$;
 
 revoke all on function public.complete_exchange_request(text, text) from public;
+revoke execute on function public.complete_exchange_request(text, text) from anon;
 grant execute on function public.complete_exchange_request(text, text) to authenticated;
