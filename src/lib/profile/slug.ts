@@ -2,20 +2,9 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
+import { RESERVED_SLUGS as RESERVED_SLUGS_LIST } from "@/lib/profile/reserved-slugs";
 
-// Mirrors the reserved-word list enforced by the
-// profiles_slug_not_reserved CHECK constraint in
-// supabase/migrations/20260717000002_profiles.sql — kept in sync by
-// hand since Postgres CHECK constraints aren't introspectable as a
-// plain array at runtime.
-const RESERVED_SLUGS = new Set([
-  "admin", "api", "app", "auth", "dashboard", "login", "logout",
-  "signup", "signin", "sign-up", "sign-in", "forgot-password",
-  "settings", "help", "support", "about", "contact", "terms",
-  "privacy", "pricing", "billing", "blog", "docs", "static",
-  "public", "assets", "u", "profile", "profiles", "wishlist",
-  "themes", "preview", "null", "undefined", "www", "root",
-]);
+const RESERVED_SLUGS = new Set<string>(RESERVED_SLUGS_LIST);
 
 function slugify(input: string): string {
   const base = input

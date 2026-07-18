@@ -12,6 +12,7 @@ import { sizesSchema, type SizesValues } from "@/lib/validation/profile";
 export function SizesSection() {
   const { profile, updateSizes } = useProfile();
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -21,8 +22,13 @@ export function SizesSection() {
     values: profile.sizes,
   });
 
-  function onSubmit(values: SizesValues) {
-    updateSizes(values);
+  async function onSubmit(values: SizesValues) {
+    setSaveError(null);
+    const result = await updateSizes(values);
+    if (!result.success) {
+      setSaveError(result.error ?? "Couldn't save. Try again.");
+      return;
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
@@ -47,6 +53,11 @@ export function SizesSection() {
           </span>
         )}
       </div>
+      {saveError && (
+        <p className="text-sm text-red-600" role="alert">
+          {saveError}
+        </p>
+      )}
     </form>
   );
 }

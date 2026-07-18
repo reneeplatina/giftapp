@@ -9,20 +9,21 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { INITIAL_WISHLIST_ITEMS, PUBLIC_SITE_ORIGIN } from "@/lib/mock/profile";
+import { SECTION_TS_KEYS, type SectionTsKey } from "@/lib/profile/section-keys";
 import {
-  INITIAL_PROFILE,
-  INITIAL_WISHLIST_ITEMS,
-  PUBLIC_SITE_ORIGIN,
-} from "@/lib/mock/profile";
+  saveBasicInfoAction,
+  saveChipListAction,
+  saveSectionVisibilityAction,
+  saveSizesAction,
+  saveStatusAction,
+  saveThemeAction,
+  uploadAvatarAction,
+  type ProfileActionResult,
+} from "@/lib/profile/actions";
 import type { GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
 
-const STORAGE_KEY = "gift-profile:mock-state:v1";
-
-interface StoredState {
-  profile: GiftProfile;
-  wishlistItems: WishlistItem[];
-  theme: ThemeKey;
-}
+const WISHLIST_STORAGE_KEY = "gift-profile:mock-wishlist:v1";
 
 interface ProfileContextValue {
   profile: GiftProfile;
@@ -30,130 +31,155 @@ interface ProfileContextValue {
   theme: ThemeKey;
   completionPercent: number;
   publicUrl: string;
-  updateBasicInfo: (values: GiftProfile["basicInfo"]) => void;
-  updateSizes: (values: GiftProfile["sizes"]) => void;
+  updateBasicInfo: (values: GiftProfile["basicInfo"]) => Promise<ProfileActionResult>;
+  updateSizes: (values: GiftProfile["sizes"]) => Promise<ProfileActionResult>;
   updateStringList: (
-    key: Extract<
-      keyof GiftProfile,
-      | "favoriteColors"
-      | "interests"
-      | "foodAndDrinks"
-      | "favoriteStores"
-      | "techAndGaming"
-      | "homeAndLifestyle"
-      | "creativity"
-      | "fitnessAndWellness"
-      | "experiences"
-      | "digitalGifts"
-      | "thingsToAvoid"
-    >,
+    key: Exclude<SectionTsKey, "sizes">,
     items: string[],
-  ) => void;
-  updatePrivacy: (values: GiftProfile["privacy"]) => void;
-  setTheme: (theme: ThemeKey) => void;
+  ) => Promise<ProfileActionResult>;
+  updatePrivacy: (values: GiftProfile["privacy"]) => Promise<ProfileActionResult>;
+  setTheme: (theme: ThemeKey) => Promise<ProfileActionResult>;
+  uploadAvatar: (file: File) => Promise<ProfileActionResult & { avatarUrl?: string }>;
   addWishlistItem: (item: Omit<WishlistItem, "id">) => void;
   updateWishlistItem: (id: string, item: Omit<WishlistItem, "id">) => void;
   removeWishlistItem: (id: string) => void;
-  resetToSampleData: () => void;
 }
 
 const ProfileContext = createContext<ProfileContextValue | null>(null);
-
-const SECTION_KEYS = [
-  "favoriteColors",
-  "interests",
-  "foodAndDrinks",
-  "favoriteStores",
-  "techAndGaming",
-  "homeAndLifestyle",
-  "creativity",
-  "fitnessAndWellness",
-  "experiences",
-  "digitalGifts",
-] as const;
 
 function calculateCompletion(profile: GiftProfile): number {
   const checks: boolean[] = [
     Boolean(profile.basicInfo.displayName && profile.basicInfo.introduction),
     Boolean(profile.basicInfo.giftStyleSummary),
-    ...SECTION_KEYS.map((key) => profile[key].length > 0),
+    ...SECTION_TS_KEYS.filter((key) => key !== "sizes").map(
+      (key) => (profile[key] as string[]).length > 0,
+    ),
     Object.values(profile.sizes).some((value) => value.trim().length > 0),
-    profile.thingsToAvoid.length > 0,
   ];
   const filled = checks.filter(Boolean).length;
   return Math.round((filled / checks.length) * 100);
 }
 
-export function ProfileProvider({ children }: { children: ReactNode }) {
-  const [profile, setProfile] = useState<GiftProfile>(INITIAL_PROFILE);
+export function ProfileProvider({
+  children,
+  initialProfile,
+  initialTheme,
+}: {
+  children: ReactNode;
+  initialProfile: GiftProfile;
+  initialTheme: ThemeKey;
+}) {
+  const [profile, setProfile] = useState<GiftProfile>(initialProfile);
+  const [theme, setThemeState] = useState<ThemeKey>(initialTheme);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>(
     INITIAL_WISHLIST_ITEMS,
   );
-  const [theme, setThemeState] = useState<ThemeKey>("general");
-  const [hydrated, setHydrated] = useState(false);
+  const [wishlistHydrated, setWishlistHydrated] = useState(false);
 
+  // Wishlist items are not yet persisted to Supabase (a future phase) —
+  // this stays exactly as it was in the mock-data version, unrelated to
+  // the real profile/theme state above.
   useEffect(() => {
-    // One-time load of client-only persisted state; localStorage isn't
-    // available during server rendering, so this can't be a lazy useState
-    // initializer without causing a hydration mismatch.
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
+      const raw = window.localStorage.getItem(WISHLIST_STORAGE_KEY);
       if (raw) {
-        const stored: StoredState = JSON.parse(raw);
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setProfile(stored.profile);
-        setWishlistItems(stored.wishlistItems);
-        setThemeState(stored.theme);
+        setWishlistItems(JSON.parse(raw));
       }
     } catch {
       // Ignore malformed local storage state and keep sample data.
     }
-    setHydrated(true);
+    setWishlistHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
-    const state: StoredState = { profile, wishlistItems, theme };
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [profile, wishlistItems, theme, hydrated]);
+    if (!wishlistHydrated) return;
+    window.localStorage.setItem(
+      WISHLIST_STORAGE_KEY,
+      JSON.stringify(wishlistItems),
+    );
+  }, [wishlistItems, wishlistHydrated]);
 
-  const updateBasicInfo = useCallback((values: GiftProfile["basicInfo"]) => {
-    setProfile((prev) => ({ ...prev, basicInfo: values }));
-  }, []);
-
-  const updateSizes = useCallback((values: GiftProfile["sizes"]) => {
-    setProfile((prev) => ({ ...prev, sizes: values }));
-  }, []);
-
-  const updateStringList = useCallback(
-    (
-      key: Extract<
-        keyof GiftProfile,
-        | "favoriteColors"
-        | "interests"
-        | "foodAndDrinks"
-        | "favoriteStores"
-        | "techAndGaming"
-        | "homeAndLifestyle"
-        | "creativity"
-        | "fitnessAndWellness"
-        | "experiences"
-        | "digitalGifts"
-        | "thingsToAvoid"
-      >,
-      items: string[],
-    ) => {
-      setProfile((prev) => ({ ...prev, [key]: items }));
+  const updateBasicInfo = useCallback(
+    async (values: GiftProfile["basicInfo"]) => {
+      const previous = profile.basicInfo;
+      setProfile((prev) => ({ ...prev, basicInfo: values }));
+      const result = await saveBasicInfoAction(values);
+      if (!result.success) {
+        setProfile((prev) => ({ ...prev, basicInfo: previous }));
+      }
+      return result;
     },
-    [],
+    [profile.basicInfo],
   );
 
-  const updatePrivacy = useCallback((values: GiftProfile["privacy"]) => {
-    setProfile((prev) => ({ ...prev, privacy: values }));
-  }, []);
+  const updateSizes = useCallback(
+    async (values: GiftProfile["sizes"]) => {
+      const previous = profile.sizes;
+      setProfile((prev) => ({ ...prev, sizes: values }));
+      const result = await saveSizesAction(values);
+      if (!result.success) {
+        setProfile((prev) => ({ ...prev, sizes: previous }));
+      }
+      return result;
+    },
+    [profile.sizes],
+  );
 
-  const setTheme = useCallback((next: ThemeKey) => {
-    setThemeState(next);
+  const updateStringList = useCallback(
+    async (key: Exclude<SectionTsKey, "sizes">, items: string[]) => {
+      const previous = profile[key] as string[];
+      setProfile((prev) => ({ ...prev, [key]: items }));
+      const result = await saveChipListAction(key, items);
+      if (!result.success) {
+        setProfile((prev) => ({ ...prev, [key]: previous }));
+      }
+      return result;
+    },
+    [profile],
+  );
+
+  const updatePrivacy = useCallback(
+    async (values: GiftProfile["privacy"]) => {
+      const previous = profile.privacy;
+      setProfile((prev) => ({ ...prev, privacy: values }));
+      const [statusResult, visibilityResult] = await Promise.all([
+        values.status === previous.status
+          ? { success: true }
+          : saveStatusAction(values.status),
+        saveSectionVisibilityAction(values.sectionVisibility),
+      ]);
+      const result = !statusResult.success ? statusResult : visibilityResult;
+      if (!result.success) {
+        setProfile((prev) => ({ ...prev, privacy: previous }));
+      }
+      return result;
+    },
+    [profile.privacy],
+  );
+
+  const setTheme = useCallback(
+    async (next: ThemeKey) => {
+      const previous = theme;
+      setThemeState(next);
+      const result = await saveThemeAction(next);
+      if (!result.success) {
+        setThemeState(previous);
+      }
+      return result;
+    },
+    [theme],
+  );
+
+  const uploadAvatar = useCallback(async (file: File) => {
+    const result = await uploadAvatarAction(file);
+    if (result.success) {
+      setProfile((prev) => ({
+        ...prev,
+        basicInfo: { ...prev.basicInfo, avatarUrl: result.avatarUrl ?? null },
+      }));
+    }
+    return result;
   }, []);
 
   const addWishlistItem = useCallback((item: Omit<WishlistItem, "id">) => {
@@ -178,12 +204,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     setWishlistItems((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
-  const resetToSampleData = useCallback(() => {
-    setProfile(INITIAL_PROFILE);
-    setWishlistItems(INITIAL_WISHLIST_ITEMS);
-    setThemeState("general");
-  }, []);
-
   const completionPercent = useMemo(() => calculateCompletion(profile), [
     profile,
   ]);
@@ -204,10 +224,10 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     updateStringList,
     updatePrivacy,
     setTheme,
+    uploadAvatar,
     addWishlistItem,
     updateWishlistItem,
     removeWishlistItem,
-    resetToSampleData,
   };
 
   return (

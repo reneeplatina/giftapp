@@ -1,6 +1,5 @@
 import type {
   BudgetLevel,
-  GiftProfile,
   PriorityLevel,
   ThemeOption,
   WishlistItem,
@@ -136,65 +135,6 @@ export const CATEGORY_OPTIONS = [
   "Creativity",
   "Experiences",
 ];
-
-export const RESERVED_SLUGS = [
-  "admin",
-  "api",
-  "dashboard",
-  "login",
-  "signup",
-  "settings",
-  "help",
-  "support",
-];
-
-export const INITIAL_PROFILE: GiftProfile = {
-  basicInfo: {
-    displayName: "Renee",
-    slug: "renee",
-    introduction:
-      "Shopping for me? Here are some things I genuinely love, use, and would be excited to receive.",
-    giftStyleSummary:
-      "Practical, tech-forward, and a little bit cozy — I love things I'll actually use every day.",
-  },
-  favoriteColors: ["Black", "White", "Pink"],
-  interests: [
-    "Cozy gaming",
-    "Technology",
-    "Artificial intelligence tools",
-    "Creative work",
-    "Web design",
-    "Home and office upgrades",
-    "Fitness and wellness",
-    "Helpful household tools",
-  ],
-  sizes: {
-    shirt: "M",
-    pants: "8",
-    shoe: "8.5",
-    dress: "6",
-    ringSize: "6.5",
-  },
-  foodAndDrinks: ["Matcha lattes", "Dark chocolate", "Sparkling water"],
-  favoriteStores: ["Apple", "Uniqlo", "Target", "Sephora"],
-  techAndGaming: ["Handheld consoles", "Mechanical keyboards", "AI software"],
-  homeAndLifestyle: ["Desk organization", "Cozy blankets", "Plants"],
-  creativity: ["Digital art", "Photography gear"],
-  fitnessAndWellness: ["Yoga", "Skincare"],
-  experiences: ["Concerts", "Weekend trips"],
-  digitalGifts: ["AI software subscriptions", "Streaming services"],
-  thingsToAvoid: [
-    "Strong perfumes or scented products",
-    "Novelty gifts",
-    "Already own a French press",
-  ],
-  privacy: {
-    status: "published",
-    showSizesPublicly: true,
-    showDreamGiftsPublicly: true,
-    showAvoidListPublicly: true,
-  },
-};
 
 export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
   {

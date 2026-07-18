@@ -28,6 +28,7 @@ export interface BasicInfo {
   slug: string;
   introduction: string;
   giftStyleSummary: string;
+  avatarUrl: string | null;
 }
 
 export interface Sizes {
@@ -38,11 +39,25 @@ export interface Sizes {
   ringSize: string;
 }
 
+export type SectionVisibility = Record<
+  | "favoriteColors"
+  | "interests"
+  | "sizes"
+  | "foodAndDrinks"
+  | "favoriteStores"
+  | "techAndGaming"
+  | "homeAndLifestyle"
+  | "creativity"
+  | "fitnessAndWellness"
+  | "experiences"
+  | "digitalGifts"
+  | "thingsToAvoid",
+  boolean
+>;
+
 export interface PrivacySettings {
   status: ProfileStatus;
-  showSizesPublicly: boolean;
-  showDreamGiftsPublicly: boolean;
-  showAvoidListPublicly: boolean;
+  sectionVisibility: SectionVisibility;
 }
 
 export interface GiftProfile {

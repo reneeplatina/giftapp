@@ -61,6 +61,7 @@ export function PublicProfileView({
         />
         <Avatar
           name={profile.basicInfo.displayName}
+          src={profile.basicInfo.avatarUrl ?? undefined}
           className="h-20 w-20 text-2xl"
         />
         <div>
@@ -93,13 +94,17 @@ export function PublicProfileView({
         </Card>
       </Section>
 
-      <Section title="Favorite colors">
-        <TagList items={profile.favoriteColors} />
-      </Section>
+      {profile.privacy.sectionVisibility.favoriteColors && (
+        <Section title="Favorite colors">
+          <TagList items={profile.favoriteColors} />
+        </Section>
+      )}
 
-      <Section title="Interests">
-        <TagList items={profile.interests} />
-      </Section>
+      {profile.privacy.sectionVisibility.interests && (
+        <Section title="Interests">
+          <TagList items={profile.interests} />
+        </Section>
+      )}
 
       {exactWishlistItems.length > 0 && (
         <Section title="Exact wishlist items">
@@ -119,7 +124,7 @@ export function PublicProfileView({
         </Section>
       )}
 
-      {profile.privacy.showDreamGiftsPublicly && dreamGifts.length > 0 && (
+      {dreamGifts.length > 0 && (
         <Section title="Dream gifts">
           <div className="grid gap-3 sm:grid-cols-2">
             {dreamGifts.map((item) => (
@@ -143,7 +148,7 @@ export function PublicProfileView({
         </Section>
       )}
 
-      {profile.privacy.showSizesPublicly && sizeEntries.length > 0 && (
+      {profile.privacy.sectionVisibility.sizes && sizeEntries.length > 0 && (
         <Section title="Sizes">
           <Card className="flex flex-wrap gap-x-6 gap-y-2">
             {sizeEntries.map(([label, value]) => (
@@ -161,15 +166,19 @@ export function PublicProfileView({
         </Section>
       )}
 
-      <Section title="Favorite stores">
-        <TagList items={profile.favoriteStores} />
-      </Section>
+      {profile.privacy.sectionVisibility.favoriteStores && (
+        <Section title="Favorite stores">
+          <TagList items={profile.favoriteStores} />
+        </Section>
+      )}
 
-      <Section title="Digital gifts">
-        <TagList items={profile.digitalGifts} />
-      </Section>
+      {profile.privacy.sectionVisibility.digitalGifts && (
+        <Section title="Digital gifts">
+          <TagList items={profile.digitalGifts} />
+        </Section>
+      )}
 
-      {profile.privacy.showAvoidListPublicly &&
+      {profile.privacy.sectionVisibility.thingsToAvoid &&
         profile.thingsToAvoid.length > 0 && (
           <Section title="Things to avoid">
             <Card className="flex flex-col gap-2">

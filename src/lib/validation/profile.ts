@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { RESERVED_SLUGS } from "@/lib/mock/profile";
+import { RESERVED_SLUGS } from "@/lib/profile/reserved-slugs";
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -13,7 +13,7 @@ export const basicInfoSchema = z.object({
       slugPattern,
       "Use lowercase letters, numbers, and hyphens only",
     )
-    .refine((value) => !RESERVED_SLUGS.includes(value), {
+    .refine((value) => !(RESERVED_SLUGS as readonly string[]).includes(value), {
       message: "This link is reserved — choose another",
     }),
   introduction: z.string().max(280, "Keep it under 280 characters"),

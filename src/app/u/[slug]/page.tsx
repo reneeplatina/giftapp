@@ -1,22 +1,19 @@
-"use client";
-
-import { use } from "react";
 import Link from "next/link";
 import { Gift, SearchX } from "lucide-react";
 import { Container } from "@/components/container";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { PublicProfileView } from "@/components/public-profile/public-profile-view";
-import { useProfile } from "@/context/profile-context";
+import { getPublicProfileBySlug } from "@/lib/profile/public-dal";
+import { getSiteUrl } from "@/lib/site-url";
 
-export default function PublicProfilePage({
+export default async function PublicProfilePage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = use(params);
-  const { profile, wishlistItems, theme, publicUrl } = useProfile();
-  const found = profile.basicInfo.slug === slug;
+  const { slug } = await params;
+  const loaded = await getPublicProfileBySlug(slug);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -33,12 +30,12 @@ export default function PublicProfilePage({
       </header>
       <main className="flex-1 py-10">
         <Container>
-          {found ? (
+          {loaded ? (
             <PublicProfileView
-              profile={profile}
-              wishlistItems={wishlistItems}
-              theme={theme}
-              publicUrl={publicUrl}
+              profile={loaded.profile}
+              wishlistItems={loaded.wishlistItems}
+              theme={loaded.theme}
+              publicUrl={`${getSiteUrl()}/u/${slug}`}
             />
           ) : (
             <EmptyState

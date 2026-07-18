@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
-import { ProfileProvider } from "@/context/profile-context";
 import "./globals.css";
 
 const inter = Inter({
@@ -30,7 +29,7 @@ export default function RootLayout({
       className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-white font-sans text-neutral-900">
-        <ProfileProvider>{children}</ProfileProvider>
+        {children}
       </body>
     </html>
   );

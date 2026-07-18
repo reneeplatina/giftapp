@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Check } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 import { TextAreaField } from "@/components/ui/textarea-field";
@@ -14,8 +15,12 @@ import {
 } from "@/lib/validation/profile";
 
 export function BasicInfoSection() {
-  const { profile, updateBasicInfo } = useProfile();
+  const { profile, updateBasicInfo, uploadAvatar } = useProfile();
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     register,
     handleSubmit,
@@ -25,14 +30,62 @@ export function BasicInfoSection() {
     values: profile.basicInfo,
   });
 
-  function onSubmit(values: BasicInfoValues) {
-    updateBasicInfo(values);
+  async function onSubmit(values: BasicInfoValues) {
+    setSaveError(null);
+    const result = await updateBasicInfo({ ...profile.basicInfo, ...values });
+    if (!result.success) {
+      setSaveError(result.error ?? "Couldn't save. Try again.");
+      return;
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
 
+  async function onAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setAvatarError(null);
+    setAvatarUploading(true);
+    const result = await uploadAvatar(file);
+    setAvatarUploading(false);
+    if (!result.success) {
+      setAvatarError(result.error ?? "Couldn't upload photo. Try again.");
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+      <div className="flex items-center gap-4">
+        <Avatar
+          name={profile.basicInfo.displayName || "Your profile"}
+          src={profile.basicInfo.avatarUrl ?? undefined}
+          className="h-16 w-16 text-lg"
+        />
+        <div className="flex flex-col gap-1">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={onAvatarChange}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={avatarUploading}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {avatarUploading ? "Uploading…" : "Change photo"}
+          </Button>
+          {avatarError && (
+            <p className="text-xs text-red-600" role="alert">
+              {avatarError}
+            </p>
+          )}
+        </div>
+      </div>
       <TextField
         label="Display name"
         error={errors.displayName?.message}
@@ -67,6 +120,11 @@ export function BasicInfoSection() {
           </span>
         )}
       </div>
+      {saveError && (
+        <p className="text-sm text-red-600" role="alert">
+          {saveError}
+        </p>
+      )}
     </form>
   );
 }
