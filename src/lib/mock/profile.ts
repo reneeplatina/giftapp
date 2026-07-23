@@ -248,5 +248,3 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     isArchived: false,
   },
 ];
-
-export const PUBLIC_SITE_ORIGIN = "https://giftprofile.app";

@@ -9,7 +9,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { INITIAL_WISHLIST_ITEMS, PUBLIC_SITE_ORIGIN } from "@/lib/mock/profile";
+import { INITIAL_WISHLIST_ITEMS } from "@/lib/mock/profile";
+import { getSiteUrl } from "@/lib/site-url";
 import { SECTION_TS_KEYS, type SectionTsKey } from "@/lib/profile/section-keys";
 import {
   saveBasicInfoAction,
@@ -209,7 +210,7 @@ export function ProfileProvider({
   ]);
 
   const publicUrl = useMemo(
-    () => `${PUBLIC_SITE_ORIGIN}/u/${profile.basicInfo.slug || "renee"}`,
+    () => `${getSiteUrl()}/u/${profile.basicInfo.slug}`,
     [profile.basicInfo.slug],
   );
 

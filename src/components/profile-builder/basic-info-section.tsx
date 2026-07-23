@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 import { TextAreaField } from "@/components/ui/textarea-field";
 import { useProfile } from "@/context/profile-context";
+import { getSiteUrl } from "@/lib/site-url";
 import {
   basicInfoSchema,
   type BasicInfoValues,
@@ -93,7 +94,7 @@ export function BasicInfoSection() {
       />
       <TextField
         label="Profile link"
-        hint="giftprofile.app/u/your-link"
+        hint={`${getSiteUrl().replace(/^https?:\/\//, "")}/u/your-link`}
         error={errors.slug?.message}
         {...register("slug")}
       />
