@@ -7,6 +7,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Container } from "@/components/container";
+import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import { ShareModal } from "@/components/share-modal";
 import { ComingSoonModal } from "@/components/coming-soon-modal";
 import { getCurrentProfile, requireAuthUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
+import { getAvatarSignedUrl } from "@/lib/profile/dal";
 import { getSiteUrl } from "@/lib/site-url";
 import type { ProfileStatus } from "@/types/profile";
 
@@ -78,16 +80,25 @@ export default async function DashboardPage() {
     profile.introduction,
   );
   const publicUrl = `${getSiteUrl()}/u/${profile.slug}`;
+  const supabase = await createClient();
+  const avatarUrl = await getAvatarSignedUrl(supabase, profile.avatar_path);
 
   return (
     <Container className="flex flex-col gap-6 py-8">
-      <div>
-        <h1 className="font-display text-2xl font-semibold text-neutral-900">
-          Welcome back, {profile.display_name}
-        </h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          Here&apos;s how your gift profile is coming along.
-        </p>
+      <div className="flex items-center gap-4">
+        <Avatar
+          name={profile.display_name}
+          src={avatarUrl ?? undefined}
+          className="h-14 w-14 text-lg"
+        />
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-neutral-900">
+            Welcome back, {profile.display_name}
+          </h1>
+          <p className="mt-1 text-sm text-neutral-600">
+            Here&apos;s how your gift profile is coming along.
+          </p>
+        </div>
       </div>
 
       <Card className="flex flex-col gap-4">
