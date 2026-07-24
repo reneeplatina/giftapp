@@ -12,9 +12,14 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
  */
 const DEFAULT_DAILY_USER_LIMIT = 200;
 
-function getDailyUserLimit(): number {
-  const raw = Number(process.env.AI_DAILY_USER_LIMIT);
-  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_DAILY_USER_LIMIT;
+/** Fallback if AI_DAILY_GUEST_LIMIT isn't set — anonymous visitors get a tighter cap than signed-in owners, per docs/AI_SAFETY.md. */
+const DEFAULT_DAILY_GUEST_LIMIT = 20;
+
+function getDailyLimit(kind: "user" | "guest"): number {
+  const envVar = kind === "user" ? "AI_DAILY_USER_LIMIT" : "AI_DAILY_GUEST_LIMIT";
+  const fallback = kind === "user" ? DEFAULT_DAILY_USER_LIMIT : DEFAULT_DAILY_GUEST_LIMIT;
+  const raw = Number(process.env[envVar]);
+  return Number.isFinite(raw) && raw > 0 ? raw : fallback;
 }
 
 function startOfTodayUtc(): string {
@@ -27,16 +32,21 @@ export interface UsageCheckResult {
   error?: string;
 }
 
+export type AiUsageIdentity = { userId: string } | { anonymousHash: string };
+
 /**
- * Checks the signed-in user's daily AI usage against AI_DAILY_USER_LIMIT
- * and, if allowed, records this call. Uses the service-role client
- * because ai_usage_events has no client-facing RLS policies at all (see
- * supabase/migrations/20260717000009_ai_usage_events.sql) — it's written
- * only by trusted server code. Fails closed: if the limit can't be
- * checked, the AI feature is refused rather than left unmetered.
+ * Checks a caller's daily AI usage and, if allowed, records this call.
+ * Signed-in users are metered against AI_DAILY_USER_LIMIT; anonymous
+ * visitors (identified by a server-issued, hashed guest cookie — see
+ * src/lib/ai/guest-identity.ts — never a client-supplied identifier) get
+ * the separate, tighter AI_DAILY_GUEST_LIMIT (docs/AI_SAFETY.md). Uses
+ * the service-role client because ai_usage_events has no client-facing
+ * RLS policies at all (supabase/migrations/20260717000009_ai_usage_events.sql)
+ * — it's written only by trusted server code. Fails closed: if the limit
+ * can't be checked, the AI feature is refused rather than left unmetered.
  */
 export async function checkAndRecordAiUsage(
-  userId: string,
+  identity: AiUsageIdentity,
   featureName: string,
 ): Promise<UsageCheckResult> {
   const supabase = createServiceRoleClient();
@@ -44,27 +54,33 @@ export async function checkAndRecordAiUsage(
     return { allowed: false, error: "The AI assistant isn't configured on this deployment." };
   }
 
+  const column = "userId" in identity ? "user_id" : "anonymous_session_hash";
+  const value = "userId" in identity ? identity.userId : identity.anonymousHash;
+  const limit = getDailyLimit("userId" in identity ? "user" : "guest");
+
   const { count, error: countError } = await supabase
     .from("ai_usage_events")
     .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
+    .eq(column, value)
     .gte("created_at", startOfTodayUtc());
 
   if (countError) {
     return { allowed: false, error: "Couldn't verify your AI usage limit right now." };
   }
 
-  if ((count ?? 0) >= getDailyUserLimit()) {
+  if ((count ?? 0) >= limit) {
     return {
       allowed: false,
       error:
-        "You've reached today's AI interview limit. You can keep building your profile manually, and the AI assistant will be available again tomorrow.",
+        "You've reached today's AI usage limit. Everything still works without it — the AI assistant will be available again tomorrow.",
     };
   }
 
-  const { error: insertError } = await supabase
-    .from("ai_usage_events")
-    .insert({ user_id: userId, feature_name: featureName });
+  const { error: insertError } = await supabase.from("ai_usage_events").insert(
+    "userId" in identity
+      ? { user_id: identity.userId, feature_name: featureName }
+      : { anonymous_session_hash: identity.anonymousHash, feature_name: featureName },
+  );
 
   if (insertError) {
     return { allowed: false, error: "Couldn't record AI usage right now." };

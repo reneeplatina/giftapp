@@ -3,7 +3,7 @@
 import { getAuthUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getAnthropicClient, getAnthropicModel } from "@/lib/ai/client";
-import { AIInterviewError } from "@/lib/ai/errors";
+import { AIAssistantError } from "@/lib/ai/errors";
 import { generateGiftStyleSummary, runInterviewTurn } from "@/lib/ai/interview";
 import { checkAndRecordAiUsage } from "@/lib/ai/rate-limit";
 import { applyInterviewExtraction } from "@/lib/interview/apply-updates";
@@ -89,7 +89,7 @@ async function beginNewSession(
     };
   } catch (error) {
     const message =
-      error instanceof AIInterviewError ? error.message : "The AI assistant hit an unexpected error.";
+      error instanceof AIAssistantError ? error.message : "The AI assistant hit an unexpected error.";
     return { success: false, error: message };
   }
 }
@@ -109,7 +109,7 @@ export async function startInterviewAction(): Promise<
     };
   }
 
-  const usage = await checkAndRecordAiUsage(user.id, AI_FEATURE_NAME);
+  const usage = await checkAndRecordAiUsage({ userId: user.id }, AI_FEATURE_NAME);
   if (!usage.allowed) {
     return { success: false, error: usage.error };
   }
@@ -139,7 +139,7 @@ export async function restartInterviewAction(
     };
   }
 
-  const usage = await checkAndRecordAiUsage(user.id, AI_FEATURE_NAME);
+  const usage = await checkAndRecordAiUsage({ userId: user.id }, AI_FEATURE_NAME);
   if (!usage.allowed) {
     return { success: false, error: usage.error };
   }
@@ -171,7 +171,7 @@ async function submitAnswer(
     };
   }
 
-  const usage = await checkAndRecordAiUsage(user.id, AI_FEATURE_NAME);
+  const usage = await checkAndRecordAiUsage({ userId: user.id }, AI_FEATURE_NAME);
   if (!usage.allowed) {
     return { success: false, error: usage.error };
   }
@@ -219,7 +219,7 @@ async function submitAnswer(
     return state ? { success: true, state } : { success: false, error: "Couldn't load the interview." };
   } catch (error) {
     const message =
-      error instanceof AIInterviewError ? error.message : "The AI assistant hit an unexpected error.";
+      error instanceof AIAssistantError ? error.message : "The AI assistant hit an unexpected error.";
     return { success: false, error: message };
   }
 }
@@ -389,7 +389,7 @@ export async function generateGiftStyleSummaryAction(
     return { success: false, error: "The AI assistant isn't available right now." };
   }
 
-  const usage = await checkAndRecordAiUsage(user.id, AI_FEATURE_NAME);
+  const usage = await checkAndRecordAiUsage({ userId: user.id }, AI_FEATURE_NAME);
   if (!usage.allowed) return { success: false, error: usage.error };
 
   const chipListDbKeys = SECTION_TS_KEYS.filter((key) => key !== "sizes").map(
@@ -423,7 +423,7 @@ export async function generateGiftStyleSummaryAction(
     return { success: true, summary };
   } catch (error) {
     const message =
-      error instanceof AIInterviewError ? error.message : "The AI assistant hit an unexpected error.";
+      error instanceof AIAssistantError ? error.message : "The AI assistant hit an unexpected error.";
     return { success: false, error: message };
   }
 }

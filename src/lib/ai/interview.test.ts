@@ -5,7 +5,7 @@ import {
   runInterviewTurn,
   type InterviewAnthropicClient,
 } from "@/lib/ai/interview";
-import { AIInterviewError } from "@/lib/ai/errors";
+import { AIAssistantError } from "@/lib/ai/errors";
 
 function toolResponse(input: unknown): Anthropic.Message {
   return {
@@ -110,7 +110,7 @@ describe("runInterviewTurn", () => {
     expect(turn.giftSuggestion?.budgetLevel).toBe("25_to_75");
   });
 
-  it("throws AIInterviewError when the tool input fails schema validation", async () => {
+  it("throws AIAssistantError when the tool input fails schema validation", async () => {
     const create = vi.fn().mockResolvedValue(
       toolResponse({
         message: "Hi",
@@ -123,25 +123,25 @@ describe("runInterviewTurn", () => {
 
     await expect(
       runInterviewTurn({ client, model: "claude-haiku-4-5", history: [], latestUserAnswer: "hi" }),
-    ).rejects.toThrow(AIInterviewError);
+    ).rejects.toThrow(AIAssistantError);
   });
 
-  it("throws AIInterviewError when no tool_use block is returned", async () => {
+  it("throws AIAssistantError when no tool_use block is returned", async () => {
     const create = vi.fn().mockResolvedValue(textResponse("plain text instead of a tool call"));
     const client: InterviewAnthropicClient = { messages: { create } };
 
     await expect(
       runInterviewTurn({ client, model: "claude-haiku-4-5", history: [], latestUserAnswer: "hi" }),
-    ).rejects.toThrow(AIInterviewError);
+    ).rejects.toThrow(AIAssistantError);
   });
 
-  it("throws AIInterviewError when the API call itself fails", async () => {
+  it("throws AIAssistantError when the API call itself fails", async () => {
     const create = vi.fn().mockRejectedValue(new Error("network down"));
     const client: InterviewAnthropicClient = { messages: { create } };
 
     await expect(
       runInterviewTurn({ client, model: "claude-haiku-4-5", history: [], latestUserAnswer: "hi" }),
-    ).rejects.toThrow(AIInterviewError);
+    ).rejects.toThrow(AIAssistantError);
   });
 
   it("seeds the opening turn with a static message when there is no history yet", async () => {
@@ -177,21 +177,21 @@ describe("generateGiftStyleSummary", () => {
     expect(summary).toBe("I love cozy nights in.");
   });
 
-  it("throws AIInterviewError when no text block is returned", async () => {
+  it("throws AIAssistantError when no text block is returned", async () => {
     const create = vi.fn().mockResolvedValue({ content: [] } as unknown as Anthropic.Message);
     const client: InterviewAnthropicClient = { messages: { create } };
 
     await expect(
       generateGiftStyleSummary({ client, model: "claude-haiku-4-5", profileFacts: {} }),
-    ).rejects.toThrow(AIInterviewError);
+    ).rejects.toThrow(AIAssistantError);
   });
 
-  it("throws AIInterviewError when the API call itself fails", async () => {
+  it("throws AIAssistantError when the API call itself fails", async () => {
     const create = vi.fn().mockRejectedValue(new Error("network down"));
     const client: InterviewAnthropicClient = { messages: { create } };
 
     await expect(
       generateGiftStyleSummary({ client, model: "claude-haiku-4-5", profileFacts: {} }),
-    ).rejects.toThrow(AIInterviewError);
+    ).rejects.toThrow(AIAssistantError);
   });
 });

@@ -5,7 +5,7 @@ import {
   interviewTurnSchema,
   type InterviewTurn,
 } from "@/lib/validation/ai-interview";
-import { AIInterviewError } from "@/lib/ai/errors";
+import { AIAssistantError } from "@/lib/ai/errors";
 
 /**
  * A minimal shape of the Anthropic client this module actually calls —
@@ -165,7 +165,7 @@ function extractToolInput(response: Anthropic.Message): unknown {
       block.type === "tool_use" && block.name === "record_interview_turn",
   );
   if (!toolUse) {
-    throw new AIInterviewError("The AI didn't return a structured response.");
+    throw new AIAssistantError("The AI didn't return a structured response.");
   }
   return toolUse.input;
 }
@@ -211,13 +211,13 @@ export async function runInterviewTurn(params: {
       messages,
     });
   } catch {
-    throw new AIInterviewError("The AI assistant is temporarily unavailable.");
+    throw new AIAssistantError("The AI assistant is temporarily unavailable.");
   }
 
   const rawInput = extractToolInput(response);
   const parsed = interviewTurnSchema.safeParse(rawInput);
   if (!parsed.success) {
-    throw new AIInterviewError("The AI's response didn't match the expected format.");
+    throw new AIAssistantError("The AI's response didn't match the expected format.");
   }
   return parsed.data;
 }
@@ -252,7 +252,7 @@ export async function generateGiftStyleSummary(params: {
       ],
     });
   } catch {
-    throw new AIInterviewError("The AI assistant is temporarily unavailable.");
+    throw new AIAssistantError("The AI assistant is temporarily unavailable.");
   }
 
   const textBlock = response.content.find(
@@ -260,7 +260,7 @@ export async function generateGiftStyleSummary(params: {
   );
   const text = textBlock?.text?.trim();
   if (!text) {
-    throw new AIInterviewError("The AI didn't return a summary.");
+    throw new AIAssistantError("The AI didn't return a summary.");
   }
   return text;
 }

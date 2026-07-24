@@ -1,10 +1,10 @@
-import { HeartCrack, MessageCircleQuestion, Shirt } from "lucide-react";
+import { HeartCrack, Shirt } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShareModal } from "@/components/share-modal";
-import { ComingSoonModal } from "@/components/coming-soon-modal";
+import { GiftAssistantModal } from "@/components/public-profile/gift-assistant-modal";
 import { TagList } from "@/components/public-profile/tag-list";
 import { GiftsByBudget } from "@/components/public-profile/gifts-by-budget";
 import { THEME_OPTIONS } from "@/lib/mock/profile";
@@ -81,13 +81,7 @@ export function PublicProfileView({
           &ldquo;{profile.basicInfo.introduction}&rdquo;
         </p>
         <div className="flex flex-wrap justify-center gap-2">
-          <ComingSoonModal
-            triggerLabel="Help Me Choose a Gift"
-            triggerIcon={<MessageCircleQuestion className="h-4 w-4" aria-hidden="true" />}
-            triggerVariant="primary"
-            modalTitle="AI Gift Assistant — coming soon"
-            modalDescription={`Soon you'll be able to chat with an AI assistant for personalized gift ideas based on ${profile.basicInfo.displayName}'s profile. For now, browse the wishlist and favorites below.`}
-          />
+          <GiftAssistantModal slug={profile.basicInfo.slug} displayName={profile.basicInfo.displayName} />
           <ShareModal
             url={publicUrl}
             title={`${profile.basicInfo.displayName}'s gift profile`}
