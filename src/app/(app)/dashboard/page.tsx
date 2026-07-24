@@ -115,12 +115,10 @@ export default async function DashboardPage() {
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <ComingSoonModal
-          triggerLabel="Continue AI Interview"
-          triggerIcon={<MessageCircleQuestion className="h-4 w-4" aria-hidden="true" />}
-          modalTitle="AI interview coming soon"
-          modalDescription="A guided, conversational way to build your profile is planned for a later phase. For now, use Edit Profile to fill things in yourself."
-        />
+        <Button href="/interview" variant="secondary">
+          <MessageCircleQuestion className="h-4 w-4" aria-hidden="true" />
+          Continue AI Interview
+        </Button>
         <Button href="/profile/edit" variant="secondary">
           <PencilLine className="h-4 w-4" aria-hidden="true" />
           Edit Profile

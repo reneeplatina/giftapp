@@ -2,7 +2,6 @@ import { PencilLine, Sparkles } from "lucide-react";
 import { Container } from "@/components/container";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ComingSoonModal } from "@/components/coming-soon-modal";
 import { requireAuthUser } from "@/lib/auth/dal";
 
 export default async function OnboardingPage() {
@@ -28,13 +27,10 @@ export default async function OnboardingPage() {
           <p className="text-sm text-neutral-500">
             A guided conversation that fills in your profile as you chat.
           </p>
-          <ComingSoonModal
-            triggerLabel="Build It With AI"
-            triggerIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
-            triggerVariant="outline"
-            modalTitle="AI interview coming soon"
-            modalDescription="A guided, conversational way to build your profile is planned for a later phase. Choose Fill It Out Myself for now — you can switch to AI once it's ready."
-          />
+          <Button href="/interview" variant="outline">
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            Build It With AI
+          </Button>
         </Card>
 
         <Card className="flex flex-col items-center gap-3 py-8">
