@@ -62,7 +62,13 @@ export function GiftAssistantModal({
         description={`Chat about what ${displayName} might like — nothing here is added to their profile.`}
         className="flex max-h-[85vh] flex-col"
       >
-        <div className="flex flex-1 flex-col gap-3 overflow-y-auto pr-1" style={{ maxHeight: "50vh" }}>
+        <div
+          className="flex flex-1 flex-col gap-3 overflow-y-auto pr-1"
+          style={{ maxHeight: "50vh" }}
+          role="log"
+          aria-live="polite"
+          aria-label="Conversation"
+        >
           {messages.map((message, index) => (
             <div
               key={index}

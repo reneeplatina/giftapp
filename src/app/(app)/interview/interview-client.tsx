@@ -409,7 +409,7 @@ export function InterviewClient({
         <ProgressBar value={state.completionPercentage} label="AI Gift Builder progress" />
       </Card>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3" role="log" aria-live="polite" aria-label="Conversation">
         {state.messages.map((message) => (
           <div
             key={message.id}

@@ -41,7 +41,7 @@ export function ChipListSection({
         value={profile[profileKey]}
         onChange={(next) => updateStringList(profileKey, next)}
       />
-      <p className="text-xs text-neutral-400">Saved automatically.</p>
+      <p className="text-xs text-neutral-500">Saved automatically.</p>
     </div>
   );
 }

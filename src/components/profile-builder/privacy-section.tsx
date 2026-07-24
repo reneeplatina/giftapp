@@ -85,7 +85,7 @@ export function PrivacySection() {
           {error}
         </p>
       )}
-      <p className="text-xs text-neutral-400">Saved automatically.</p>
+      <p className="text-xs text-neutral-500">Saved automatically.</p>
     </div>
   );
 }

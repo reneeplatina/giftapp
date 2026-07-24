@@ -53,7 +53,7 @@ export function ChipMultiSelect({
               aria-pressed={selected}
               onClick={() => toggle(option)}
               className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                "inline-flex items-center gap-1 rounded-full border px-4 py-2.5 text-sm font-medium transition-colors",
                 selected
                   ? "border-neutral-900 bg-neutral-900 text-white"
                   : "border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50",
@@ -65,7 +65,7 @@ export function ChipMultiSelect({
           );
         })}
         {allChips.length === 0 && (
-          <p className="text-sm text-neutral-400">Nothing added yet.</p>
+          <p className="text-sm text-neutral-500">Nothing added yet.</p>
         )}
       </div>
       <div className="mt-1 flex items-center gap-2">

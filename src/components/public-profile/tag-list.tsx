@@ -1,6 +1,6 @@
 export function TagList({ items }: { items: string[] }) {
   if (items.length === 0) {
-    return <p className="text-sm text-neutral-400">Nothing added yet.</p>;
+    return <p className="text-sm text-neutral-500">Nothing added yet.</p>;
   }
 
   return (
