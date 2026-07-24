@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PublicProfileView } from "@/components/public-profile/public-profile-view";
 import { useProfile } from "@/context/profile-context";
+import { THEME_OPTIONS } from "@/lib/mock/profile";
 import type { ProfileStatus } from "@/types/profile";
 
 const STATUS_LABEL: Record<ProfileStatus, string> = {
@@ -22,6 +23,8 @@ const STATUS_VARIANT: Record<ProfileStatus, "success" | "warning" | "outline"> =
 
 export function PreviewClient() {
   const { profile, wishlistItems, theme, publicUrl } = useProfile();
+  const background = THEME_OPTIONS.find((option) => option.key === theme)
+    ?.background;
 
   return (
     <Container className="flex flex-col gap-6 py-8">
@@ -44,12 +47,17 @@ export function PreviewClient() {
         </div>
       </div>
 
-      <PublicProfileView
-        profile={profile}
-        wishlistItems={wishlistItems}
-        theme={theme}
-        publicUrl={publicUrl}
-      />
+      <div
+        className="rounded-2xl px-4 py-8 sm:px-8"
+        style={background ? { backgroundColor: background } : undefined}
+      >
+        <PublicProfileView
+          profile={profile}
+          wishlistItems={wishlistItems}
+          theme={theme}
+          publicUrl={publicUrl}
+        />
+      </div>
     </Container>
   );
 }

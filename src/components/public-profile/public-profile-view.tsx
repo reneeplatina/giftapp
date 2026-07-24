@@ -8,6 +8,7 @@ import { ComingSoonModal } from "@/components/coming-soon-modal";
 import { TagList } from "@/components/public-profile/tag-list";
 import { GiftsByBudget } from "@/components/public-profile/gifts-by-budget";
 import { THEME_OPTIONS } from "@/lib/mock/profile";
+import { THEME_ICONS } from "@/lib/profile/theme-icons";
 import type { GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
 
 function Section({
@@ -39,6 +40,7 @@ export function PublicProfileView({
   publicUrl: string;
 }) {
   const accent = THEME_OPTIONS.find((option) => option.key === theme)?.accent;
+  const ThemeIcon = THEME_ICONS[theme];
   const publicItems = wishlistItems.filter(
     (item) => item.isPublic && !item.isArchived,
   );
@@ -56,9 +58,15 @@ export function PublicProfileView({
     <div className="flex flex-col gap-10">
       <div className="flex flex-col items-center gap-4 text-center">
         <span
-          className="h-1.5 w-16 rounded-full"
-          style={{ backgroundColor: accent ?? "#1c1917" }}
-        />
+          className="flex h-12 w-12 items-center justify-center rounded-full"
+          style={{ backgroundColor: `${accent ?? "#1c1917"}1a` }}
+        >
+          <ThemeIcon
+            className="h-6 w-6"
+            style={{ color: accent ?? "#1c1917" }}
+            aria-hidden="true"
+          />
+        </span>
         <Avatar
           name={profile.basicInfo.displayName}
           src={profile.basicInfo.avatarUrl ?? undefined}

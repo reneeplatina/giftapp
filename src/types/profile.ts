@@ -21,6 +21,8 @@ export interface ThemeOption {
   key: ThemeKey;
   label: string;
   accent: string;
+  /** Soft, light background tint for the public profile page/preview. */
+  background: string;
 }
 
 export interface BasicInfo {

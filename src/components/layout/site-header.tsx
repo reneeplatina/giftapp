@@ -19,7 +19,8 @@ export function SiteHeader() {
             Sign in
           </Button>
           <Button href="/signup" size="sm">
-            Create my gift profile
+            <span className="hidden sm:inline">Create my gift profile</span>
+            <span className="sm:hidden">Sign up</span>
           </Button>
         </nav>
       </Container>

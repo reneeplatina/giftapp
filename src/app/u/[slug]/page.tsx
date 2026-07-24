@@ -4,6 +4,7 @@ import { Container } from "@/components/container";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { PublicProfileView } from "@/components/public-profile/public-profile-view";
+import { THEME_OPTIONS } from "@/lib/mock/profile";
 import { getPublicProfileBySlug } from "@/lib/profile/public-dal";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -14,6 +15,9 @@ export default async function PublicProfilePage({
 }) {
   const { slug } = await params;
   const loaded = await getPublicProfileBySlug(slug);
+  const background = loaded
+    ? THEME_OPTIONS.find((option) => option.key === loaded.theme)?.background
+    : undefined;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -28,7 +32,10 @@ export default async function PublicProfilePage({
           </Link>
         </Container>
       </header>
-      <main className="flex-1 py-10">
+      <main
+        className="flex-1 py-10"
+        style={background ? { backgroundColor: background } : undefined}
+      >
         <Container>
           {loaded ? (
             <PublicProfileView
