@@ -56,6 +56,7 @@ export function PreviewClient() {
           wishlistItems={wishlistItems}
           theme={theme}
           publicUrl={publicUrl}
+          isPreview
         />
       </div>
     </Container>

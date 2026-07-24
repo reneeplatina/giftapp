@@ -4,7 +4,10 @@ import { useState } from "react";
 import { Loader2, MessageCircleQuestion, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { sendGiftAssistantMessageAction } from "@/lib/gift-assistant/actions";
+import {
+  sendGiftAssistantMessageAction,
+  sendGiftAssistantPreviewMessageAction,
+} from "@/lib/gift-assistant/actions";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -14,9 +17,11 @@ interface ChatMessage {
 export function GiftAssistantModal({
   slug,
   displayName,
+  isPreview = false,
 }: {
   slug: string;
   displayName: string;
+  isPreview?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -40,7 +45,9 @@ export function GiftAssistantModal({
     setPending(true);
     setError(null);
 
-    const result = await sendGiftAssistantMessageAction(slug, history, trimmed);
+    const result = isPreview
+      ? await sendGiftAssistantPreviewMessageAction(history, trimmed)
+      : await sendGiftAssistantMessageAction(slug, history, trimmed);
     setPending(false);
     if (!result.success || !result.reply) {
       setError(result.error ?? "Couldn't reach the AI assistant.");
@@ -59,7 +66,11 @@ export function GiftAssistantModal({
         open={open}
         onClose={() => setOpen(false)}
         title="Gift ideas"
-        description={`Chat about what ${displayName} might like — nothing here is added to their profile.`}
+        description={
+          isPreview
+            ? `This is a live preview of the assistant visitors will see. Nothing here is added to your profile.`
+            : `Chat about what ${displayName} might like — nothing here is added to their profile.`
+        }
         className="flex max-h-[85vh] flex-col"
       >
         <div

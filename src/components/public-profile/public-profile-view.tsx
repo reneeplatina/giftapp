@@ -33,11 +33,13 @@ export function PublicProfileView({
   wishlistItems,
   theme,
   publicUrl,
+  isPreview = false,
 }: {
   profile: GiftProfile;
   wishlistItems: WishlistItem[];
   theme: ThemeKey;
   publicUrl: string;
+  isPreview?: boolean;
 }) {
   const accent = THEME_OPTIONS.find((option) => option.key === theme)?.accent;
   const ThemeIcon = THEME_ICONS[theme];
@@ -81,7 +83,11 @@ export function PublicProfileView({
           &ldquo;{profile.basicInfo.introduction}&rdquo;
         </p>
         <div className="flex flex-wrap justify-center gap-2">
-          <GiftAssistantModal slug={profile.basicInfo.slug} displayName={profile.basicInfo.displayName} />
+          <GiftAssistantModal
+            slug={profile.basicInfo.slug}
+            displayName={profile.basicInfo.displayName}
+            isPreview={isPreview}
+          />
           <ShareModal
             url={publicUrl}
             title={`${profile.basicInfo.displayName}'s gift profile`}
