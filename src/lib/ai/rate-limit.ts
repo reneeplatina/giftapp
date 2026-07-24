@@ -4,12 +4,13 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
 /**
  * Fallback if AI_DAILY_USER_LIMIT isn't set — keeps the assistant usable
- * but bounded (docs/AI_SAFETY.md). Every interview turn (send/skip),
- * restart, and gift-style-summary draft counts as one call, so a single
- * full conversation alone can use 10-15+ of these — 50 leaves room for
- * a few real sessions a day without feeling like a hair-trigger limit.
+ * but bounded (docs/AI_SAFETY.md: guards against a runaway bug/loop, not
+ * meant to gate normal use). At today's low per-call cost (Haiku) and
+ * this app's current single-user scale, 200/day is still a real ceiling
+ * but generous enough that normal use — even several full conversations,
+ * restarts, and experimentation in one day — shouldn't come close to it.
  */
-const DEFAULT_DAILY_USER_LIMIT = 50;
+const DEFAULT_DAILY_USER_LIMIT = 200;
 
 function getDailyUserLimit(): number {
   const raw = Number(process.env.AI_DAILY_USER_LIMIT);
