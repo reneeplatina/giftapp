@@ -21,9 +21,9 @@ import { BUDGET_LABELS, CATEGORY_OPTIONS } from "@/lib/mock/profile";
 import { SECTION_LABELS, type SectionTsKey } from "@/lib/profile/section-keys";
 import { useProfile } from "@/context/profile-context";
 import {
-  approveExtractedFieldsAction,
+  approveAllExtractedFieldsAction,
   approveGiftStyleSummaryAction,
-  dismissExtractedFieldsAction,
+  dismissAllExtractedFieldsAction,
   finishWithoutSummaryAction,
   generateGiftStyleSummaryAction,
   goBackInterviewAction,
@@ -75,57 +75,38 @@ function ExtractionPreview({ fields }: { fields: InterviewExtraction }) {
   );
 }
 
-function ExtractionCard({
-  message,
-  onApprove,
-  onDismiss,
-  pending,
-}: {
-  message: InterviewMessageView;
-  onApprove: () => void;
-  onDismiss: () => void;
-  pending: boolean;
-}) {
-  if (!message.extractedFields) return null;
+/**
+ * Combines every not-yet-resolved extraction across the whole
+ * conversation into one preview — the AI tallies facts silently turn by
+ * turn, and this is what the single end-of-chat approval reflects.
+ */
+function mergeExtractionsForPreview(fieldsList: InterviewExtraction[]): InterviewExtraction {
+  const merged: InterviewExtraction = {};
 
-  if (message.extractionResolved) {
-    return (
-      <p className="mt-2 flex items-center gap-1.5 text-xs text-neutral-500">
-        {message.extractionApplied ? (
-          <>
-            <Check className="h-3.5 w-3.5 text-green-600" aria-hidden="true" />
-            Added to your profile
-          </>
-        ) : (
-          "Not added"
-        )}
-      </p>
-    );
+  for (const fields of fieldsList) {
+    for (const key of CHIP_FIELD_KEYS) {
+      const values = fields[key];
+      if (!values || values.length === 0) continue;
+      const existing = merged[key] ?? [];
+      const seen = new Set(existing.map((value) => value.toLowerCase()));
+      const next = [...existing];
+      for (const value of values) {
+        const norm = value.toLowerCase();
+        if (seen.has(norm)) continue;
+        seen.add(norm);
+        next.push(value);
+      }
+      merged[key] = next;
+    }
+    if (fields.sizes) {
+      merged.sizes = { ...merged.sizes, ...fields.sizes };
+    }
+    if (fields.introduction) {
+      merged.introduction = fields.introduction;
+    }
   }
 
-  return (
-    <Card className="mt-2 flex flex-col gap-3 border-neutral-300 bg-cream/40 p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-        I picked up on this — add it to your profile?
-      </p>
-      <ExtractionPreview fields={message.extractedFields} />
-      <div className="flex gap-2">
-        <Button type="button" size="sm" onClick={onApprove} disabled={pending}>
-          <Check className="h-4 w-4" aria-hidden="true" />
-          Add to profile
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          onClick={onDismiss}
-          disabled={pending}
-        >
-          Not now
-        </Button>
-      </div>
-    </Card>
-  );
+  return merged;
 }
 
 function GiftSuggestionCard({
@@ -252,11 +233,11 @@ export function InterviewClient({
     setState(result.state);
   }
 
-  async function handleApprove(messageId: string, fields: InterviewExtraction) {
+  async function handleApproveAllExtractions() {
     if (!state) return;
     setPending(true);
     setError(null);
-    const result = await approveExtractedFieldsAction(state.sessionId, messageId, fields);
+    const result = await approveAllExtractedFieldsAction(state.sessionId);
     setPending(false);
     if (!result.success || !result.state) {
       setError(result.error ?? "Couldn't save those changes.");
@@ -269,11 +250,11 @@ export function InterviewClient({
     void refreshProfile();
   }
 
-  async function handleDismiss(messageId: string) {
+  async function handleDismissAllExtractions() {
     if (!state) return;
     setPending(true);
     setError(null);
-    const result = await dismissExtractedFieldsAction(state.sessionId, messageId);
+    const result = await dismissAllExtractedFieldsAction(state.sessionId);
     setPending(false);
     if (!result.success || !result.state) {
       setError(result.error ?? "Couldn't update.");
@@ -413,9 +394,11 @@ export function InterviewClient({
   const isDone = state.status === "completed" || justCompleted;
   const readyToWrapUp = state.isComplete && state.status === "in_progress" && !justCompleted;
   const canGoBack = state.messages.length > 1;
-  const pendingExtractions = state.messages.filter(
-    (message) => message.extractedFields && !message.extractionResolved,
-  );
+  const pendingExtractionFields = state.messages
+    .filter((message) => message.extractedFields && !message.extractionResolved)
+    .map((message) => message.extractedFields!);
+  const mergedExtraction =
+    pendingExtractionFields.length > 0 ? mergeExtractionsForPreview(pendingExtractionFields) : null;
   const pendingGiftSuggestions = state.messages.filter(
     (message) => message.giftSuggestion && !message.giftSuggestionResolved,
   );
@@ -445,24 +428,14 @@ export function InterviewClient({
             >
               {message.content}
             </div>
-            {message.role === "assistant" && (message.extractedFields || message.giftSuggestion) && (
-              <div className="flex w-full max-w-[85%] flex-col gap-2">
-                {message.extractedFields && (
-                  <ExtractionCard
-                    message={message}
-                    pending={pending}
-                    onApprove={() => handleApprove(message.id, message.extractedFields!)}
-                    onDismiss={() => handleDismiss(message.id)}
-                  />
-                )}
-                {message.giftSuggestion && (
-                  <GiftSuggestionCard
-                    message={message}
-                    pending={pending}
-                    onApprove={() => handleApproveGift(message.id, message.giftSuggestion!)}
-                    onDismiss={() => handleDismissGift(message.id)}
-                  />
-                )}
+            {message.role === "assistant" && message.giftSuggestion && (
+              <div className="w-full max-w-[85%]">
+                <GiftSuggestionCard
+                  message={message}
+                  pending={pending}
+                  onApprove={() => handleApproveGift(message.id, message.giftSuggestion!)}
+                  onDismiss={() => handleDismissGift(message.id)}
+                />
               </div>
             )}
           </div>
@@ -499,27 +472,44 @@ export function InterviewClient({
         </Card>
       ) : readyToWrapUp ? (
         <>
-          {(pendingExtractions.length > 0 || pendingGiftSuggestions.length > 0) && (
+          {mergedExtraction && (
             <Card className="flex flex-col gap-3 border-amber-300 bg-amber-50 p-5">
               <p className="font-display text-lg font-semibold text-neutral-900">
-                Before we wrap up — {pendingExtractions.length + pendingGiftSuggestions.length}{" "}
-                thing{pendingExtractions.length + pendingGiftSuggestions.length === 1 ? "" : "s"}{" "}
-                still waiting for your OK
+                Here&apos;s everything I picked up on
               </p>
               <p className="text-sm text-neutral-600">
-                You didn&apos;t approve or dismiss these while we were chatting. Add
-                them now, or leave them out.
+                Add it all to your profile, or leave it out — nothing was saved
+                while we were chatting.
+              </p>
+              <ExtractionPreview fields={mergedExtraction} />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleApproveAllExtractions}
+                  disabled={pending}
+                >
+                  <Check className="h-4 w-4" aria-hidden="true" />
+                  Add to my profile
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleDismissAllExtractions}
+                  disabled={pending}
+                >
+                  Leave it out
+                </Button>
+              </div>
+            </Card>
+          )}
+          {pendingGiftSuggestions.length > 0 && (
+            <Card className="flex flex-col gap-3 p-5">
+              <p className="font-display text-lg font-semibold text-neutral-900">
+                Gift ideas from our chat
               </p>
               <div className="flex flex-col gap-3">
-                {pendingExtractions.map((message) => (
-                  <ExtractionCard
-                    key={message.id}
-                    message={message}
-                    pending={pending}
-                    onApprove={() => handleApprove(message.id, message.extractedFields!)}
-                    onDismiss={() => handleDismiss(message.id)}
-                  />
-                ))}
                 {pendingGiftSuggestions.map((message) => (
                   <GiftSuggestionCard
                     key={message.id}

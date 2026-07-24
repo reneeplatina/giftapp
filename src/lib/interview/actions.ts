@@ -19,10 +19,7 @@ import {
 } from "@/lib/interview/dal";
 import { SECTION_KEY_MAP, SECTION_TS_KEYS, dbKeyToTsKey } from "@/lib/profile/section-keys";
 import { loadInterviewStateView, toMessageView, type InterviewStateView } from "@/lib/interview/view";
-import {
-  interviewExtractionSchema,
-  type InterviewExtraction,
-} from "@/lib/validation/ai-interview";
+import { interviewExtractionSchema } from "@/lib/validation/ai-interview";
 
 const AI_FEATURE_NAME = "ai_interview";
 const SKIP_ANSWER_TEXT = "(I'd like to skip this question.)";
@@ -277,59 +274,69 @@ export async function goBackInterviewAction(
   return state ? { success: true, state } : { success: false, error: "Couldn't load the interview." };
 }
 
-/** Applies an (optionally user-edited) extraction proposal to the profile. Requires explicit approval — never called automatically. */
-export async function approveExtractedFieldsAction(
+function findUnresolvedExtractions(
+  rows: Awaited<ReturnType<typeof listInterviewMessages>>,
+): { row: (typeof rows)[number]; envelope: AssistantTurnEnvelope }[] {
+  const result: { row: (typeof rows)[number]; envelope: AssistantTurnEnvelope }[] = [];
+  for (const row of rows) {
+    const envelope = row.structured_updates as AssistantTurnEnvelope | null;
+    if (envelope?.extractedFields && !envelope.extractionResolution) {
+      result.push({ row, envelope });
+    }
+  }
+  return result;
+}
+
+/**
+ * Applies every profile fact learned across the whole conversation so
+ * far in one go — nothing is written per-question; the AI silently
+ * tallies facts turn by turn, and this is the single explicit approval
+ * point the user acts on (typically at wrap-up).
+ */
+export async function approveAllExtractedFieldsAction(
   sessionId: string,
-  messageId: string,
-  fields: InterviewExtraction,
 ): Promise<InterviewActionResult & { state?: InterviewStateView }> {
   const owned = await requireOwnedSession(sessionId);
   if ("error" in owned) return { success: false, error: owned.error };
   const { user, supabase } = owned;
 
-  const parsed = interviewExtractionSchema.safeParse(fields);
-  if (!parsed.success) {
-    return { success: false, error: "Those changes weren't in the expected format." };
+  const rows = await listInterviewMessages(sessionId);
+  const pending = findUnresolvedExtractions(rows);
+
+  for (const { envelope } of pending) {
+    const parsed = interviewExtractionSchema.safeParse(envelope.extractedFields);
+    if (!parsed.success) continue; // defensive: skip a malformed turn rather than failing the whole batch
+    const applyError = await applyInterviewExtraction(supabase, user.id, parsed.data);
+    if (applyError) return { success: false, error: applyError };
   }
 
-  const applyError = await applyInterviewExtraction(supabase, user.id, parsed.data);
-  if (applyError) return { success: false, error: applyError };
-
-  const rows = await listInterviewMessages(sessionId);
-  const target = rows.find((row) => row.id === messageId);
-  if (target) {
-    const envelope = target.structured_updates as AssistantTurnEnvelope | null;
-    if (envelope) {
-      await updateMessageEnvelope(supabase, messageId, {
-        ...envelope,
-        extractionResolution: { applied: true, resolvedAt: new Date().toISOString() },
-      });
-    }
+  for (const { row, envelope } of pending) {
+    await updateMessageEnvelope(supabase, row.id, {
+      ...envelope,
+      extractionResolution: { applied: true, resolvedAt: new Date().toISOString() },
+    });
   }
 
   const state = await loadInterviewStateView(sessionId, user.id);
   return state ? { success: true, state } : { success: false, error: "Couldn't load the interview." };
 }
 
-/** Declines an extraction proposal — nothing is written to the profile. */
-export async function dismissExtractedFieldsAction(
+/** Declines everything tallied up so far — nothing is written to the profile. */
+export async function dismissAllExtractedFieldsAction(
   sessionId: string,
-  messageId: string,
 ): Promise<InterviewActionResult & { state?: InterviewStateView }> {
   const owned = await requireOwnedSession(sessionId);
   if ("error" in owned) return { success: false, error: owned.error };
   const { user, supabase } = owned;
 
   const rows = await listInterviewMessages(sessionId);
-  const target = rows.find((row) => row.id === messageId);
-  if (target) {
-    const envelope = target.structured_updates as AssistantTurnEnvelope | null;
-    if (envelope) {
-      await updateMessageEnvelope(supabase, messageId, {
-        ...envelope,
-        extractionResolution: { applied: false, resolvedAt: new Date().toISOString() },
-      });
-    }
+  const pending = findUnresolvedExtractions(rows);
+
+  for (const { row, envelope } of pending) {
+    await updateMessageEnvelope(supabase, row.id, {
+      ...envelope,
+      extractionResolution: { applied: false, resolvedAt: new Date().toISOString() },
+    });
   }
 
   const state = await loadInterviewStateView(sessionId, user.id);
