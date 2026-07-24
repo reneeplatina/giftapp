@@ -11,6 +11,7 @@ import {
 import { getSiteUrl } from "@/lib/site-url";
 import { SECTION_TS_KEYS, type SectionTsKey } from "@/lib/profile/section-keys";
 import {
+  getProfileSnapshotAction,
   saveBasicInfoAction,
   saveChipListAction,
   saveSectionVisibilityAction,
@@ -44,6 +45,8 @@ interface ProfileContextValue {
   updatePrivacy: (values: GiftProfile["privacy"]) => Promise<ProfileActionResult>;
   setTheme: (theme: ThemeKey) => Promise<ProfileActionResult>;
   uploadAvatar: (file: File) => Promise<ProfileActionResult & { avatarUrl?: string }>;
+  /** Re-reads the profile from the database and replaces local state — for updates made outside this context (e.g. the AI interview). */
+  refreshProfile: () => Promise<void>;
   addWishlistItem: (item: WishlistItemValues) => Promise<WishlistActionResult>;
   updateWishlistItem: (
     id: string,
@@ -207,6 +210,14 @@ export function ProfileProvider({
     [wishlistItems],
   );
 
+  const refreshProfile = useCallback(async () => {
+    const result = await getProfileSnapshotAction();
+    if (result.success) {
+      setProfile(result.profile);
+      setThemeState(result.theme);
+    }
+  }, []);
+
   const completionPercent = useMemo(() => calculateCompletion(profile), [
     profile,
   ]);
@@ -228,6 +239,7 @@ export function ProfileProvider({
     updatePrivacy,
     setTheme,
     uploadAvatar,
+    refreshProfile,
     addWishlistItem,
     updateWishlistItem,
     removeWishlistItem,

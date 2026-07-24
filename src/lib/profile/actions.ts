@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/auth/dal";
-import { getAvatarSignedUrl } from "@/lib/profile/dal";
+import { getAvatarSignedUrl, getFullProfileForEditing } from "@/lib/profile/dal";
 import { SECTION_TS_KEYS, type SectionTsKey } from "@/lib/profile/section-keys";
 import { upsertSectionRow } from "@/lib/profile/section-writes";
 import {
@@ -12,7 +12,24 @@ import {
   type BasicInfoValues,
   type SizesValues,
 } from "@/lib/validation/profile";
-import type { ProfileStatus, SectionVisibility, ThemeKey } from "@/types/profile";
+import type { GiftProfile, ProfileStatus, SectionVisibility, ThemeKey } from "@/types/profile";
+
+/**
+ * Re-reads the signed-in user's full profile from the database. Used to
+ * resync ProfileContext's in-memory state after something outside the
+ * context's own optimistic-update flow writes to the profile directly
+ * (currently: the AI interview's server actions in
+ * src/lib/interview/actions.ts, which persist via Supabase rather than
+ * through this context's update* functions).
+ */
+export async function getProfileSnapshotAction(): Promise<
+  | { success: true; profile: GiftProfile; theme: ThemeKey }
+  | { success: false; error: string }
+> {
+  const loaded = await getFullProfileForEditing();
+  if (!loaded) return { success: false, error: "Not signed in." };
+  return { success: true, profile: loaded.profile, theme: loaded.theme };
+}
 
 export interface ProfileActionResult {
   success: boolean;

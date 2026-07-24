@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SECTION_LABELS, type SectionTsKey } from "@/lib/profile/section-keys";
+import { useProfile } from "@/context/profile-context";
 import {
   approveExtractedFieldsAction,
   approveGiftStyleSummaryAction,
@@ -126,6 +127,7 @@ export function InterviewClient({
 }: {
   initialState: InterviewStateView | null;
 }) {
+  const { refreshProfile } = useProfile();
   const [state, setState] = useState<InterviewStateView | null>(initialState);
   const [answer, setAnswer] = useState("");
   const [pending, setPending] = useState(false);
@@ -197,6 +199,10 @@ export function InterviewClient({
       return;
     }
     setState(result.state);
+    // These fields were just written straight to the database (not
+    // through ProfileContext's own update* methods), so Preview and the
+    // manual editor need an explicit resync to see them.
+    void refreshProfile();
   }
 
   async function handleDismiss(messageId: string) {
@@ -236,6 +242,7 @@ export function InterviewClient({
       return;
     }
     setJustCompleted(true);
+    void refreshProfile();
   }
 
   async function handleFinishWithoutSummary() {
@@ -287,6 +294,9 @@ export function InterviewClient({
   const isDone = state.status === "completed" || justCompleted;
   const readyToWrapUp = state.isComplete && state.status === "in_progress" && !justCompleted;
   const canGoBack = state.messages.length > 1;
+  const pendingMessages = state.messages.filter(
+    (message) => message.extractedFields && !message.resolved,
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -352,7 +362,31 @@ export function InterviewClient({
           </div>
         </Card>
       ) : readyToWrapUp ? (
-        <Card className="flex flex-col gap-3 p-5">
+        <>
+          {pendingMessages.length > 0 && (
+            <Card className="flex flex-col gap-3 border-amber-300 bg-amber-50 p-5">
+              <p className="font-display text-lg font-semibold text-neutral-900">
+                Before we wrap up — {pendingMessages.length} suggestion
+                {pendingMessages.length === 1 ? "" : "s"} still waiting for your OK
+              </p>
+              <p className="text-sm text-neutral-600">
+                You didn&apos;t approve or dismiss these while we were chatting. Add
+                them now, or leave them out.
+              </p>
+              <div className="flex flex-col gap-3">
+                {pendingMessages.map((message) => (
+                  <ExtractionCard
+                    key={message.id}
+                    message={message}
+                    pending={pending}
+                    onApprove={() => handleApprove(message.id, message.extractedFields!)}
+                    onDismiss={() => handleDismiss(message.id)}
+                  />
+                ))}
+              </div>
+            </Card>
+          )}
+          <Card className="flex flex-col gap-3 p-5">
           <p className="font-display text-lg font-semibold text-neutral-900">
             That&apos;s everything I needed to ask
           </p>
@@ -423,7 +457,8 @@ export function InterviewClient({
               </div>
             </>
           )}
-        </Card>
+          </Card>
+        </>
       ) : (
         <Card className="flex flex-col gap-3 p-4">
           <label htmlFor="interview-answer" className="text-sm font-medium text-neutral-800">
