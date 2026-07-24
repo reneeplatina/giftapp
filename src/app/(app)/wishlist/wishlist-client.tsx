@@ -53,11 +53,11 @@ export function WishlistClient() {
     setDialogOpen(true);
   }
 
-  function handleSubmit(values: WishlistItemValues) {
+  async function handleSubmit(values: WishlistItemValues) {
     if (editingItem) {
-      updateWishlistItem(editingItem.id, { ...values, isArchived: false });
+      await updateWishlistItem(editingItem.id, values);
     } else {
-      addWishlistItem({ ...values, isArchived: false });
+      await addWishlistItem(values);
     }
   }
 

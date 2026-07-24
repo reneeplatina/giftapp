@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppTopBar } from "@/components/layout/app-topbar";
 import { ProfileProvider } from "@/context/profile-context";
 import { buildEmptyProfile, getFullProfileForEditing } from "@/lib/profile/dal";
+import { getWishlistItemsForEditing } from "@/lib/wishlist/dal";
 
 // Auth is intentionally NOT checked here. Next.js error.tsx boundaries
 // don't catch errors thrown by a layout in the same segment (only by
@@ -24,12 +25,16 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const loaded = await getFullProfileForEditing();
+  const [loaded, initialWishlistItems] = await Promise.all([
+    getFullProfileForEditing(),
+    getWishlistItemsForEditing(),
+  ]);
 
   return (
     <ProfileProvider
       initialProfile={loaded?.profile ?? buildEmptyProfile()}
       initialTheme={loaded?.theme ?? "general"}
+      initialWishlistItems={initialWishlistItems}
     >
       <div className="flex flex-1 flex-col md:flex-row">
         <AppSidebar />

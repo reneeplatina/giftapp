@@ -4,12 +4,10 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
-import { INITIAL_WISHLIST_ITEMS } from "@/lib/mock/profile";
 import { getSiteUrl } from "@/lib/site-url";
 import { SECTION_TS_KEYS, type SectionTsKey } from "@/lib/profile/section-keys";
 import {
@@ -22,9 +20,14 @@ import {
   uploadAvatarAction,
   type ProfileActionResult,
 } from "@/lib/profile/actions";
+import {
+  addWishlistItemAction,
+  removeWishlistItemAction,
+  updateWishlistItemAction,
+  type WishlistActionResult,
+} from "@/lib/wishlist/actions";
 import type { GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
-
-const WISHLIST_STORAGE_KEY = "gift-profile:mock-wishlist:v1";
+import type { WishlistItemValues } from "@/lib/validation/wishlist";
 
 interface ProfileContextValue {
   profile: GiftProfile;
@@ -41,9 +44,12 @@ interface ProfileContextValue {
   updatePrivacy: (values: GiftProfile["privacy"]) => Promise<ProfileActionResult>;
   setTheme: (theme: ThemeKey) => Promise<ProfileActionResult>;
   uploadAvatar: (file: File) => Promise<ProfileActionResult & { avatarUrl?: string }>;
-  addWishlistItem: (item: Omit<WishlistItem, "id">) => void;
-  updateWishlistItem: (id: string, item: Omit<WishlistItem, "id">) => void;
-  removeWishlistItem: (id: string) => void;
+  addWishlistItem: (item: WishlistItemValues) => Promise<WishlistActionResult>;
+  updateWishlistItem: (
+    id: string,
+    item: WishlistItemValues,
+  ) => Promise<WishlistActionResult>;
+  removeWishlistItem: (id: string) => Promise<WishlistActionResult>;
 }
 
 const ProfileContext = createContext<ProfileContextValue | null>(null);
@@ -65,41 +71,18 @@ export function ProfileProvider({
   children,
   initialProfile,
   initialTheme,
+  initialWishlistItems,
 }: {
   children: ReactNode;
   initialProfile: GiftProfile;
   initialTheme: ThemeKey;
+  initialWishlistItems: WishlistItem[];
 }) {
   const [profile, setProfile] = useState<GiftProfile>(initialProfile);
   const [theme, setThemeState] = useState<ThemeKey>(initialTheme);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>(
-    INITIAL_WISHLIST_ITEMS,
+    initialWishlistItems,
   );
-  const [wishlistHydrated, setWishlistHydrated] = useState(false);
-
-  // Wishlist items are not yet persisted to Supabase (a future phase) —
-  // this stays exactly as it was in the mock-data version, unrelated to
-  // the real profile/theme state above.
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(WISHLIST_STORAGE_KEY);
-      if (raw) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setWishlistItems(JSON.parse(raw));
-      }
-    } catch {
-      // Ignore malformed local storage state and keep sample data.
-    }
-    setWishlistHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!wishlistHydrated) return;
-    window.localStorage.setItem(
-      WISHLIST_STORAGE_KEY,
-      JSON.stringify(wishlistItems),
-    );
-  }, [wishlistItems, wishlistHydrated]);
 
   const updateBasicInfo = useCallback(
     async (values: GiftProfile["basicInfo"]) => {
@@ -183,27 +166,46 @@ export function ProfileProvider({
     return result;
   }, []);
 
-  const addWishlistItem = useCallback((item: Omit<WishlistItem, "id">) => {
-    setWishlistItems((prev) => [
-      ...prev,
-      { ...item, id: `wl-${Date.now()}-${Math.round(Math.random() * 1000)}` },
-    ]);
+  const addWishlistItem = useCallback(async (item: WishlistItemValues) => {
+    const result = await addWishlistItemAction(item);
+    if (result.success && result.item) {
+      const newItem = result.item;
+      setWishlistItems((prev) => [...prev, newItem]);
+    }
+    return result;
   }, []);
 
   const updateWishlistItem = useCallback(
-    (id: string, item: Omit<WishlistItem, "id">) => {
+    async (id: string, item: WishlistItemValues) => {
+      const previous = wishlistItems;
       setWishlistItems((prev) =>
         prev.map((existing) =>
-          existing.id === id ? { ...item, id } : existing,
+          existing.id === id
+            ? { ...existing, ...item, id }
+            : existing,
         ),
       );
+      const result = await updateWishlistItemAction(id, item);
+      if (!result.success) {
+        setWishlistItems(previous);
+      }
+      return result;
     },
-    [],
+    [wishlistItems],
   );
 
-  const removeWishlistItem = useCallback((id: string) => {
-    setWishlistItems((prev) => prev.filter((item) => item.id !== id));
-  }, []);
+  const removeWishlistItem = useCallback(
+    async (id: string) => {
+      const previous = wishlistItems;
+      setWishlistItems((prev) => prev.filter((item) => item.id !== id));
+      const result = await removeWishlistItemAction(id);
+      if (!result.success) {
+        setWishlistItems(previous);
+      }
+      return result;
+    },
+    [wishlistItems],
+  );
 
   const completionPercent = useMemo(() => calculateCompletion(profile), [
     profile,
