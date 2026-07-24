@@ -2,8 +2,14 @@ import "server-only";
 
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
-/** Fallback if AI_DAILY_USER_LIMIT isn't set — keeps the assistant usable but bounded (docs/AI_SAFETY.md). */
-const DEFAULT_DAILY_USER_LIMIT = 20;
+/**
+ * Fallback if AI_DAILY_USER_LIMIT isn't set — keeps the assistant usable
+ * but bounded (docs/AI_SAFETY.md). Every interview turn (send/skip),
+ * restart, and gift-style-summary draft counts as one call, so a single
+ * full conversation alone can use 10-15+ of these — 50 leaves room for
+ * a few real sessions a day without feeling like a hair-trigger limit.
+ */
+const DEFAULT_DAILY_USER_LIMIT = 50;
 
 function getDailyUserLimit(): number {
   const raw = Number(process.env.AI_DAILY_USER_LIMIT);

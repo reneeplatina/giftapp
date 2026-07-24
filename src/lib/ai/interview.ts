@@ -27,18 +27,18 @@ export interface InterviewHistoryItem {
   content: string;
 }
 
+// Kept intentionally short — every topic here is roughly one more AI
+// call in a full run, and a few closely related topics are merged into
+// a single question below rather than asked one at a time.
 const INTERVIEW_TOPICS = [
-  "interests and hobbies",
+  "interests, hobbies, and creativity",
   "favorite colors",
   "clothing and shoe sizes",
   "food and drinks",
   "favorite stores and brands",
-  "technology and gaming",
-  "home and lifestyle",
-  "creativity",
-  "fitness and wellness",
+  "technology, gaming, and digital subscriptions",
+  "home, lifestyle, fitness, and wellness",
   "experiences they'd enjoy",
-  "digital gifts and subscriptions",
   "things to avoid gifting them",
 ].join(", ");
 
