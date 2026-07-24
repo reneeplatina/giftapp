@@ -7,6 +7,7 @@ import {
   Gift,
   Loader2,
   MessageCircleQuestion,
+  RotateCcw,
   Sparkles,
   X,
 } from "lucide-react";
@@ -15,6 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { BUDGET_LABELS, CATEGORY_OPTIONS } from "@/lib/mock/profile";
 import { SECTION_LABELS, type SectionTsKey } from "@/lib/profile/section-keys";
 import { useProfile } from "@/context/profile-context";
@@ -26,6 +28,7 @@ import {
   generateGiftStyleSummaryAction,
   goBackInterviewAction,
   resolveGiftSuggestionAction,
+  restartInterviewAction,
   sendInterviewAnswerAction,
   skipInterviewQuestionAction,
   startInterviewAction,
@@ -195,6 +198,7 @@ export function InterviewClient({
   const [summaryDraft, setSummaryDraft] = useState<string | null>(null);
   const [summaryPending, setSummaryPending] = useState(false);
   const [justCompleted, setJustCompleted] = useState(false);
+  const [restartConfirmOpen, setRestartConfirmOpen] = useState(false);
 
   async function handleStart() {
     setPending(true);
@@ -355,6 +359,22 @@ export function InterviewClient({
       return;
     }
     setJustCompleted(true);
+  }
+
+  async function handleRestart() {
+    if (!state) return;
+    setPending(true);
+    setError(null);
+    const result = await restartInterviewAction(state.sessionId);
+    setPending(false);
+    if (!result.success || !result.state) {
+      setError(result.error ?? "Couldn't start over.");
+      return;
+    }
+    setState(result.state);
+    setAnswer("");
+    setSummaryDraft(null);
+    setJustCompleted(false);
   }
 
   if (!state) {
@@ -635,9 +655,30 @@ export function InterviewClient({
         </Card>
       )}
 
-      <Button href="/dashboard" variant="ghost" size="sm" className="self-start">
-        Save &amp; exit to dashboard
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button href="/dashboard" variant="ghost" size="sm">
+          Save &amp; exit to dashboard
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setRestartConfirmOpen(true)}
+          disabled={pending}
+        >
+          <RotateCcw className="h-4 w-4" aria-hidden="true" />
+          Start over
+        </Button>
+      </div>
+
+      <ConfirmDialog
+        open={restartConfirmOpen}
+        onClose={() => setRestartConfirmOpen(false)}
+        onConfirm={handleRestart}
+        title="Start a new conversation?"
+        description="This resets the chat and asks the opening question again. Anything you've already added to your profile or wishlist stays exactly as it is."
+        confirmLabel="Start over"
+      />
     </div>
   );
 }

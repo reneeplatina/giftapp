@@ -43,27 +43,11 @@ async function requireOwnedSession(sessionId: string) {
   return { user, supabase, session };
 }
 
-/** Starts a new interview session and generates the opening question. */
-export async function startInterviewAction(): Promise<
-  InterviewActionResult & { state?: InterviewStateView }
-> {
-  const user = await getAuthUser();
-  if (!user) return { success: false, error: "Not signed in." };
-
-  const client = getAnthropicClient();
-  if (!client) {
-    return {
-      success: false,
-      error: "The AI assistant isn't available right now. You can build your profile manually instead.",
-    };
-  }
-
-  const usage = await checkAndRecordAiUsage(user.id, AI_FEATURE_NAME);
-  if (!usage.allowed) {
-    return { success: false, error: usage.error };
-  }
-
-  const supabase = await createClient();
+async function beginNewSession(
+  user: { id: string },
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  client: NonNullable<ReturnType<typeof getAnthropicClient>>,
+): Promise<InterviewActionResult & { state?: InterviewStateView }> {
   const session = await createInterviewSession(supabase, user.id);
   if (!session) {
     return { success: false, error: "Couldn't start the interview." };
@@ -111,6 +95,63 @@ export async function startInterviewAction(): Promise<
       error instanceof AIInterviewError ? error.message : "The AI assistant hit an unexpected error.";
     return { success: false, error: message };
   }
+}
+
+/** Starts a new interview session and generates the opening question. */
+export async function startInterviewAction(): Promise<
+  InterviewActionResult & { state?: InterviewStateView }
+> {
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Not signed in." };
+
+  const client = getAnthropicClient();
+  if (!client) {
+    return {
+      success: false,
+      error: "The AI assistant isn't available right now. You can build your profile manually instead.",
+    };
+  }
+
+  const usage = await checkAndRecordAiUsage(user.id, AI_FEATURE_NAME);
+  if (!usage.allowed) {
+    return { success: false, error: usage.error };
+  }
+
+  const supabase = await createClient();
+  return beginNewSession(user, supabase, client);
+}
+
+/**
+ * Abandons the current session (if it's still in progress — already-
+ * completed sessions are left as historical record) and starts a fresh
+ * one. Only the conversation resets: anything already approved into the
+ * profile or wishlist stays exactly as it is.
+ */
+export async function restartInterviewAction(
+  currentSessionId: string,
+): Promise<InterviewActionResult & { state?: InterviewStateView }> {
+  const owned = await requireOwnedSession(currentSessionId);
+  if ("error" in owned) return { success: false, error: owned.error };
+  const { user, supabase, session } = owned;
+
+  const client = getAnthropicClient();
+  if (!client) {
+    return {
+      success: false,
+      error: "The AI assistant isn't available right now. You can build your profile manually instead.",
+    };
+  }
+
+  const usage = await checkAndRecordAiUsage(user.id, AI_FEATURE_NAME);
+  if (!usage.allowed) {
+    return { success: false, error: usage.error };
+  }
+
+  if (session.status === "in_progress") {
+    await updateInterviewSession(supabase, currentSessionId, { status: "abandoned" });
+  }
+
+  return beginNewSession(user, supabase, client);
 }
 
 async function submitAnswer(
