@@ -1,6 +1,7 @@
 import { Gift, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
 import { BUDGET_LABELS, PRIORITY_LABELS } from "@/lib/mock/profile";
 import type { PriorityLevel, WishlistItem } from "@/types/profile";
 
@@ -62,6 +63,7 @@ export function WishlistItemCard({
         <Badge variant="outline">{item.category}</Badge>
         {!item.isPublic && <Badge variant="outline">Private</Badge>}
       </div>
+      <AmazonSearchLink itemName={item.name} />
     </Card>
   );
 }

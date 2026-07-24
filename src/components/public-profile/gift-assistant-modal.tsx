@@ -71,11 +71,11 @@ export function GiftAssistantModal({
             ? `This is a live preview of the assistant visitors will see. Nothing here is added to your profile.`
             : `Chat about what ${displayName} might like — nothing here is added to their profile.`
         }
-        className="flex max-h-[85vh] flex-col"
+        className="flex max-h-[85dvh] flex-col"
       >
         <div
           className="flex flex-1 flex-col gap-3 overflow-y-auto pr-1"
-          style={{ maxHeight: "50vh" }}
+          style={{ maxHeight: "50dvh" }}
           role="log"
           aria-live="polite"
           aria-label="Conversation"

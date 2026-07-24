@@ -42,11 +42,11 @@ export function Modal({
       }}
       aria-labelledby="modal-title"
       className={cn(
-        "w-[calc(100vw-2rem)] max-w-md rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl",
+        "w-[calc(100vw-2rem)] max-h-[90dvh] max-w-md overflow-y-auto rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl",
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="sticky top-0 z-10 -m-6 mb-0 flex items-start justify-between gap-4 bg-white p-6 pb-0">
         <h2
           id="modal-title"
           className="font-display text-xl font-semibold text-neutral-900"

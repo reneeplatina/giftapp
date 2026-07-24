@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShareModal } from "@/components/share-modal";
 import { GiftAssistantModal } from "@/components/public-profile/gift-assistant-modal";
+import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
 import { TagList } from "@/components/public-profile/tag-list";
 import { GiftsByBudget } from "@/components/public-profile/gifts-by-budget";
 import { THEME_OPTIONS } from "@/lib/mock/profile";
@@ -126,6 +127,7 @@ export function PublicProfileView({
                 <Badge variant="outline" className="mt-1 w-fit">
                   {item.category}
                 </Badge>
+                <AmazonSearchLink itemName={item.name} />
               </Card>
             ))}
           </div>
@@ -144,6 +146,7 @@ export function PublicProfileView({
                 <Badge variant="neutral" className="mt-1 w-fit">
                   Dream gift
                 </Badge>
+                <AmazonSearchLink itemName={item.name} />
               </Card>
             ))}
           </div>

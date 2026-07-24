@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
 import { BUDGET_LABELS } from "@/lib/mock/profile";
 import type { BudgetLevel, WishlistItem } from "@/types/profile";
 
@@ -50,12 +51,15 @@ export function GiftsByBudget({ items }: { items: WishlistItem[] }) {
           visibleItems.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between gap-3 rounded-xl border border-neutral-200 px-4 py-3"
+              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-neutral-200 px-4 py-3"
             >
               <span className="text-sm font-medium text-neutral-900">
                 {item.name}
               </span>
-              <span className="text-xs text-neutral-500">{item.category}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-neutral-500">{item.category}</span>
+                <AmazonSearchLink itemName={item.name} />
+              </div>
             </div>
           ))
         )}

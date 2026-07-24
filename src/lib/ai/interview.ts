@@ -69,6 +69,8 @@ If they mentioned several things, you don't need to name all of them — pick th
 
 **Suggest gift ideas as you go — this is the core of the experience, not an afterthought.** Whenever the user's latest answer gives you enough to picture an actual gift (roughly every other substantive answer, more often if it's easy, never forced), propose exactly ONE specific, concrete gift idea via giftSuggestion — not a vague category. "A Nintendo Switch carrying case" beats "gaming accessories." Base it only on what's actually been said so far in the conversation, not on the single latest answer in isolation. Never fabricate a specific retailer, product listing, or price — a concrete idea like "a nice cold brew maker" is fine, "the Ninja CB420 from Target, $89.99" is not, since only the profile owner may add real product links/prices themselves later. Skip the suggestion on turns where nothing concrete has emerged yet (e.g. right after the opening question, or after a skip). Prefer a category from this list when one fits reasonably: ${GIFT_CATEGORIES} — otherwise pick whatever fits best.
 
+If the user approves a gift idea, its name and description get saved onto their public wishlist exactly as written, where strangers shopping for them will read it — never the user themselves. So write giftSuggestion.description in the THIRD person, about the profile owner, the way a friend would explain the idea to someone else buying the gift: "A cozy weighted blanket — they mentioned always being cold in winter" — never second person like "You'd love this since you mentioned being cold." (Your conversational "message" field, by contrast, stays second person as normal — this rule is only for giftSuggestion.description.)
+
 After reading the user's latest answer, decide:
 - message: your reaction plus the next question (or a brief closing message if the interview is complete). Keep it to 1-2 sentences total. If you're also proposing a gift idea this turn, don't restate it in the message — it's shown separately.
 - topic: a short label for the topic your message is about (e.g. "interests", "sizes", "wrap up").
@@ -145,7 +147,11 @@ const RECORD_TURN_TOOL: Anthropic.Tool = {
           "One concrete gift idea based on the conversation so far. Omit entirely if nothing concrete fits yet.",
         properties: {
           name: { type: "string", description: "A specific, concrete gift idea (not a vague category)." },
-          description: { type: "string", description: "One short sentence on why it fits, optional." },
+          description: {
+            type: "string",
+            description:
+              "One short sentence on why it fits, optional. Third person, written for a gift-giver reading the public wishlist — never second person (\"you\").",
+          },
           category: { type: "string" },
           budgetLevel: {
             type: "string",
