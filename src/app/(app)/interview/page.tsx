@@ -16,11 +16,11 @@ export default async function InterviewPage() {
     <Container className="flex flex-1 flex-col gap-6 py-8">
       <div>
         <h1 className="font-display text-2xl font-semibold text-neutral-900">
-          AI-guided interview
+          AI Gift Builder
         </h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Answer a few casual questions and I&apos;ll fill in your gift
-          profile as we go — nothing is saved until you approve it.
+          One chat that learns your taste and suggests gifts as it goes.
+          Nothing is added to your profile or wishlist until you approve it.
         </p>
       </div>
       <InterviewClient initialState={initialState} />

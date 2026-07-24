@@ -22,14 +22,14 @@ export default async function OnboardingPage() {
         <Card className="flex flex-col items-center gap-3 py-8">
           <Sparkles className="h-8 w-8 text-neutral-400" aria-hidden="true" />
           <p className="font-display text-lg font-semibold text-neutral-900">
-            Build It With AI
+            AI Gift Builder
           </p>
           <p className="text-sm text-neutral-500">
-            A guided conversation that fills in your profile as you chat.
+            One chat that learns your taste and suggests gifts as it goes.
           </p>
           <Button href="/interview" variant="outline">
             <Sparkles className="h-4 w-4" aria-hidden="true" />
-            Build It With AI
+            AI Gift Builder
           </Button>
         </Card>
 

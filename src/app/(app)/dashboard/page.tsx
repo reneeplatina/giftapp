@@ -1,7 +1,6 @@
 import {
   Eye,
   ListChecks,
-  MessageCircleQuestion,
   Palette,
   PencilLine,
   Sparkles,
@@ -14,7 +13,6 @@ import { Card } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { CopyLinkButton } from "@/components/copy-link-button";
 import { ShareModal } from "@/components/share-modal";
-import { ComingSoonModal } from "@/components/coming-soon-modal";
 import { getCurrentProfile, requireAuthUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getAvatarSignedUrl } from "@/lib/profile/dal";
@@ -114,11 +112,19 @@ export default async function DashboardPage() {
         <ProgressBar value={completionPercent} label="Profile completeness" />
       </Card>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Button href="/interview" variant="secondary">
-          <MessageCircleQuestion className="h-4 w-4" aria-hidden="true" />
-          Continue AI Interview
+      <Card className="flex flex-col items-center gap-3 border-neutral-900 bg-neutral-900 py-8 text-center">
+        <Sparkles className="h-8 w-8 text-white" aria-hidden="true" />
+        <p className="font-display text-lg font-semibold text-white">AI Gift Builder</p>
+        <p className="max-w-sm text-sm text-neutral-300">
+          One chat that gets to know you and suggests gifts as it goes —
+          approve what you like, skip the rest.
+        </p>
+        <Button href="/interview" variant="secondary" size="sm">
+          Open AI Gift Builder
         </Button>
+      </Card>
+
+      <div className="grid gap-4 sm:grid-cols-2">
         <Button href="/profile/edit" variant="secondary">
           <PencilLine className="h-4 w-4" aria-hidden="true" />
           Edit Profile
@@ -127,12 +133,6 @@ export default async function DashboardPage() {
           <ListChecks className="h-4 w-4" aria-hidden="true" />
           Manage Wishlist
         </Button>
-        <ComingSoonModal
-          triggerLabel="Get AI Gift Ideas"
-          triggerIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
-          modalTitle="AI gift ideas coming soon"
-          modalDescription="An assistant that suggests gift ideas from your profile is planned for a later phase."
-        />
         <Button href="/themes" variant="secondary">
           <Palette className="h-4 w-4" aria-hidden="true" />
           Choose Theme

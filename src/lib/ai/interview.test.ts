@@ -82,6 +82,34 @@ describe("runInterviewTurn", () => {
     expect(turn.extractedFields?.interests).toEqual(["hiking"]);
   });
 
+  it("returns a proposed gift suggestion alongside extracted fields when the model offers one", async () => {
+    const create = vi.fn().mockResolvedValue(
+      toolResponse({
+        message: "Switch fan, noted! What colors do you like?",
+        topic: "tech and gaming",
+        isComplete: false,
+        completionPercentage: 40,
+        extractedFields: { techAndGaming: ["Nintendo Switch"] },
+        giftSuggestion: {
+          name: "A Nintendo Switch carrying case",
+          category: "Tech",
+          budgetLevel: "25_to_75",
+        },
+      }),
+    );
+    const client: InterviewAnthropicClient = { messages: { create } };
+
+    const turn = await runInterviewTurn({
+      client,
+      model: "claude-haiku-4-5",
+      history: [],
+      latestUserAnswer: "I have a Nintendo Switch.",
+    });
+
+    expect(turn.giftSuggestion?.name).toBe("A Nintendo Switch carrying case");
+    expect(turn.giftSuggestion?.budgetLevel).toBe("25_to_75");
+  });
+
   it("throws AIInterviewError when the tool input fails schema validation", async () => {
     const create = vi.fn().mockResolvedValue(
       toolResponse({

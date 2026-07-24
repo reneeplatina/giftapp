@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { interviewExtractionSchema, interviewTurnSchema } from "@/lib/validation/ai-interview";
+import {
+  giftSuggestionSchema,
+  interviewExtractionSchema,
+  interviewTurnSchema,
+} from "@/lib/validation/ai-interview";
 
 describe("interviewExtractionSchema", () => {
   it("accepts a fully empty object", () => {
@@ -38,6 +42,43 @@ describe("interviewExtractionSchema", () => {
   });
 });
 
+describe("giftSuggestionSchema", () => {
+  it("accepts a suggestion with just a name", () => {
+    expect(giftSuggestionSchema.safeParse({ name: "A cold brew maker" }).success).toBe(true);
+  });
+
+  it("accepts a fully specified suggestion", () => {
+    const result = giftSuggestionSchema.safeParse({
+      name: "A Nintendo Switch carrying case",
+      description: "They mentioned loving their Switch.",
+      category: "Tech",
+      budgetLevel: "25_to_75",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a missing name", () => {
+    expect(giftSuggestionSchema.safeParse({ description: "no name here" }).success).toBe(false);
+  });
+
+  it("rejects an invalid budgetLevel (no fabricated price tiers)", () => {
+    const result = giftSuggestionSchema.safeParse({
+      name: "A gift card",
+      budgetLevel: "one million dollars",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects unknown fields (e.g. a fabricated product link/price)", () => {
+    const result = giftSuggestionSchema.safeParse({
+      name: "A gift card",
+      productUrl: "https://example.com/product/123",
+      price: 49.99,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
 describe("interviewTurnSchema", () => {
   it("accepts a well-formed turn", () => {
     const result = interviewTurnSchema.safeParse({
@@ -45,6 +86,18 @@ describe("interviewTurnSchema", () => {
       topic: "favorite colors",
       isComplete: false,
       completionPercentage: 10,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a turn with both an extraction and a gift suggestion", () => {
+    const result = interviewTurnSchema.safeParse({
+      message: "Nintendo Switch fan, noted! What colors do you like?",
+      topic: "tech and gaming",
+      isComplete: false,
+      completionPercentage: 40,
+      extractedFields: { techAndGaming: ["Nintendo Switch"] },
+      giftSuggestion: { name: "A Nintendo Switch carrying case", category: "Tech" },
     });
     expect(result.success).toBe(true);
   });

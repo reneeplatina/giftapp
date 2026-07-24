@@ -19,7 +19,10 @@ export interface AssistantTurnEnvelope {
   isComplete: boolean;
   extractedFields?: Record<string, unknown>;
   /** Set once the user approves or dismisses the extraction proposal, if any. */
-  resolution?: { applied: boolean; resolvedAt: string };
+  extractionResolution?: { applied: boolean; resolvedAt: string };
+  giftSuggestion?: Record<string, unknown>;
+  /** Set once the user approves or dismisses the gift suggestion, if any — independent of extractionResolution. */
+  giftSuggestionResolution?: { applied: boolean; resolvedAt: string };
 }
 
 /** Most recent interview session for a profile, regardless of status, or null if none exists yet. */

@@ -39,6 +39,25 @@ export const interviewExtractionSchema = z
 export type InterviewExtraction = z.infer<typeof interviewExtractionSchema>;
 
 /**
+ * A single concrete gift idea the AI proposes mid-conversation, based
+ * only on what's been said so far. Never a specific product/retailer
+ * link or a price — those are the profile owner's own info to add later
+ * (wishlist_items.product_url), not something the AI fabricates, per
+ * docs/AI_SAFETY.md. budgetLevel/category/description are the model's
+ * best guess and always editable before the user approves.
+ */
+export const giftSuggestionSchema = z
+  .object({
+    name: z.string().min(1).max(80),
+    description: z.string().max(200).optional(),
+    category: z.string().max(60).optional(),
+    budgetLevel: z.enum(["under_25", "25_to_75", "75_to_200", "over_200"]).optional(),
+  })
+  .strict();
+
+export type GiftSuggestion = z.infer<typeof giftSuggestionSchema>;
+
+/**
  * The AI's full structured turn response — always produced via a forced
  * tool call (see src/lib/ai/interview.ts) so the shape is guaranteed at
  * the API level, then re-validated here as defense in depth before
@@ -50,6 +69,7 @@ export const interviewTurnSchema = z.object({
   isComplete: z.boolean(),
   completionPercentage: z.number().int().min(0).max(100),
   extractedFields: interviewExtractionSchema.optional(),
+  giftSuggestion: giftSuggestionSchema.optional(),
 });
 
 export type InterviewTurn = z.infer<typeof interviewTurnSchema>;

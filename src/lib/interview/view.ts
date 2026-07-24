@@ -6,7 +6,7 @@ import {
   listInterviewMessages,
   type AssistantTurnEnvelope,
 } from "@/lib/interview/dal";
-import type { InterviewExtraction } from "@/lib/validation/ai-interview";
+import type { GiftSuggestion, InterviewExtraction } from "@/lib/validation/ai-interview";
 
 /**
  * Read-side view types/helpers shared between the "use server" action
@@ -21,8 +21,11 @@ export interface InterviewMessageView {
   content: string;
   topic?: string;
   extractedFields?: InterviewExtraction;
-  resolved?: boolean;
-  applied?: boolean;
+  extractionResolved?: boolean;
+  extractionApplied?: boolean;
+  giftSuggestion?: GiftSuggestion;
+  giftSuggestionResolved?: boolean;
+  giftSuggestionApplied?: boolean;
 }
 
 export interface InterviewStateView {
@@ -46,8 +49,11 @@ export function toMessageView(row: {
     content: row.content,
     topic: envelope?.topic,
     extractedFields: envelope?.extractedFields as InterviewExtraction | undefined,
-    resolved: Boolean(envelope?.resolution),
-    applied: envelope?.resolution?.applied,
+    extractionResolved: Boolean(envelope?.extractionResolution),
+    extractionApplied: envelope?.extractionResolution?.applied,
+    giftSuggestion: envelope?.giftSuggestion as GiftSuggestion | undefined,
+    giftSuggestionResolved: Boolean(envelope?.giftSuggestionResolution),
+    giftSuggestionApplied: envelope?.giftSuggestionResolution?.applied,
   };
 }
 

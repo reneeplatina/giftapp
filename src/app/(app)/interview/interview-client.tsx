@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   ArrowLeft,
   Check,
+  Gift,
   Loader2,
   MessageCircleQuestion,
   Sparkles,
@@ -14,6 +15,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { EmptyState } from "@/components/ui/empty-state";
+import { BUDGET_LABELS, CATEGORY_OPTIONS } from "@/lib/mock/profile";
 import { SECTION_LABELS, type SectionTsKey } from "@/lib/profile/section-keys";
 import { useProfile } from "@/context/profile-context";
 import {
@@ -23,12 +25,13 @@ import {
   finishWithoutSummaryAction,
   generateGiftStyleSummaryAction,
   goBackInterviewAction,
+  resolveGiftSuggestionAction,
   sendInterviewAnswerAction,
   skipInterviewQuestionAction,
   startInterviewAction,
 } from "@/lib/interview/actions";
 import type { InterviewMessageView, InterviewStateView } from "@/lib/interview/view";
-import type { InterviewExtraction } from "@/lib/validation/ai-interview";
+import type { GiftSuggestion, InterviewExtraction } from "@/lib/validation/ai-interview";
 
 const CHIP_FIELD_KEYS = Object.keys(SECTION_LABELS).filter(
   (key) => key !== "sizes",
@@ -82,10 +85,10 @@ function ExtractionCard({
 }) {
   if (!message.extractedFields) return null;
 
-  if (message.resolved) {
+  if (message.extractionResolved) {
     return (
       <p className="mt-2 flex items-center gap-1.5 text-xs text-neutral-500">
-        {message.applied ? (
+        {message.extractionApplied ? (
           <>
             <Check className="h-3.5 w-3.5 text-green-600" aria-hidden="true" />
             Added to your profile
@@ -122,12 +125,69 @@ function ExtractionCard({
   );
 }
 
+function GiftSuggestionCard({
+  message,
+  onApprove,
+  onDismiss,
+  pending,
+}: {
+  message: InterviewMessageView;
+  onApprove: () => void;
+  onDismiss: () => void;
+  pending: boolean;
+}) {
+  if (!message.giftSuggestion) return null;
+
+  if (message.giftSuggestionResolved) {
+    return (
+      <p className="mt-2 flex items-center gap-1.5 text-xs text-neutral-500">
+        {message.giftSuggestionApplied ? (
+          <>
+            <Check className="h-3.5 w-3.5 text-green-600" aria-hidden="true" />
+            Added to your wishlist
+          </>
+        ) : (
+          "Not added"
+        )}
+      </p>
+    );
+  }
+
+  const { name, description, category, budgetLevel } = message.giftSuggestion;
+
+  return (
+    <Card className="mt-2 flex flex-col gap-3 border-neutral-300 bg-white p-4">
+      <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-neutral-500">
+        <Gift className="h-3.5 w-3.5" aria-hidden="true" />
+        Gift idea
+      </p>
+      <div className="flex flex-col gap-1">
+        <p className="text-sm font-medium text-neutral-900">{name}</p>
+        {description && <p className="text-sm text-neutral-600">{description}</p>}
+        <p className="text-xs text-neutral-500">
+          {category ?? CATEGORY_OPTIONS[0]}
+          {budgetLevel ? ` · ${BUDGET_LABELS[budgetLevel]}` : ""}
+        </p>
+      </div>
+      <div className="flex gap-2">
+        <Button type="button" size="sm" onClick={onApprove} disabled={pending}>
+          <Check className="h-4 w-4" aria-hidden="true" />
+          Add to wishlist
+        </Button>
+        <Button type="button" size="sm" variant="ghost" onClick={onDismiss} disabled={pending}>
+          Not now
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 export function InterviewClient({
   initialState,
 }: {
   initialState: InterviewStateView | null;
 }) {
-  const { refreshProfile } = useProfile();
+  const { refreshProfile, addWishlistItem } = useProfile();
   const [state, setState] = useState<InterviewStateView | null>(initialState);
   const [answer, setAnswer] = useState("");
   const [pending, setPending] = useState(false);
@@ -218,6 +278,45 @@ export function InterviewClient({
     setState(result.state);
   }
 
+  async function handleApproveGift(messageId: string, suggestion: GiftSuggestion) {
+    if (!state) return;
+    setPending(true);
+    setError(null);
+    const addResult = await addWishlistItem({
+      name: suggestion.name,
+      description: suggestion.description ?? "",
+      category: suggestion.category?.trim() || CATEGORY_OPTIONS[0],
+      budgetLevel: suggestion.budgetLevel ?? "under_25",
+      priority: "would_love",
+      isPublic: true,
+    });
+    if (!addResult.success) {
+      setPending(false);
+      setError(addResult.error ?? "Couldn't add that to your wishlist.");
+      return;
+    }
+    const result = await resolveGiftSuggestionAction(state.sessionId, messageId, true);
+    setPending(false);
+    if (!result.success || !result.state) {
+      setError(result.error ?? "Added to your wishlist, but couldn't update the chat.");
+      return;
+    }
+    setState(result.state);
+  }
+
+  async function handleDismissGift(messageId: string) {
+    if (!state) return;
+    setPending(true);
+    setError(null);
+    const result = await resolveGiftSuggestionAction(state.sessionId, messageId, false);
+    setPending(false);
+    if (!result.success || !result.state) {
+      setError(result.error ?? "Couldn't update.");
+      return;
+    }
+    setState(result.state);
+  }
+
   async function handleGenerateSummary() {
     if (!state) return;
     setSummaryPending(true);
@@ -263,8 +362,8 @@ export function InterviewClient({
       <div className="flex flex-col gap-4">
         <EmptyState
           icon={MessageCircleQuestion}
-          title="Let's build your profile together"
-          description="I'll ask one question at a time. Skip anything you'd rather not answer, and nothing is added to your profile until you approve it."
+          title="AI Gift Builder"
+          description="Chat with me for a few minutes — I'll get to know your taste and suggest actual gift ideas as we go. Nothing is added to your profile or wishlist until you say so."
         >
           <Button onClick={handleStart} disabled={pending}>
             {pending ? (
@@ -272,7 +371,7 @@ export function InterviewClient({
             ) : (
               <Sparkles className="h-4 w-4" aria-hidden="true" />
             )}
-            Start the interview
+            Start chatting
           </Button>
         </EmptyState>
         {error && (
@@ -294,14 +393,17 @@ export function InterviewClient({
   const isDone = state.status === "completed" || justCompleted;
   const readyToWrapUp = state.isComplete && state.status === "in_progress" && !justCompleted;
   const canGoBack = state.messages.length > 1;
-  const pendingMessages = state.messages.filter(
-    (message) => message.extractedFields && !message.resolved,
+  const pendingExtractions = state.messages.filter(
+    (message) => message.extractedFields && !message.extractionResolved,
+  );
+  const pendingGiftSuggestions = state.messages.filter(
+    (message) => message.giftSuggestion && !message.giftSuggestionResolved,
   );
 
   return (
     <div className="flex flex-col gap-4">
       <Card className="p-4">
-        <ProgressBar value={state.completionPercentage} label="Interview progress" />
+        <ProgressBar value={state.completionPercentage} label="AI Gift Builder progress" />
       </Card>
 
       <div className="flex flex-col gap-3">
@@ -323,14 +425,24 @@ export function InterviewClient({
             >
               {message.content}
             </div>
-            {message.role === "assistant" && message.extractedFields && (
-              <div className="w-full max-w-[85%]">
-                <ExtractionCard
-                  message={message}
-                  pending={pending}
-                  onApprove={() => handleApprove(message.id, message.extractedFields!)}
-                  onDismiss={() => handleDismiss(message.id)}
-                />
+            {message.role === "assistant" && (message.extractedFields || message.giftSuggestion) && (
+              <div className="flex w-full max-w-[85%] flex-col gap-2">
+                {message.extractedFields && (
+                  <ExtractionCard
+                    message={message}
+                    pending={pending}
+                    onApprove={() => handleApprove(message.id, message.extractedFields!)}
+                    onDismiss={() => handleDismiss(message.id)}
+                  />
+                )}
+                {message.giftSuggestion && (
+                  <GiftSuggestionCard
+                    message={message}
+                    pending={pending}
+                    onApprove={() => handleApproveGift(message.id, message.giftSuggestion!)}
+                    onDismiss={() => handleDismissGift(message.id)}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -347,14 +459,18 @@ export function InterviewClient({
         <Card className="flex flex-col items-center gap-3 py-8 text-center">
           <Sparkles className="h-8 w-8 text-neutral-400" aria-hidden="true" />
           <p className="font-display text-lg font-semibold text-neutral-900">
-            Interview complete
+            All done!
           </p>
           <p className="text-sm text-neutral-500">
-            Check your profile to see what was added, or keep filling things in yourself.
+            Check your profile and wishlist to see what got added, or keep filling
+            things in yourself.
           </p>
           <div className="flex gap-2">
             <Button href="/profile/edit" size="sm">
               View my profile
+            </Button>
+            <Button href="/wishlist" variant="outline" size="sm">
+              View wishlist
             </Button>
             <Button href="/preview" variant="outline" size="sm">
               Preview
@@ -363,24 +479,34 @@ export function InterviewClient({
         </Card>
       ) : readyToWrapUp ? (
         <>
-          {pendingMessages.length > 0 && (
+          {(pendingExtractions.length > 0 || pendingGiftSuggestions.length > 0) && (
             <Card className="flex flex-col gap-3 border-amber-300 bg-amber-50 p-5">
               <p className="font-display text-lg font-semibold text-neutral-900">
-                Before we wrap up — {pendingMessages.length} suggestion
-                {pendingMessages.length === 1 ? "" : "s"} still waiting for your OK
+                Before we wrap up — {pendingExtractions.length + pendingGiftSuggestions.length}{" "}
+                thing{pendingExtractions.length + pendingGiftSuggestions.length === 1 ? "" : "s"}{" "}
+                still waiting for your OK
               </p>
               <p className="text-sm text-neutral-600">
                 You didn&apos;t approve or dismiss these while we were chatting. Add
                 them now, or leave them out.
               </p>
               <div className="flex flex-col gap-3">
-                {pendingMessages.map((message) => (
+                {pendingExtractions.map((message) => (
                   <ExtractionCard
                     key={message.id}
                     message={message}
                     pending={pending}
                     onApprove={() => handleApprove(message.id, message.extractedFields!)}
                     onDismiss={() => handleDismiss(message.id)}
+                  />
+                ))}
+                {pendingGiftSuggestions.map((message) => (
+                  <GiftSuggestionCard
+                    key={message.id}
+                    message={message}
+                    pending={pending}
+                    onApprove={() => handleApproveGift(message.id, message.giftSuggestion!)}
+                    onDismiss={() => handleDismissGift(message.id)}
                   />
                 ))}
               </div>

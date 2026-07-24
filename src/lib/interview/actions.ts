@@ -82,6 +82,7 @@ export async function startInterviewAction(): Promise<
       completionPercentage: turn.completionPercentage,
       isComplete: turn.isComplete,
       extractedFields: turn.extractedFields,
+      giftSuggestion: turn.giftSuggestion,
     };
     const message = await insertInterviewMessage(supabase, {
       sessionId: session.id,
@@ -162,6 +163,7 @@ async function submitAnswer(
       completionPercentage: turn.completionPercentage,
       isComplete: turn.isComplete,
       extractedFields: turn.extractedFields,
+      giftSuggestion: turn.giftSuggestion,
     };
     await insertInterviewMessage(supabase, {
       sessionId,
@@ -259,7 +261,7 @@ export async function approveExtractedFieldsAction(
     if (envelope) {
       await updateMessageEnvelope(supabase, messageId, {
         ...envelope,
-        resolution: { applied: true, resolvedAt: new Date().toISOString() },
+        extractionResolution: { applied: true, resolvedAt: new Date().toISOString() },
       });
     }
   }
@@ -284,7 +286,40 @@ export async function dismissExtractedFieldsAction(
     if (envelope) {
       await updateMessageEnvelope(supabase, messageId, {
         ...envelope,
-        resolution: { applied: false, resolvedAt: new Date().toISOString() },
+        extractionResolution: { applied: false, resolvedAt: new Date().toISOString() },
+      });
+    }
+  }
+
+  const state = await loadInterviewStateView(sessionId, user.id);
+  return state ? { success: true, state } : { success: false, error: "Couldn't load the interview." };
+}
+
+/**
+ * Marks a gift-idea proposal as approved or dismissed. The actual
+ * wishlist write happens client-side via ProfileContext's addWishlistItem
+ * (so the shared wishlist state stays in sync the same way manual adds
+ * do) — this action only persists that the card has been resolved, so it
+ * doesn't get shown again. Call with applied=true only after the wishlist
+ * item was actually added successfully.
+ */
+export async function resolveGiftSuggestionAction(
+  sessionId: string,
+  messageId: string,
+  applied: boolean,
+): Promise<InterviewActionResult & { state?: InterviewStateView }> {
+  const owned = await requireOwnedSession(sessionId);
+  if ("error" in owned) return { success: false, error: owned.error };
+  const { user, supabase } = owned;
+
+  const rows = await listInterviewMessages(sessionId);
+  const target = rows.find((row) => row.id === messageId);
+  if (target) {
+    const envelope = target.structured_updates as AssistantTurnEnvelope | null;
+    if (envelope) {
+      await updateMessageEnvelope(supabase, messageId, {
+        ...envelope,
+        giftSuggestionResolution: { applied, resolvedAt: new Date().toISOString() },
       });
     }
   }
