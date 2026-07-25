@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getAvatarSignedUrl } from "@/lib/profile/dal";
 import {
@@ -40,11 +41,11 @@ interface PublicProfileRpcResult {
  * came back (true) vs. didn't (false) — this is display bookkeeping,
  * not a second privacy check.
  */
-export async function getPublicProfileBySlug(slug: string): Promise<{
+export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
   profile: GiftProfile;
   theme: ThemeKey;
   wishlistItems: WishlistItem[];
-} | null> {
+} | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_public_profile", {
     profile_slug: slug,
@@ -106,4 +107,4 @@ export async function getPublicProfileBySlug(slug: string): Promise<{
     theme: (result.theme as ThemeKey) ?? "general",
     wishlistItems,
   };
-}
+});

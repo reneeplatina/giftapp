@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Gift, SearchX } from "lucide-react";
 import { Container } from "@/components/container";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -7,6 +8,31 @@ import { PublicProfileView } from "@/components/public-profile/public-profile-vi
 import { THEME_OPTIONS } from "@/lib/mock/profile";
 import { getPublicProfileBySlug } from "@/lib/profile/public-dal";
 import { getSiteUrl } from "@/lib/site-url";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const loaded = await getPublicProfileBySlug(slug);
+
+  if (!loaded) {
+    return { title: "Profile not found — Gift Profile" };
+  }
+
+  const title = `GIFT ME! 🎁 — ${loaded.profile.basicInfo.displayName}'s Gift Profile`;
+  const description =
+    loaded.profile.basicInfo.introduction ||
+    `See ${loaded.profile.basicInfo.displayName}'s sizes, favorites, and wishlist — all in one place.`;
+
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "profile" },
+    twitter: { card: "summary_large_image", title, description },
+  };
+}
 
 export default async function PublicProfilePage({
   params,

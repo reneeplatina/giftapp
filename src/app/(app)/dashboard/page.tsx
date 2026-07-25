@@ -106,7 +106,7 @@ export default async function DashboardPage() {
           </Badge>
           <div className="flex flex-wrap gap-2">
             <CopyLinkButton url={publicUrl} />
-            <ShareModal url={publicUrl} title={`${profile.display_name}'s gift profile`} />
+            <ShareModal url={publicUrl} title={`GIFT ME! 🎁 — ${profile.display_name}'s gift profile`} />
           </div>
         </div>
         <ProgressBar value={completionPercent} label="Profile completeness" />

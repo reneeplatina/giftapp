@@ -91,7 +91,7 @@ export function PublicProfileView({
           />
           <ShareModal
             url={publicUrl}
-            title={`${profile.basicInfo.displayName}'s gift profile`}
+            title={`GIFT ME! 🎁 — ${profile.basicInfo.displayName}'s gift profile`}
             triggerLabel="Share"
           />
         </div>

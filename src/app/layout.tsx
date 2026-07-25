@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const inter = Inter({
@@ -12,10 +13,16 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
 });
 
+const title = "Gift Profile — One profile. Better gifts. Less guessing.";
+const description =
+  "Create a free gift profile with your sizes, favorites, and wishlist, and share one link so friends and family always know what to get you.";
+
 export const metadata: Metadata = {
-  title: "Gift Profile — One profile. Better gifts. Less guessing.",
-  description:
-    "Create a free gift profile with your sizes, favorites, and wishlist, and share one link so friends and family always know what to get you.",
+  metadataBase: new URL(getSiteUrl()),
+  title,
+  description,
+  openGraph: { title, description, type: "website" },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 export default function RootLayout({
