@@ -4,6 +4,7 @@ import { AppTopBar } from "@/components/layout/app-topbar";
 import { ProfileProvider } from "@/context/profile-context";
 import { buildEmptyProfile, getFullProfileForEditing } from "@/lib/profile/dal";
 import { getWishlistItemsForEditing } from "@/lib/wishlist/dal";
+import { getProfileSwitcherData } from "@/lib/profile/managed-dal";
 
 // Auth is intentionally NOT checked here. Next.js error.tsx boundaries
 // don't catch errors thrown by a layout in the same segment (only by
@@ -25,9 +26,10 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [loaded, initialWishlistItems] = await Promise.all([
+  const [loaded, initialWishlistItems, switcherData] = await Promise.all([
     getFullProfileForEditing(),
     getWishlistItemsForEditing(),
+    getProfileSwitcherData(),
   ]);
 
   return (
@@ -37,9 +39,9 @@ export default async function AppLayout({
       initialWishlistItems={initialWishlistItems}
     >
       <div className="flex flex-1 flex-col md:flex-row">
-        <AppSidebar />
+        <AppSidebar switcherData={switcherData} />
         <div className="flex flex-1 flex-col">
-          <AppTopBar />
+          <AppTopBar switcherData={switcherData} />
           <main className="flex-1 pb-20 md:pb-0">{children}</main>
         </div>
         <AppBottomNav />

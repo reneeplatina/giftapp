@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { getAuthUser } from "@/lib/auth/dal";
+import { getActiveProfileId } from "@/lib/profile/active";
 import { getAvatarSignedUrl, getFullProfileForEditing } from "@/lib/profile/dal";
 import { SECTION_TS_KEYS, type SectionTsKey } from "@/lib/profile/section-keys";
 import { upsertSectionRow } from "@/lib/profile/section-writes";
@@ -45,8 +45,7 @@ const THEME_KEYS = [
 const chipListSchema = z.array(z.string().min(1).max(80)).max(60);
 
 async function requireProfileId(): Promise<string | null> {
-  const user = await getAuthUser();
-  return user?.id ?? null;
+  return getActiveProfileId();
 }
 
 export async function saveBasicInfoAction(

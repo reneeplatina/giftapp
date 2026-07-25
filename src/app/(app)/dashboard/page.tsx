@@ -13,7 +13,8 @@ import { Card } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { CopyLinkButton } from "@/components/copy-link-button";
 import { ShareModal } from "@/components/share-modal";
-import { getCurrentProfile, requireAuthUser } from "@/lib/auth/dal";
+import { requireAuthUser } from "@/lib/auth/dal";
+import { getActiveProfileId } from "@/lib/profile/active";
 import { createClient } from "@/lib/supabase/server";
 import { getAvatarSignedUrl } from "@/lib/profile/dal";
 import { getSiteUrl } from "@/lib/site-url";
@@ -56,8 +57,16 @@ async function getCompletion(profileId: string, introduction: string) {
 }
 
 export default async function DashboardPage() {
-  await requireAuthUser("/dashboard");
-  const profile = await getCurrentProfile();
+  const user = await requireAuthUser("/dashboard");
+  const activeProfileId = await getActiveProfileId();
+  const isManagedProfileActive = activeProfileId !== user.id;
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", activeProfileId ?? user.id)
+    .maybeSingle();
 
   if (!profile) {
     // requireAuthUser() above guarantees a session exists; a missing
@@ -78,11 +87,16 @@ export default async function DashboardPage() {
     profile.introduction,
   );
   const publicUrl = `${getSiteUrl()}/u/${profile.slug}`;
-  const supabase = await createClient();
   const avatarUrl = await getAvatarSignedUrl(supabase, profile.avatar_path);
 
   return (
     <Container className="flex flex-col gap-6 py-8">
+      {isManagedProfileActive && (
+        <p className="rounded-xl bg-neutral-100 px-4 py-2 text-sm text-neutral-700">
+          You&apos;re managing <strong>{profile.display_name}</strong>&apos;s
+          profile. Switch back to your own profile from the menu anytime.
+        </p>
+      )}
       <div className="flex items-center gap-4">
         <Avatar
           name={profile.display_name}
@@ -91,10 +105,13 @@ export default async function DashboardPage() {
         />
         <div>
           <h1 className="font-display text-2xl font-semibold text-neutral-900">
-            Welcome back, {profile.display_name}
+            {isManagedProfileActive
+              ? `${profile.display_name}'s profile`
+              : `Welcome back, ${profile.display_name}`}
           </h1>
           <p className="mt-1 text-sm text-neutral-600">
-            Here&apos;s how your gift profile is coming along.
+            Here&apos;s how {isManagedProfileActive ? "this" : "your"} gift
+            profile is coming along.
           </p>
         </div>
       </div>
@@ -112,17 +129,19 @@ export default async function DashboardPage() {
         <ProgressBar value={completionPercent} label="Profile completeness" />
       </Card>
 
-      <Card className="flex flex-col items-center gap-3 border-neutral-900 bg-neutral-900 py-8 text-center">
-        <Sparkles className="h-8 w-8 text-white" aria-hidden="true" />
-        <p className="font-display text-lg font-semibold text-white">AI Gift Builder</p>
-        <p className="max-w-sm text-sm text-neutral-300">
-          One chat that gets to know you and suggests gifts as it goes —
-          approve what you like, skip the rest.
-        </p>
-        <Button href="/interview" variant="secondary" size="sm">
-          Open AI Gift Builder
-        </Button>
-      </Card>
+      {!isManagedProfileActive && (
+        <Card className="flex flex-col items-center gap-3 border-neutral-900 bg-neutral-900 py-8 text-center">
+          <Sparkles className="h-8 w-8 text-white" aria-hidden="true" />
+          <p className="font-display text-lg font-semibold text-white">AI Gift Builder</p>
+          <p className="max-w-sm text-sm text-neutral-300">
+            One chat that gets to know you and suggests gifts as it goes —
+            approve what you like, skip the rest.
+          </p>
+          <Button href="/interview" variant="secondary" size="sm">
+            Open AI Gift Builder
+          </Button>
+        </Card>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Button href="/profile/edit" variant="secondary">

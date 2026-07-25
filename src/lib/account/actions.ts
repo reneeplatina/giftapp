@@ -3,43 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
-
-type ServiceClient = NonNullable<ReturnType<typeof createServiceRoleClient>>;
-
-/**
- * Removes every file under {userId}/ in a storage bucket, including one
- * level of subfolders (wishlist-images nests files under {itemId}/).
- * Best-effort cleanup — the database rows and the auth user itself are
- * what actually matter for privacy, since RLS already makes these paths
- * unreachable the moment the profile row is gone.
- */
-async function removeAllUnderPrefix(
-  serviceClient: ServiceClient,
-  bucket: "avatars" | "wishlist-images",
-  userId: string,
-) {
-  const { data: entries } = await serviceClient.storage.from(bucket).list(userId);
-  if (!entries || entries.length === 0) return;
-
-  const filePaths: string[] = [];
-  for (const entry of entries) {
-    // Files have an id; Supabase Storage's folder-like prefix entries don't.
-    if (entry.id) {
-      filePaths.push(`${userId}/${entry.name}`);
-      continue;
-    }
-    const { data: nested } = await serviceClient.storage
-      .from(bucket)
-      .list(`${userId}/${entry.name}`);
-    for (const nestedEntry of nested ?? []) {
-      filePaths.push(`${userId}/${entry.name}/${nestedEntry.name}`);
-    }
-  }
-
-  if (filePaths.length > 0) {
-    await serviceClient.storage.from(bucket).remove(filePaths);
-  }
-}
+import { removeAllUnderPrefix } from "@/lib/storage/remove-profile-files";
 
 export async function deleteAccountAction(): Promise<{
   success: boolean;
@@ -62,10 +26,30 @@ export async function deleteAccountAction(): Promise<{
     };
   }
 
-  await Promise.allSettled([
-    removeAllUnderPrefix(serviceClient, "avatars", user.id),
-    removeAllUnderPrefix(serviceClient, "wishlist-images", user.id),
-  ]);
+  // Profiles this account manages (see managed_by_profile_id) each have
+  // their own synthetic auth.users row that nothing else will ever clean
+  // up — deleting the manager's profile row cascades away the *profile*
+  // (managed_by_profile_id references profiles.id on delete cascade),
+  // but leaves that orphaned auth user behind unless we delete it here,
+  // the same way we delete the manager's own.
+  const { data: managedProfiles } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("managed_by_profile_id", user.id);
+
+  const profileIds = [user.id, ...(managedProfiles ?? []).map((row) => row.id)];
+
+  await Promise.allSettled(
+    profileIds.flatMap((profileId) => [
+      removeAllUnderPrefix(serviceClient, "avatars", profileId),
+      removeAllUnderPrefix(serviceClient, "wishlist-images", profileId),
+    ]),
+  );
+
+  for (const profileId of profileIds) {
+    if (profileId === user.id) continue;
+    await serviceClient.auth.admin.deleteUser(profileId).catch(() => {});
+  }
 
   // Deletes the auth.users row, which cascades through every table that
   // references it — profiles, and from there profile_sections,

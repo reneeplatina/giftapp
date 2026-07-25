@@ -5,9 +5,11 @@ import { usePathname } from "next/navigation";
 import { Gift } from "lucide-react";
 import { APP_NAV_ITEMS } from "@/lib/nav";
 import { SignOutButton } from "@/components/sign-out-button";
+import { ProfileSwitcher } from "@/components/layout/profile-switcher";
+import type { ProfileSwitcherData } from "@/lib/profile/managed-dal";
 import { cn } from "@/lib/utils";
 
-export function AppSidebar() {
+export function AppSidebar({ switcherData }: { switcherData: ProfileSwitcherData }) {
   const pathname = usePathname();
 
   return (
@@ -19,6 +21,9 @@ export function AppSidebar() {
         <Gift className="h-5 w-5" aria-hidden="true" />
         Gift Profile
       </Link>
+      <div className="px-3 pb-3">
+        <ProfileSwitcher data={switcherData} />
+      </div>
       <nav aria-label="Primary" className="flex flex-1 flex-col gap-1 px-3">
         {APP_NAV_ITEMS.map((item) => {
           const active = pathname === item.href;

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getAuthUser } from "@/lib/auth/dal";
+import { getActiveProfileId } from "@/lib/profile/active";
 import { rowToWishlistItem } from "@/lib/wishlist/dal";
 import {
   wishlistItemSchema,
@@ -16,8 +16,7 @@ export interface WishlistActionResult {
 }
 
 async function requireProfileId(): Promise<string | null> {
-  const user = await getAuthUser();
-  return user?.id ?? null;
+  return getActiveProfileId();
 }
 
 export async function addWishlistItemAction(

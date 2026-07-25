@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { requireAuthUser } from "@/lib/auth/dal";
+import { getActiveProfileId } from "@/lib/profile/active";
 import { getLatestInterviewSession } from "@/lib/interview/dal";
 import { loadInterviewStateView } from "@/lib/interview/view";
 import { Container } from "@/components/container";
@@ -6,6 +8,15 @@ import { InterviewClient } from "./interview-client";
 
 export default async function InterviewPage() {
   const user = await requireAuthUser("/interview");
+
+  // The AI Gift Builder only ever reads/writes the signed-in user's own
+  // profile (see src/lib/interview/actions.ts) — it doesn't yet know how
+  // to target a managed profile, so send a manager back to the dashboard
+  // rather than let it silently edit the wrong profile.
+  const activeProfileId = await getActiveProfileId();
+  if (activeProfileId !== user.id) {
+    redirect("/dashboard");
+  }
 
   const session = await getLatestInterviewSession(user.id);
   const initialState = session

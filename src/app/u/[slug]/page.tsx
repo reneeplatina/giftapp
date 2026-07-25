@@ -69,6 +69,7 @@ export default async function PublicProfilePage({
               wishlistItems={loaded.wishlistItems}
               theme={loaded.theme}
               publicUrl={`${getSiteUrl()}/u/${slug}`}
+              linkedProfiles={loaded.linkedProfiles}
             />
           ) : (
             <EmptyState

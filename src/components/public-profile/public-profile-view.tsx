@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { HeartCrack, Shirt } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ import { TagList } from "@/components/public-profile/tag-list";
 import { GiftsByBudget } from "@/components/public-profile/gifts-by-budget";
 import { THEME_OPTIONS } from "@/lib/mock/profile";
 import { THEME_ICONS } from "@/lib/profile/theme-icons";
+import type { PublicLinkedProfile } from "@/lib/profile/public-dal";
 import type { GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
 
 function Section({
@@ -34,12 +36,14 @@ export function PublicProfileView({
   wishlistItems,
   theme,
   publicUrl,
+  linkedProfiles = [],
   isPreview = false,
 }: {
   profile: GiftProfile;
   wishlistItems: WishlistItem[];
   theme: ThemeKey;
   publicUrl: string;
+  linkedProfiles?: PublicLinkedProfile[];
   isPreview?: boolean;
 }) {
   const accent = THEME_OPTIONS.find((option) => option.key === theme)?.accent;
@@ -91,6 +95,29 @@ export function PublicProfileView({
           />
         </div>
       </div>
+
+      {linkedProfiles.length > 0 && (
+        <Section title={`Also gifting for ${profile.basicInfo.displayName}'s family`}>
+          <div className="flex flex-wrap gap-3">
+            {linkedProfiles.map((linked) => (
+              <Link
+                key={linked.slug}
+                href={`/u/${linked.slug}`}
+                className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3 transition-colors hover:border-neutral-400"
+              >
+                <Avatar
+                  name={linked.displayName}
+                  src={linked.avatarUrl ?? undefined}
+                  className="h-10 w-10 text-sm"
+                />
+                <span className="font-medium text-neutral-900">
+                  {linked.displayName}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </Section>
+      )}
 
       <GiftAssistantSection
         slug={profile.basicInfo.slug}

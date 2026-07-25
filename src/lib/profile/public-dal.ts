@@ -11,6 +11,12 @@ import {
 } from "@/lib/profile/section-keys";
 import type { GiftProfile, SectionVisibility, ThemeKey, WishlistItem } from "@/types/profile";
 
+export interface PublicLinkedProfile {
+  slug: string;
+  displayName: string;
+  avatarUrl: string | null;
+}
+
 interface PublicProfileRpcResult {
   slug: string;
   displayName: string;
@@ -26,6 +32,11 @@ interface PublicProfileRpcResult {
     category: string | null;
     budgetLevel: string | null;
     priority: string;
+  }[];
+  managedProfiles: {
+    slug: string;
+    displayName: string;
+    avatarPath: string | null;
   }[];
 }
 
@@ -45,6 +56,7 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
   profile: GiftProfile;
   theme: ThemeKey;
   wishlistItems: WishlistItem[];
+  linkedProfiles: PublicLinkedProfile[];
 } | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_public_profile", {
@@ -102,9 +114,18 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
     }),
   );
 
+  const linkedProfiles: PublicLinkedProfile[] = await Promise.all(
+    (result.managedProfiles ?? []).map(async (linked) => ({
+      slug: linked.slug,
+      displayName: linked.displayName,
+      avatarUrl: await getAvatarSignedUrl(supabase, linked.avatarPath),
+    })),
+  );
+
   return {
     profile,
     theme: (result.theme as ThemeKey) ?? "general",
     wishlistItems,
+    linkedProfiles,
   };
 });

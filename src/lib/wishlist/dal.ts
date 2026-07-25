@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { getAuthUser } from "@/lib/auth/dal";
+import { getActiveProfileId } from "@/lib/profile/active";
 import type { Database } from "@/types/database";
 import type { WishlistItem } from "@/types/profile";
 
@@ -21,19 +21,20 @@ export function rowToWishlistItem(row: WishlistItemRow): WishlistItem {
 }
 
 /**
- * All of the signed-in user's own wishlist items, public and private
- * alike — this is the owner's editing view. Public-only filtering for
- * visitors happens separately, through get_public_profile().
+ * All of the active profile's wishlist items (the signed-in user's own,
+ * or one they manage), public and private alike — this is the owner's
+ * editing view. Public-only filtering for visitors happens separately,
+ * through get_public_profile().
  */
 export async function getWishlistItemsForEditing(): Promise<WishlistItem[]> {
-  const user = await getAuthUser();
-  if (!user) return [];
+  const profileId = await getActiveProfileId();
+  if (!profileId) return [];
 
   const supabase = await createClient();
   const { data } = await supabase
     .from("wishlist_items")
     .select("*")
-    .eq("profile_id", user.id)
+    .eq("profile_id", profileId)
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
 

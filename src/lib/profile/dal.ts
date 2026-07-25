@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { getAuthUser } from "@/lib/auth/dal";
+import { getActiveProfileId } from "@/lib/profile/active";
 import {
   DEFAULT_HIDDEN_SECTIONS,
   SECTION_TS_KEYS,
@@ -69,29 +69,30 @@ export function buildEmptyProfile(): GiftProfile {
 }
 
 /**
- * Loads the signed-in user's own profile, shaped exactly like the
- * GiftProfile the profile-builder UI already expects, plus their theme
- * and publish status. Returns null only if there's no session — a
- * missing profiles row (shouldn't happen post-signup, but defensively
- * handled) falls back to sensible empty defaults rather than crashing,
- * since a brand new profile has nothing in profile_sections yet.
+ * Loads the currently active profile (the signed-in user's own, or one
+ * they manage — see getActiveProfileId()), shaped exactly like the
+ * GiftProfile the profile-builder UI already expects, plus its theme and
+ * publish status. Returns null only if there's no session — a missing
+ * profiles row (shouldn't happen post-signup, but defensively handled)
+ * falls back to sensible empty defaults rather than crashing, since a
+ * brand new profile has nothing in profile_sections yet.
  */
 export async function getFullProfileForEditing(): Promise<{
   profile: GiftProfile;
   theme: ThemeKey;
   status: ProfileStatus;
 } | null> {
-  const user = await getAuthUser();
-  if (!user) return null;
+  const profileId = await getActiveProfileId();
+  if (!profileId) return null;
 
   const supabase = await createClient();
 
   const [{ data: profileRow }, { data: sectionRows }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("*").eq("id", profileId).maybeSingle(),
     supabase
       .from("profile_sections")
       .select("section_key, data, is_public")
-      .eq("profile_id", user.id),
+      .eq("profile_id", profileId),
   ]);
 
   const avatarUrl = await getAvatarSignedUrl(
