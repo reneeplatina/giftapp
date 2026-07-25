@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   Check,
@@ -140,14 +140,14 @@ function GiftSuggestionCard({
   const { name, description, category, budgetLevel } = message.giftSuggestion;
 
   return (
-    <Card className="mt-2 flex flex-col gap-3 border-neutral-300 bg-white p-4">
-      <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-neutral-500">
-        <Gift className="h-3.5 w-3.5" aria-hidden="true" />
+    <div className="mt-1.5 flex flex-col gap-2 rounded-xl border border-dashed border-neutral-300 bg-neutral-50/60 px-3 py-2.5">
+      <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+        <Gift className="h-3 w-3" aria-hidden="true" />
         Gift idea
       </p>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5">
         <p className="text-sm font-medium text-neutral-900">{name}</p>
-        {description && <p className="text-sm text-neutral-600">{description}</p>}
+        {description && <p className="text-xs text-neutral-600">{description}</p>}
         <p className="text-xs text-neutral-500">
           {category ?? CATEGORY_OPTIONS[0]}
           {budgetLevel ? ` · ${BUDGET_LABELS[budgetLevel]}` : ""}
@@ -162,7 +162,7 @@ function GiftSuggestionCard({
           Not now
         </Button>
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -180,6 +180,14 @@ export function InterviewClient({
   const [summaryPending, setSummaryPending] = useState(false);
   const [justCompleted, setJustCompleted] = useState(false);
   const [restartConfirmOpen, setRestartConfirmOpen] = useState(false);
+  const latestMessageRef = useRef<HTMLDivElement>(null);
+
+  // Bring the newest question to the top of the screen after every turn —
+  // otherwise, on a full page of growing chat history, a gift-idea card
+  // can visually bury the question the user actually needs to answer next.
+  useEffect(() => {
+    latestMessageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [state?.messages.length]);
 
   async function handleStart() {
     setPending(true);
@@ -410,19 +418,20 @@ export function InterviewClient({
       </Card>
 
       <div className="flex flex-col gap-3" role="log" aria-live="polite" aria-label="Conversation">
-        {state.messages.map((message) => (
+        {state.messages.map((message, index) => (
           <div
             key={message.id}
+            ref={index === state.messages.length - 1 ? latestMessageRef : undefined}
             className={
               message.role === "assistant"
-                ? "flex flex-col items-start"
+                ? "flex scroll-mt-4 flex-col items-start"
                 : "flex flex-col items-end"
             }
           >
             <div
               className={
                 message.role === "assistant"
-                  ? "max-w-[85%] rounded-2xl rounded-tl-sm bg-neutral-100 px-4 py-2.5 text-sm text-neutral-900"
+                  ? "max-w-[85%] rounded-2xl rounded-tl-sm bg-neutral-100 px-4 py-2.5 text-[15px] font-medium leading-snug text-neutral-900"
                   : "max-w-[85%] rounded-2xl rounded-tr-sm bg-neutral-900 px-4 py-2.5 text-sm text-white"
               }
             >
