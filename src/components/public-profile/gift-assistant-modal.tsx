@@ -88,8 +88,8 @@ export function GiftAssistantModal({
               <div
                 className={
                   message.role === "assistant"
-                    ? "max-w-[85%] rounded-2xl rounded-tl-sm bg-neutral-100 px-4 py-2.5 text-sm text-neutral-900"
-                    : "max-w-[85%] rounded-2xl rounded-tr-sm bg-neutral-900 px-4 py-2.5 text-sm text-white"
+                    ? "max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-neutral-100 px-4 py-2.5 text-sm text-neutral-900"
+                    : "max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-neutral-900 px-4 py-2.5 text-sm text-white"
                 }
               >
                 {message.content}
