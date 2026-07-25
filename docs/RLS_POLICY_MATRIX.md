@@ -14,25 +14,44 @@ other signed-in user. **Anon** = unauthenticated visitor.
 | Role | select | insert | update | delete |
 |---|---|---|---|---|
 | Owner | ✅ (`id = auth.uid()`) | ✅ (`id = auth.uid()`) | ✅ | ✅ |
+| Manager (`managed_by_profile_id = auth.uid()`) | ✅ | ❌ (service role only — see below) | ✅ | ✅ |
 | Other auth | ❌ | ❌ | ❌ | ❌ |
 | Anon | ❌ (no grant at all) | ❌ | ❌ | ❌ |
 
 Public reads (any status other than published are indistinguishable
 from "doesn't exist") only ever go through `get_public_profile()`.
 
+**Managed profiles** (`supabase/migrations/20260725000001_managed_profiles.sql`):
+a profile can be created and controlled by another profile's owner —
+for someone who wants a gift profile but won't sign up themselves (a
+child, a grandparent). The managed profile still has a real
+`auth.users` row (so the existing `profiles.id -> auth.users.id` FK is
+unchanged) — it's just a synthetic one nobody signs into. What grants
+access is `managed_by_profile_id`, checked by additive policies keyed
+off `auth.uid()` rather than `id`. A trigger
+(`prevent_managed_profile_chaining`) blocks a managed profile from
+itself managing another — one level of nesting only. Creating a managed
+profile's row always goes through the service role (it also has to
+create the synthetic auth user first, which requires the admin API), so
+there is no client-facing `insert` policy for the manager.
+
 ## `profile_sections`, `wishlist_items`, `ai_interview_sessions`, `ai_interview_messages`, `ai_suggestions`
 
-All four follow the same single-policy pattern:
+The first four follow the same two-policy pattern (`ai_suggestions` has
+no managed-profile policy yet — it's unused by any shipped feature):
 
 | Role | select | insert | update | delete |
 |---|---|---|---|---|
 | Owner (`profile_id = auth.uid()`) | ✅ | ✅ | ✅ | ✅ |
+| Manager (`profile_id` is managed by `auth.uid()`) | ✅ | ✅ | ✅ | ✅ |
 | Other auth | ❌ | ❌ | ❌ | ❌ |
 | Anon | ❌ | ❌ | ❌ | ❌ |
 
 Public reads of `profile_sections`/`wishlist_items` (public + non-archived
 rows of a published profile only) go through `get_public_profile()`, not
-direct table access.
+direct table access. `get_public_profile()` also returns a
+`managedProfiles` array of the profile's own published managed
+profiles, for a manager's public page to link out to them.
 
 ## `gift_exchange_requests`
 
@@ -77,6 +96,7 @@ Both buckets are private (`public = false`). Path convention
 | Role | select (read) | insert | update | delete |
 |---|---|---|---|---|
 | Owner (`foldername[1] = auth.uid()`) | ✅ | ✅ | ✅ | ✅ |
+| Manager (`foldername[1]` is a profile managed by `auth.uid()`) | ✅ (via owner-or-published read policy) | ✅ | ✅ | ✅ |
 | Anyone, if profile is published (`is_profile_published(...)`) | ✅ | ❌ | ❌ | ❌ |
 | Anyone, if profile is draft/hidden | ❌ | ❌ | ❌ | ❌ |
 
@@ -153,3 +173,11 @@ project reports only expected/intentional findings: `ai_usage_events`
 has RLS enabled with no policies (by design — service-role only), and
 the five functions meant to be publicly callable are flagged as
 "publicly callable" (also by design).
+
+**Managed profiles**, added later, were verified directly against the
+real project (temporary fixture rows, deleted immediately after): a
+normal manager-assignment succeeds; a second-level assignment (a
+managed profile attempting to manage another) is rejected by
+`prevent_managed_profile_chaining`; a self-reference is rejected by the
+`profiles_not_self_managed` check constraint. `get_advisors` reported
+no new findings beyond the pre-existing ones above.
