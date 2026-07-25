@@ -101,7 +101,18 @@ docs/                   Product & engineering documentation
 
 ## Deployment
 
-- Netlify builds the Next.js app directly from the GitHub repository.
+- Netlify builds the Next.js app directly from the GitHub repository,
+  using the official `@netlify/plugin-nextjs` runtime (declared in
+  `netlify.toml`) to adapt server actions, `src/proxy.ts` (auth
+  redirects), image optimization, and dynamic routes to Netlify
+  Functions/Edge Functions. `netlify.toml` also pins the Node version.
 - Environment variables (see `.env.example`) are configured in Netlify's
-  dashboard, never committed to the repo.
-- No deployment is performed during this foundation phase.
+  dashboard, never committed to the repo:
+  `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+  `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`,
+  `AI_DAILY_USER_LIMIT`, `AI_DAILY_GUEST_LIMIT`, and `NEXT_PUBLIC_SITE_URL`
+  (set to the real production domain once one is assigned).
+- Supabase Auth's Site URL and Redirect URLs (Authentication > URL
+  Configuration in the Supabase dashboard) must include the production
+  domain, or email confirmation and password-reset links will point at
+  the wrong host.
