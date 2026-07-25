@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Eye, LayoutDashboard, ListChecks, Palette, PencilLine } from "lucide-react";
+import { Eye, LayoutDashboard, ListChecks, Palette, PencilLine, Settings } from "lucide-react";
 
 export interface NavItem {
   href: string;
@@ -13,4 +13,5 @@ export const APP_NAV_ITEMS: NavItem[] = [
   { href: "/wishlist", label: "Wishlist", icon: ListChecks },
   { href: "/themes", label: "Themes", icon: Palette },
   { href: "/preview", label: "Preview", icon: Eye },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];

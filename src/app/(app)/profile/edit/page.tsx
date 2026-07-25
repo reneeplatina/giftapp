@@ -3,7 +3,6 @@ import { requireAuthUser } from "@/lib/auth/dal";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { BasicInfoSection } from "@/components/profile-builder/basic-info-section";
 import { SizesSection } from "@/components/profile-builder/sizes-section";
-import { PrivacySection } from "@/components/profile-builder/privacy-section";
 import { ChipListSection } from "@/components/profile-builder/chip-list-section";
 import {
   COLOR_OPTIONS,
@@ -116,9 +115,6 @@ export default async function ProfileEditPage() {
             hint="Dislikes, allergies, or things you already own."
             options={[]}
           />
-        </AccordionItem>
-        <AccordionItem title="Privacy settings">
-          <PrivacySection />
         </AccordionItem>
       </Accordion>
     </Container>
