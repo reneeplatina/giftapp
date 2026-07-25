@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShareModal } from "@/components/share-modal";
-import { GiftAssistantModal } from "@/components/public-profile/gift-assistant-modal";
+import { GiftAssistantSection } from "@/components/public-profile/gift-assistant-section";
 import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
 import { TagList } from "@/components/public-profile/tag-list";
 import { GiftsByBudget } from "@/components/public-profile/gifts-by-budget";
@@ -84,11 +84,6 @@ export function PublicProfileView({
           &ldquo;{profile.basicInfo.introduction}&rdquo;
         </p>
         <div className="flex flex-wrap justify-center gap-2">
-          <GiftAssistantModal
-            slug={profile.basicInfo.slug}
-            displayName={profile.basicInfo.displayName}
-            isPreview={isPreview}
-          />
           <ShareModal
             url={publicUrl}
             title={`GIFT ME! 🎁 — ${profile.basicInfo.displayName}'s gift profile`}
@@ -96,6 +91,12 @@ export function PublicProfileView({
           />
         </div>
       </div>
+
+      <GiftAssistantSection
+        slug={profile.basicInfo.slug}
+        displayName={profile.basicInfo.displayName}
+        isPreview={isPreview}
+      />
 
       <Section title="My Gift Style">
         <Card>
