@@ -129,19 +129,18 @@ export default async function DashboardPage() {
         <ProgressBar value={completionPercent} label="Profile completeness" />
       </Card>
 
-      {!isManagedProfileActive && (
-        <Card className="flex flex-col items-center gap-3 border-neutral-900 bg-neutral-900 py-8 text-center">
-          <Sparkles className="h-8 w-8 text-white" aria-hidden="true" />
-          <p className="font-display text-lg font-semibold text-white">AI Gift Builder</p>
-          <p className="max-w-sm text-sm text-neutral-300">
-            One chat that gets to know you and suggests gifts as it goes —
-            approve what you like, skip the rest.
-          </p>
-          <Button href="/interview" variant="secondary" size="sm">
-            Open AI Gift Builder
-          </Button>
-        </Card>
-      )}
+      <Card className="flex flex-col items-center gap-3 border-neutral-900 bg-neutral-900 py-8 text-center">
+        <Sparkles className="h-8 w-8 text-white" aria-hidden="true" />
+        <p className="font-display text-lg font-semibold text-white">AI Gift Builder</p>
+        <p className="max-w-sm text-sm text-neutral-300">
+          {isManagedProfileActive
+            ? `One chat that gets to know ${profile.display_name} and suggests gifts as it goes — approve what you like, skip the rest.`
+            : "One chat that gets to know you and suggests gifts as it goes — approve what you like, skip the rest."}
+        </p>
+        <Button href="/interview" variant="secondary" size="sm">
+          Open AI Gift Builder
+        </Button>
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Button href="/profile/edit" variant="secondary">

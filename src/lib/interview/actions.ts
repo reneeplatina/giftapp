@@ -1,6 +1,7 @@
 "use server";
 
 import { getAuthUser } from "@/lib/auth/dal";
+import { getActiveProfileId } from "@/lib/profile/active";
 import { createClient } from "@/lib/supabase/server";
 import { getAnthropicClient, getAnthropicModel } from "@/lib/ai/client";
 import { AIAssistantError } from "@/lib/ai/errors";
@@ -29,23 +30,33 @@ export interface InterviewActionResult {
   error?: string;
 }
 
+/**
+ * Resolves both identities every interview action needs: the real
+ * signed-in user (rate limiting always applies to the real account, so a
+ * manager can't multiply their AI quota by running separate interviews
+ * per managed profile) and the active profile (whose data is actually
+ * being read/written — their own, or one they manage).
+ */
 async function requireOwnedSession(sessionId: string) {
   const user = await getAuthUser();
   if (!user) return { error: "Not signed in." as const };
 
+  const profileId = await getActiveProfileId();
+  if (!profileId) return { error: "Not signed in." as const };
+
   const supabase = await createClient();
-  const session = await getInterviewSessionById(supabase, sessionId, user.id);
+  const session = await getInterviewSessionById(supabase, sessionId, profileId);
   if (!session) return { error: "Interview session not found." as const };
 
-  return { user, supabase, session };
+  return { user, profileId, supabase, session };
 }
 
 async function beginNewSession(
-  user: { id: string },
+  profileId: string,
   supabase: Awaited<ReturnType<typeof createClient>>,
   client: NonNullable<ReturnType<typeof getAnthropicClient>>,
 ): Promise<InterviewActionResult & { state?: InterviewStateView }> {
-  const session = await createInterviewSession(supabase, user.id);
+  const session = await createInterviewSession(supabase, profileId);
   if (!session) {
     return { success: false, error: "Couldn't start the interview." };
   }
@@ -67,7 +78,7 @@ async function beginNewSession(
     };
     const message = await insertInterviewMessage(supabase, {
       sessionId: session.id,
-      profileId: user.id,
+      profileId,
       role: "assistant",
       content: turn.message,
       structuredUpdates: envelope,
@@ -101,6 +112,9 @@ export async function startInterviewAction(): Promise<
   const user = await getAuthUser();
   if (!user) return { success: false, error: "Not signed in." };
 
+  const profileId = await getActiveProfileId();
+  if (!profileId) return { success: false, error: "Not signed in." };
+
   const client = getAnthropicClient();
   if (!client) {
     return {
@@ -115,7 +129,7 @@ export async function startInterviewAction(): Promise<
   }
 
   const supabase = await createClient();
-  return beginNewSession(user, supabase, client);
+  return beginNewSession(profileId, supabase, client);
 }
 
 /**
@@ -129,7 +143,7 @@ export async function restartInterviewAction(
 ): Promise<InterviewActionResult & { state?: InterviewStateView }> {
   const owned = await requireOwnedSession(currentSessionId);
   if ("error" in owned) return { success: false, error: owned.error };
-  const { user, supabase, session } = owned;
+  const { user, profileId, supabase, session } = owned;
 
   const client = getAnthropicClient();
   if (!client) {
@@ -148,7 +162,7 @@ export async function restartInterviewAction(
     await updateInterviewSession(supabase, currentSessionId, { status: "abandoned" });
   }
 
-  return beginNewSession(user, supabase, client);
+  return beginNewSession(profileId, supabase, client);
 }
 
 async function submitAnswer(
@@ -157,7 +171,7 @@ async function submitAnswer(
 ): Promise<InterviewActionResult & { state?: InterviewStateView }> {
   const owned = await requireOwnedSession(sessionId);
   if ("error" in owned) return { success: false, error: owned.error };
-  const { user, supabase, session } = owned;
+  const { user, profileId, supabase, session } = owned;
 
   if (session.status !== "in_progress") {
     return { success: false, error: "This interview has already ended." };
@@ -178,7 +192,7 @@ async function submitAnswer(
 
   await insertInterviewMessage(supabase, {
     sessionId,
-    profileId: user.id,
+    profileId,
     role: "user",
     content: answerText,
   });
@@ -205,7 +219,7 @@ async function submitAnswer(
     };
     await insertInterviewMessage(supabase, {
       sessionId,
-      profileId: user.id,
+      profileId,
       role: "assistant",
       content: turn.message,
       structuredUpdates: envelope,
@@ -215,7 +229,7 @@ async function submitAnswer(
       completionPercentage: turn.completionPercentage,
     });
 
-    const state = await loadInterviewStateView(sessionId, user.id);
+    const state = await loadInterviewStateView(sessionId, profileId);
     return state ? { success: true, state } : { success: false, error: "Couldn't load the interview." };
   } catch (error) {
     const message =
@@ -246,7 +260,7 @@ export async function goBackInterviewAction(
 ): Promise<InterviewActionResult & { state?: InterviewStateView }> {
   const owned = await requireOwnedSession(sessionId);
   if ("error" in owned) return { success: false, error: owned.error };
-  const { user, supabase } = owned;
+  const { profileId, supabase } = owned;
 
   const rows = await listInterviewMessages(sessionId);
   if (rows.length <= 1) {
@@ -270,7 +284,7 @@ export async function goBackInterviewAction(
     completionPercentage: envelope?.completionPercentage ?? 0,
   });
 
-  const state = await loadInterviewStateView(sessionId, user.id);
+  const state = await loadInterviewStateView(sessionId, profileId);
   return state ? { success: true, state } : { success: false, error: "Couldn't load the interview." };
 }
 
@@ -298,7 +312,7 @@ export async function approveAllExtractedFieldsAction(
 ): Promise<InterviewActionResult & { state?: InterviewStateView }> {
   const owned = await requireOwnedSession(sessionId);
   if ("error" in owned) return { success: false, error: owned.error };
-  const { user, supabase } = owned;
+  const { profileId, supabase } = owned;
 
   const rows = await listInterviewMessages(sessionId);
   const pending = findUnresolvedExtractions(rows);
@@ -306,7 +320,7 @@ export async function approveAllExtractedFieldsAction(
   for (const { envelope } of pending) {
     const parsed = interviewExtractionSchema.safeParse(envelope.extractedFields);
     if (!parsed.success) continue; // defensive: skip a malformed turn rather than failing the whole batch
-    const applyError = await applyInterviewExtraction(supabase, user.id, parsed.data);
+    const applyError = await applyInterviewExtraction(supabase, profileId, parsed.data);
     if (applyError) return { success: false, error: applyError };
   }
 
@@ -317,7 +331,7 @@ export async function approveAllExtractedFieldsAction(
     });
   }
 
-  const state = await loadInterviewStateView(sessionId, user.id);
+  const state = await loadInterviewStateView(sessionId, profileId);
   return state ? { success: true, state } : { success: false, error: "Couldn't load the interview." };
 }
 
@@ -327,7 +341,7 @@ export async function dismissAllExtractedFieldsAction(
 ): Promise<InterviewActionResult & { state?: InterviewStateView }> {
   const owned = await requireOwnedSession(sessionId);
   if ("error" in owned) return { success: false, error: owned.error };
-  const { user, supabase } = owned;
+  const { profileId, supabase } = owned;
 
   const rows = await listInterviewMessages(sessionId);
   const pending = findUnresolvedExtractions(rows);
@@ -339,7 +353,7 @@ export async function dismissAllExtractedFieldsAction(
     });
   }
 
-  const state = await loadInterviewStateView(sessionId, user.id);
+  const state = await loadInterviewStateView(sessionId, profileId);
   return state ? { success: true, state } : { success: false, error: "Couldn't load the interview." };
 }
 
@@ -358,7 +372,7 @@ export async function resolveGiftSuggestionAction(
 ): Promise<InterviewActionResult & { state?: InterviewStateView }> {
   const owned = await requireOwnedSession(sessionId);
   if ("error" in owned) return { success: false, error: owned.error };
-  const { user, supabase } = owned;
+  const { profileId, supabase } = owned;
 
   const rows = await listInterviewMessages(sessionId);
   const target = rows.find((row) => row.id === messageId);
@@ -372,7 +386,7 @@ export async function resolveGiftSuggestionAction(
     }
   }
 
-  const state = await loadInterviewStateView(sessionId, user.id);
+  const state = await loadInterviewStateView(sessionId, profileId);
   return state ? { success: true, state } : { success: false, error: "Couldn't load the interview." };
 }
 
@@ -382,7 +396,7 @@ export async function generateGiftStyleSummaryAction(
 ): Promise<InterviewActionResult & { summary?: string }> {
   const owned = await requireOwnedSession(sessionId);
   if ("error" in owned) return { success: false, error: owned.error };
-  const { user, supabase } = owned;
+  const { user, profileId, supabase } = owned;
 
   const client = getAnthropicClient();
   if (!client) {
@@ -397,11 +411,11 @@ export async function generateGiftStyleSummaryAction(
   );
 
   const [{ data: profileRow }, { data: sectionRows }] = await Promise.all([
-    supabase.from("profiles").select("introduction").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("introduction").eq("id", profileId).maybeSingle(),
     supabase
       .from("profile_sections")
       .select("section_key, data")
-      .eq("profile_id", user.id)
+      .eq("profile_id", profileId)
       .in("section_key", chipListDbKeys),
   ]);
 
@@ -435,7 +449,7 @@ export async function approveGiftStyleSummaryAction(
 ): Promise<InterviewActionResult> {
   const owned = await requireOwnedSession(sessionId);
   if ("error" in owned) return { success: false, error: owned.error };
-  const { user, supabase } = owned;
+  const { profileId, supabase } = owned;
 
   const trimmed = summary.trim();
   if (!trimmed || trimmed.length > 300) {
@@ -445,7 +459,7 @@ export async function approveGiftStyleSummaryAction(
   const { error } = await supabase
     .from("profiles")
     .update({ gift_style_summary: trimmed })
-    .eq("id", user.id);
+    .eq("id", profileId);
   if (error) return { success: false, error: error.message };
 
   const sessionError = await updateInterviewSession(supabase, sessionId, {

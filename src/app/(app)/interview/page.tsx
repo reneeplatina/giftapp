@@ -8,19 +8,13 @@ import { InterviewClient } from "./interview-client";
 
 export default async function InterviewPage() {
   const user = await requireAuthUser("/interview");
-
-  // The AI Gift Builder only ever reads/writes the signed-in user's own
-  // profile (see src/lib/interview/actions.ts) — it doesn't yet know how
-  // to target a managed profile, so send a manager back to the dashboard
-  // rather than let it silently edit the wrong profile.
   const activeProfileId = await getActiveProfileId();
-  if (activeProfileId !== user.id) {
-    redirect("/dashboard");
-  }
+  if (!activeProfileId) redirect("/dashboard");
+  const isManagedProfileActive = activeProfileId !== user.id;
 
-  const session = await getLatestInterviewSession(user.id);
+  const session = await getLatestInterviewSession(activeProfileId);
   const initialState = session
-    ? await loadInterviewStateView(session.id, user.id)
+    ? await loadInterviewStateView(session.id, activeProfileId)
     : null;
 
   return (
@@ -30,8 +24,9 @@ export default async function InterviewPage() {
           AI Gift Builder
         </h1>
         <p className="mt-1 text-sm text-neutral-600">
-          One chat that learns your taste and suggests gifts as it goes.
-          Nothing is added to your profile or wishlist until you approve it.
+          {isManagedProfileActive
+            ? "One chat that learns their taste and suggests gifts as it goes. Nothing is added to this profile or wishlist until you approve it."
+            : "One chat that learns your taste and suggests gifts as it goes. Nothing is added to your profile or wishlist until you approve it."}
         </p>
       </div>
       <InterviewClient initialState={initialState} />
