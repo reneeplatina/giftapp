@@ -1,13 +1,17 @@
 [build]
   command = "next build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "22"
 
-# Netlify auto-detects Next.js projects and installs the Next.js Runtime
-# (@netlify/plugin-nextjs) itself — this site already has it registered
-# that way. Declaring the plugin again here too causes Netlify to try to
-# install it twice ("plugin already installed" build failure), so it's
-# intentionally left out of this file. The package still lives in
-# package.json's devDependencies to pin its version under version
-# control; Netlify's auto-install picks up that pinned version.
+# Netlify's own build-settings validation rejects a build whose resolved
+# publish directory equals the base directory — confirmed the actual
+# cause of this deploy failing (twice) once `publish` was removed in an
+# earlier attempt to "modernize" this file, regardless of whether the
+# plugin below was declared or not. Restored to match this site's
+# previously-working configuration. The actual runtime adaptation
+# (server actions, src/proxy.ts, image optimization) is handled by the
+# Next.js Runtime, which this site already has installed (auto-detected
+# for Next.js projects; also pinned as a devDependency in package.json)
+# — no explicit [[plugins]] block needed here.
