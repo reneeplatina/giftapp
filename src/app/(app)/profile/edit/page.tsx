@@ -4,6 +4,8 @@ import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { BasicInfoSection } from "@/components/profile-builder/basic-info-section";
 import { SizesSection } from "@/components/profile-builder/sizes-section";
 import { ChipListSection } from "@/components/profile-builder/chip-list-section";
+import { MyImagesSection } from "@/components/profile-builder/my-images-section";
+import { getProfileImagesForEditing } from "@/lib/profile-images/dal";
 import {
   COLOR_OPTIONS,
   CREATIVITY_OPTIONS,
@@ -19,6 +21,7 @@ import {
 
 export default async function ProfileEditPage() {
   await requireAuthUser("/profile/edit");
+  const images = await getProfileImagesForEditing();
 
   return (
     <Container className="flex flex-col gap-6 py-8">
@@ -115,6 +118,9 @@ export default async function ProfileEditPage() {
             hint="Dislikes, allergies, or things you already own."
             options={[]}
           />
+        </AccordionItem>
+        <AccordionItem title="My images">
+          <MyImagesSection initialImages={images} />
         </AccordionItem>
       </Accordion>
     </Container>

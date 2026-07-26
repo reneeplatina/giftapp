@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getAvatarSignedUrl } from "@/lib/profile/dal";
+import { getProfileImageSignedUrl } from "@/lib/profile-images/dal";
 import {
   SECTION_TS_KEYS,
   dbKeyToTsKey,
@@ -38,6 +39,17 @@ interface PublicProfileRpcResult {
     displayName: string;
     avatarPath: string | null;
   }[];
+  images: {
+    id: string;
+    imagePath: string;
+    caption: string | null;
+  }[];
+}
+
+export interface PublicProfileImage {
+  id: string;
+  imageUrl: string | null;
+  caption: string;
 }
 
 /**
@@ -57,6 +69,7 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
   theme: ThemeKey;
   wishlistItems: WishlistItem[];
   linkedProfiles: PublicLinkedProfile[];
+  images: PublicProfileImage[];
 } | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_public_profile", {
@@ -122,10 +135,19 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
     })),
   );
 
+  const images: PublicProfileImage[] = await Promise.all(
+    (result.images ?? []).map(async (image) => ({
+      id: image.id,
+      imageUrl: await getProfileImageSignedUrl(supabase, image.imagePath),
+      caption: image.caption ?? "",
+    })),
+  );
+
   return {
     profile,
     theme: (result.theme as ThemeKey) ?? "general",
     wishlistItems,
     linkedProfiles,
+    images,
   };
 });

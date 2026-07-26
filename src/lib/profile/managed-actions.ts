@@ -101,6 +101,7 @@ export async function deleteManagedProfileAction(
   await Promise.allSettled([
     removeAllUnderPrefix(serviceClient, "avatars", profileId),
     removeAllUnderPrefix(serviceClient, "wishlist-images", profileId),
+    removeAllUnderPrefix(serviceClient, "profile-images", profileId),
   ]);
 
   const { error } = await serviceClient.auth.admin.deleteUser(profileId);
