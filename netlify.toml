@@ -4,9 +4,10 @@
 [build.environment]
   NODE_VERSION = "22"
 
-# Adapts Next.js's server actions, middleware (src/proxy.ts), image
-# optimization, and dynamic routes to Netlify Functions/Edge Functions.
-# Without this, Netlify would try to serve .next as a static directory,
-# and none of the server-rendered app would work.
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+# Netlify auto-detects Next.js projects and installs the Next.js Runtime
+# (@netlify/plugin-nextjs) itself — this site already has it registered
+# that way. Declaring the plugin again here too causes Netlify to try to
+# install it twice ("plugin already installed" build failure), so it's
+# intentionally left out of this file. The package still lives in
+# package.json's devDependencies to pin its version under version
+# control; Netlify's auto-install picks up that pinned version.
