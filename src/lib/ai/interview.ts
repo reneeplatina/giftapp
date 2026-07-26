@@ -69,7 +69,7 @@ Before asking the next question, react to what they just told you — briefly, a
 - Specific (do this): "Dutch Bros and sushi is a solid combo — noted. What colors do you find yourself drawn to?"
 If they mentioned several things, you don't need to name all of them — pick the one detail that's most fun or distinctive to react to. Vary your phrasing turn to turn; don't reuse the same opener word (e.g. don't say "Nice!"/"Cool!"/"Awesome!" every time). If they skipped or gave a one-word non-answer, skip the reaction and just move on lightly — don't force enthusiasm about nothing.
 
-**Suggest gift ideas as you go — this is the core of the experience, not an afterthought.** Whenever the user's latest answer gives you enough to picture an actual gift (roughly every other substantive answer, more often if it's easy, never forced), propose exactly ONE specific, concrete gift idea via giftSuggestion — not a vague category. "A Nintendo Switch carrying case" beats "gaming accessories." Base it only on what's actually been said so far in the conversation, not on the single latest answer in isolation. Never fabricate a specific retailer, product listing, or price — a concrete idea like "a nice cold brew maker" is fine, "the Ninja CB420 from Target, $89.99" is not, since only the profile owner may add real product links/prices themselves later. Skip the suggestion on turns where nothing concrete has emerged yet (e.g. right after the opening question, or after a skip). Prefer a category from this list when one fits reasonably: ${GIFT_CATEGORIES} — otherwise pick whatever fits best.
+**Suggest gift ideas as you go — this is the core of the experience, not an afterthought.** Whenever the user's latest answer gives you enough to picture an actual gift (roughly every other substantive answer, more often if it's easy, never forced), propose exactly ONE specific, concrete gift idea via giftSuggestion — not a vague category. "A Nintendo Switch carrying case" beats "gaming accessories." Base it only on what's actually been said so far in the conversation, not on the single latest answer in isolation. Never fabricate a specific retailer, product listing, or price — a concrete idea like "a nice cold brew maker" is fine, "the Ninja CB420 from Target, $89.99" is not, since only the profile owner may add real product links/prices themselves later. Skip the suggestion on turns where nothing concrete has emerged yet (e.g. right after the opening question, or after a skip). Prefer a category from this list when one fits reasonably: ${GIFT_CATEGORIES} — otherwise pick whatever fits best. Never repeat a gift idea you've already suggested earlier in this same conversation, even reworded — if a list of already-suggested ideas appears below, treat it as exhaustive and pick something genuinely different, or skip the suggestion this turn if nothing new fits.
 
 If the user approves a gift idea, its name and description get saved onto their public wishlist exactly as written, where strangers shopping for them will read it — never the user themselves. So write giftSuggestion.description in the THIRD person, about the profile owner, the way a friend would explain the idea to someone else buying the gift: "A cozy weighted blanket — they mentioned always being cold in winter" — never second person like "You'd love this since you mentioned being cold." (Your conversational "message" field, by contrast, stays second person as normal — this rule is only for giftSuggestion.description.)
 
@@ -190,8 +190,21 @@ export async function runInterviewTurn(params: {
   model: string;
   history: InterviewHistoryItem[];
   latestUserAnswer: string | null;
+  /**
+   * Names of gift ideas already proposed earlier in this conversation.
+   * The plain conversational history alone doesn't carry this — the
+   * system prompt deliberately keeps giftSuggestion out of the "message"
+   * text shown in history — so without this, the model has no way to
+   * know it already suggested something and can propose it again.
+   */
+  previousGiftSuggestions?: string[];
 }): Promise<InterviewTurn> {
-  const { client, model, history, latestUserAnswer } = params;
+  const { client, model, history, latestUserAnswer, previousGiftSuggestions = [] } = params;
+
+  const system =
+    previousGiftSuggestions.length > 0
+      ? `${INTERVIEW_SYSTEM_PROMPT}\n\nGift ideas already suggested this conversation — do not suggest any of these again: ${previousGiftSuggestions.join("; ")}.`
+      : INTERVIEW_SYSTEM_PROMPT;
 
   const messages: Anthropic.MessageParam[] = history.map((item) => ({
     role: item.role,
@@ -213,7 +226,7 @@ export async function runInterviewTurn(params: {
     response = await client.messages.create({
       model,
       max_tokens: 1024,
-      system: INTERVIEW_SYSTEM_PROMPT,
+      system,
       tools: [RECORD_TURN_TOOL],
       tool_choice: { type: "tool", name: "record_interview_turn" },
       messages,
@@ -230,9 +243,11 @@ export async function runInterviewTurn(params: {
   return parsed.data;
 }
 
+const GIFT_STYLE_MAX_CHARS = 300;
+
 const GIFT_STYLE_SYSTEM_PROMPT = `You write a short "My Gift Style" summary for someone's gift profile, in their own first-person voice (e.g. "I love cozy nights in and anything handmade.").
 
-You will be given a JSON object of facts about the person, wrapped in <profile_facts> tags. Base the summary strictly on those facts — never invent details, never state a specific price, product link, or availability, and never address the reader in second person ("you"). Write exactly 1-2 warm, natural sentences and nothing else — no preamble, no quotation marks, no labels.`;
+You will be given a JSON object of facts about the person, wrapped in <profile_facts> tags. Base the summary strictly on those facts — never invent details, never state a specific price, product link, or availability, and never address the reader in second person ("you"). Write exactly 1-2 warm, natural sentences and nothing else — no preamble, no quotation marks, no labels. Stay under ${GIFT_STYLE_MAX_CHARS} characters total, including spaces and punctuation — this is a hard limit, not a suggestion, so favor one confident sentence over two if you're at all close to it.`;
 
 /**
  * Generates a draft "My Gift Style" summary from already-approved
@@ -270,5 +285,17 @@ export async function generateGiftStyleSummary(params: {
   if (!text) {
     throw new AIAssistantError("The AI didn't return a summary.");
   }
-  return text;
+
+  // The prompt asks for a hard character limit, but nothing stops the
+  // model from ignoring it — and profiles.gift_style_summary itself is
+  // capped at 300 characters (src/lib/validation/profile.ts), so an
+  // over-length response would otherwise pass this function fine and
+  // only fail later when the user tries to save it. Clamp defensively,
+  // preferring a clean word boundary over a mid-word cut.
+  if (text.length <= GIFT_STYLE_MAX_CHARS) {
+    return text;
+  }
+  const truncated = text.slice(0, GIFT_STYLE_MAX_CHARS);
+  const lastSpace = truncated.lastIndexOf(" ");
+  return (lastSpace > GIFT_STYLE_MAX_CHARS * 0.6 ? truncated.slice(0, lastSpace) : truncated).trim();
 }
