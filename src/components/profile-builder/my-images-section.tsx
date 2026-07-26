@@ -28,14 +28,21 @@ export function MyImagesSection({
 
     setError(null);
     setUploading(true);
-    const result = await uploadProfileImageAction(file);
-    setUploading(false);
-
-    if (!result.success || !result.item) {
-      setError(result.error ?? "Couldn't upload that photo. Try again.");
-      return;
+    try {
+      const result = await uploadProfileImageAction(file);
+      if (!result.success || !result.item) {
+        setError(result.error ?? "Couldn't upload that photo. Try again.");
+        return;
+      }
+      setImages((prev) => [...prev, result.item!]);
+    } catch {
+      // A thrown (rather than returned) failure — e.g. a network drop or
+      // a request rejected before our own code ran — must still clear
+      // the pending state, or the button gets stuck on "Uploading…" forever.
+      setError("Couldn't upload that photo. Try again.");
+    } finally {
+      setUploading(false);
     }
-    setImages((prev) => [...prev, result.item!]);
   }
 
   async function handleToggleVisibility(image: ProfileImageView) {

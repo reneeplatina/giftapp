@@ -48,10 +48,18 @@ export function BasicInfoSection() {
     if (!file) return;
     setAvatarError(null);
     setAvatarUploading(true);
-    const result = await uploadAvatar(file);
-    setAvatarUploading(false);
-    if (!result.success) {
-      setAvatarError(result.error ?? "Couldn't upload photo. Try again.");
+    try {
+      const result = await uploadAvatar(file);
+      if (!result.success) {
+        setAvatarError(result.error ?? "Couldn't upload photo. Try again.");
+      }
+    } catch {
+      // A thrown (rather than returned) failure — e.g. a network drop or
+      // a request rejected before our own code ran — must still clear
+      // the pending state, or the button gets stuck on "Uploading…" forever.
+      setAvatarError("Couldn't upload photo. Try again.");
+    } finally {
+      setAvatarUploading(false);
     }
   }
 
