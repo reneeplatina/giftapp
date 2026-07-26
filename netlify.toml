@@ -1,0 +1,12 @@
+[build]
+  command = "next build"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Adapts Next.js's server actions, middleware (src/proxy.ts), image
+# optimization, and dynamic routes to Netlify Functions/Edge Functions.
+# Without this, Netlify would try to serve .next as a static directory,
+# and none of the server-rendered app would work.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

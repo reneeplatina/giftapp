@@ -1,0 +1,133 @@
+import type { BudgetLevel, PriorityLevel, ThemeOption } from "@/types/profile";
+
+export const BUDGET_LABELS: Record<BudgetLevel, string> = {
+  under_25: "Under $25",
+  "25_to_75": "$25 – $75",
+  "75_to_200": "$75 – $200",
+  over_200: "$200+",
+};
+
+export const PRIORITY_LABELS: Record<PriorityLevel, string> = {
+  nice_to_have: "Nice to have",
+  would_love: "Would love",
+  dream_gift: "Dream gift",
+};
+
+export const THEME_OPTIONS: ThemeOption[] = [
+  { key: "general", label: "General", accent: "#1c1917", background: "#fafaf9" },
+  { key: "birthday", label: "Birthday", accent: "#db2777", background: "#fdf2f8" },
+  { key: "christmas", label: "Christmas", accent: "#166534", background: "#f0fdf4" },
+  { key: "anniversary", label: "Anniversary", accent: "#9f1239", background: "#fff1f2" },
+  { key: "graduation", label: "Graduation", accent: "#1d4ed8", background: "#eff6ff" },
+  { key: "valentines", label: "Valentine's Day", accent: "#e11d48", background: "#fef2f2" },
+  { key: "mothers_day", label: "Mother's Day", accent: "#d946ef", background: "#fdf4ff" },
+  { key: "fathers_day", label: "Father's Day", accent: "#0f766e", background: "#f0fdfa" },
+  { key: "wedding", label: "Wedding", accent: "#a8a29e", background: "#f5f5f4" },
+  { key: "baby_shower", label: "Baby Shower", accent: "#7dd3fc", background: "#f0f9ff" },
+  { key: "housewarming", label: "Housewarming", accent: "#c2410c", background: "#fff7ed" },
+];
+
+export const COLOR_OPTIONS = [
+  "Black",
+  "White",
+  "Pink",
+  "Navy",
+  "Sage green",
+  "Cream",
+  "Burgundy",
+  "Gold",
+  "Lavender",
+  "Charcoal",
+];
+
+export const INTEREST_OPTIONS = [
+  "Cozy gaming",
+  "Technology",
+  "Artificial intelligence tools",
+  "Creative work",
+  "Web design",
+  "Home and office upgrades",
+  "Fitness and wellness",
+  "Helpful household tools",
+  "Reading",
+  "Travel",
+  "Photography",
+  "Cooking",
+];
+
+export const FOOD_AND_DRINK_OPTIONS = [
+  "Matcha lattes",
+  "Dark chocolate",
+  "Spicy snacks",
+  "Sparkling water",
+  "Good coffee",
+  "Sushi",
+];
+
+export const STORE_OPTIONS = [
+  "Apple",
+  "Uniqlo",
+  "Target",
+  "Sephora",
+  "REI",
+  "Muji",
+];
+
+export const TECH_AND_GAMING_OPTIONS = [
+  "Handheld consoles",
+  "Mechanical keyboards",
+  "Smart home gadgets",
+  "AI software",
+  "Productivity tools",
+  "Noise-cancelling audio",
+];
+
+export const HOME_AND_LIFESTYLE_OPTIONS = [
+  "Cozy blankets",
+  "Scented candles",
+  "Desk organization",
+  "Plants",
+  "Minimalist decor",
+];
+
+export const CREATIVITY_OPTIONS = [
+  "Sketching",
+  "Digital art",
+  "Journaling",
+  "Photography gear",
+  "DIY projects",
+];
+
+export const FITNESS_AND_WELLNESS_OPTIONS = [
+  "Yoga",
+  "Strength training",
+  "Running",
+  "Skincare",
+  "Meditation apps",
+];
+
+export const EXPERIENCE_OPTIONS = [
+  "Concerts",
+  "Weekend trips",
+  "Cooking classes",
+  "Museum visits",
+  "Spa days",
+];
+
+export const DIGITAL_GIFT_OPTIONS = [
+  "AI software subscriptions",
+  "Streaming services",
+  "Cloud storage",
+  "App store gift cards",
+  "Online course credits",
+];
+
+export const CATEGORY_OPTIONS = [
+  "Tech",
+  "Home",
+  "Fitness",
+  "Fashion",
+  "Creativity",
+  "Experiences",
+];
+

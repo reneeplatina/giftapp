@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-cream: #f7f1e6;
+  --color-cream-dark: #ece2cd;
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-playfair);
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Native <dialog> reset so it can be styled purely with Tailwind classes.
+   Wrapped in @layer base so Tailwind utility classes (bg-white, p-6,
+   border, ...) still win in the cascade — unlayered CSS would otherwise
+   beat them regardless of specificity. */
+@layer base {
+  dialog {
+    margin: auto;
+    max-height: none;
+  }
+
+  dialog::backdrop {
+    background: rgb(28 25 23 / 0.5);
+  }
+}
