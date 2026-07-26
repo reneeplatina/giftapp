@@ -6,7 +6,7 @@ current one.
 
 ## Core message
 
-> One profile. Better gifts. Less guessing.
+> Better gifts. Less guessing.
 
 See `docs/PRODUCT_SPEC.md` for the full product definition.
 

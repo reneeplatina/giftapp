@@ -13,7 +13,7 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
 });
 
-const title = "Gift Profile — One profile. Better gifts. Less guessing.";
+const title = "Gift Profile — Better gifts. Less guessing.";
 const description =
   "Create a free gift profile with your sizes, favorites, and wishlist, and share one link so friends and family always know what to get you.";
 
