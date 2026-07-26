@@ -33,7 +33,16 @@ export default async function AppLayout({
   ]);
 
   return (
+    // Keyed by the active profile: router.refresh() (used when switching
+    // profiles) intentionally preserves existing useState in already-
+    // mounted client components, so without this key, ProfileProvider's
+    // internal state would keep showing the *previous* profile's data
+    // after a switch — the switch itself would still work correctly
+    // server-side, but the UI would silently lie about which profile
+    // you're looking at. Changing the key forces a full remount, which
+    // re-seeds state from the fresh props below.
     <ProfileProvider
+      key={switcherData.activeProfileId ?? "signed-out"}
       initialProfile={loaded?.profile ?? buildEmptyProfile()}
       initialTheme={loaded?.theme ?? "general"}
       initialWishlistItems={initialWishlistItems}

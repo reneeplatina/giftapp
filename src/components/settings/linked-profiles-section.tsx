@@ -44,8 +44,9 @@ export function LinkedProfilesSection({
     setCreateError(null);
     startTransition(async () => {
       const result = await createManagedProfileAction(trimmed);
-      if (result.success) {
+      if (result.success && result.profile) {
         setName("");
+        setProfiles((prev) => [...prev, result.profile!]);
         router.refresh();
       } else {
         setCreateError(result.error ?? "Couldn't create that profile.");

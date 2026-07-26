@@ -86,7 +86,7 @@ export function MyImagesSection({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={image.imageUrl}
-                alt=""
+                alt={`Uploaded photo, ${image.isPublic ? "public" : "private"}`}
                 className="h-full w-full object-cover"
               />
             )}
