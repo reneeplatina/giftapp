@@ -8,11 +8,14 @@ import { getAuthUser } from "@/lib/auth/dal";
 import { generateUniqueSlug } from "@/lib/profile/slug";
 import { ACTIVE_PROFILE_COOKIE, activeProfileCookieOptions } from "@/lib/profile/active";
 import { removeAllUnderPrefix } from "@/lib/storage/remove-profile-files";
+import type { ManagedProfileSummary } from "@/lib/profile/managed-dal";
 
 export interface ManagedProfileActionResult {
   success: boolean;
   error?: string;
   profileId?: string;
+  /** Set on successful creation — lets the caller update its own local list without a full reload. */
+  profile?: ManagedProfileSummary;
 }
 
 /**
@@ -66,7 +69,17 @@ export async function createManagedProfileAction(
     return { success: false, error: "Couldn't create that profile. Please try again." };
   }
 
-  return { success: true, profileId: created.user.id };
+  return {
+    success: true,
+    profileId: created.user.id,
+    profile: {
+      id: created.user.id,
+      displayName: trimmed,
+      slug,
+      avatarUrl: null,
+      status: "draft",
+    },
+  };
 }
 
 /**
