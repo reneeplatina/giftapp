@@ -70,6 +70,7 @@ export default async function PublicProfilePage({
               theme={loaded.theme}
               publicUrl={`${getSiteUrl()}/u/${slug}`}
               linkedProfiles={loaded.linkedProfiles}
+              images={loaded.images}
             />
           ) : (
             <EmptyState

@@ -35,9 +35,9 @@ profile's row always goes through the service role (it also has to
 create the synthetic auth user first, which requires the admin API), so
 there is no client-facing `insert` policy for the manager.
 
-## `profile_sections`, `wishlist_items`, `ai_interview_sessions`, `ai_interview_messages`, `ai_suggestions`
+## `profile_sections`, `wishlist_items`, `profile_images`, `ai_interview_sessions`, `ai_interview_messages`, `ai_suggestions`
 
-The first four follow the same two-policy pattern (`ai_suggestions` has
+The first five follow the same two-policy pattern (`ai_suggestions` has
 no managed-profile policy yet — it's unused by any shipped feature):
 
 | Role | select | insert | update | delete |
@@ -88,9 +88,9 @@ owner) can read reports back through the API; review happens through
 trusted server-side/service-role tooling only, out of scope for this
 phase.
 
-## Storage: `avatars`, `wishlist-images`
+## Storage: `avatars`, `wishlist-images`, `profile-images`
 
-Both buckets are private (`public = false`). Path convention
+All three buckets are private (`public = false`). Path convention
 `{profile_id}/...`.
 
 | Role | select (read) | insert | update | delete |

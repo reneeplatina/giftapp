@@ -94,6 +94,21 @@ so a future phase can map the two 1:1. `UNIQUE (profile_id, section_key)`
 the profile owner typed in themselves (docs/AI_SAFETY.md: "the AI does
 not invent new [links]"); this table has no AI-authorship column at all.
 
+### `profile_images`
+
+"My Images" — a general gallery of gift-idea reference photos, separate
+from the single avatar and from any one wishlist item's own image.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid, PK | |
+| `profile_id` | uuid, FK → `profiles.id` | |
+| `image_path` | text | storage path in `profile-images` |
+| `caption` | text | defaults to `''`, max 140 chars |
+| `is_public` | boolean | |
+| `sort_order` | integer | |
+| `created_at` | timestamptz | no `updated_at` — a photo is deleted and re-added rather than edited |
+
 ### `ai_interview_sessions` / `ai_interview_messages`
 
 State for a future guided, conversational profile-building feature (not

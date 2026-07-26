@@ -13,7 +13,7 @@ type ServiceClient = NonNullable<ReturnType<typeof createServiceRoleClient>>;
  */
 export async function removeAllUnderPrefix(
   serviceClient: ServiceClient,
-  bucket: "avatars" | "wishlist-images",
+  bucket: "avatars" | "wishlist-images" | "profile-images",
   profileId: string,
 ) {
   const { data: entries } = await serviceClient.storage.from(bucket).list(profileId);

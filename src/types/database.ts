@@ -230,6 +230,44 @@ export type Database = {
           },
         ]
       }
+      profile_images: {
+        Row: {
+          caption: string
+          created_at: string
+          id: string
+          image_path: string
+          is_public: boolean
+          profile_id: string
+          sort_order: number
+        }
+        Insert: {
+          caption?: string
+          created_at?: string
+          id?: string
+          image_path: string
+          is_public?: boolean
+          profile_id: string
+          sort_order?: number
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          id?: string
+          image_path?: string
+          is_public?: boolean
+          profile_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_images_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_reports: {
         Row: {
           created_at: string

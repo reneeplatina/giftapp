@@ -43,6 +43,7 @@ export async function deleteAccountAction(): Promise<{
     profileIds.flatMap((profileId) => [
       removeAllUnderPrefix(serviceClient, "avatars", profileId),
       removeAllUnderPrefix(serviceClient, "wishlist-images", profileId),
+      removeAllUnderPrefix(serviceClient, "profile-images", profileId),
     ]),
   );
 

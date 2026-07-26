@@ -11,7 +11,7 @@ import { TagList } from "@/components/public-profile/tag-list";
 import { GiftsByBudget } from "@/components/public-profile/gifts-by-budget";
 import { THEME_OPTIONS } from "@/lib/mock/profile";
 import { THEME_ICONS } from "@/lib/profile/theme-icons";
-import type { PublicLinkedProfile } from "@/lib/profile/public-dal";
+import type { PublicLinkedProfile, PublicProfileImage } from "@/lib/profile/public-dal";
 import type { GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
 
 function Section({
@@ -37,6 +37,7 @@ export function PublicProfileView({
   theme,
   publicUrl,
   linkedProfiles = [],
+  images = [],
   isPreview = false,
 }: {
   profile: GiftProfile;
@@ -44,6 +45,7 @@ export function PublicProfileView({
   theme: ThemeKey;
   publicUrl: string;
   linkedProfiles?: PublicLinkedProfile[];
+  images?: PublicProfileImage[];
   isPreview?: boolean;
 }) {
   const accent = THEME_OPTIONS.find((option) => option.key === theme)?.accent;
@@ -176,6 +178,28 @@ export function PublicProfileView({
                 </Badge>
                 <AmazonSearchLink itemName={item.name} />
               </Card>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {images.length > 0 && (
+        <Section title="My images">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {images.map((image) => (
+              <div
+                key={image.id}
+                className="aspect-square overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100"
+              >
+                {image.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={image.imageUrl}
+                    alt={image.caption || "Gift idea photo"}
+                    className="h-full w-full object-cover"
+                  />
+                )}
+              </div>
             ))}
           </div>
         </Section>
