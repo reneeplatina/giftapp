@@ -129,7 +129,9 @@ unique, CHECK-constrained to that exact format), `referred_user_id` /
 ### `ai_usage_events`
 
 Append-only log backing `AI_DAILY_USER_LIMIT` / `AI_DAILY_GUEST_LIMIT`
-(docs/AI_SAFETY.md). `user_id` (nullable FK), `anonymous_session_hash`
+(docs/AI_SAFETY.md). `user_id` (nullable FK, cascades on account
+deletion — this data only exists to back short-lived rate limiting, so
+there's nothing to retain once the account is gone), `anonymous_session_hash`
 (nullable text), `feature_name`. CHECK requires at least one of
 `user_id`/`anonymous_session_hash` to be present. No `updated_at` — rows
 are never modified after insert.

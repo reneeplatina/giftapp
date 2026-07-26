@@ -2,7 +2,7 @@
 
 ## Core message
 
-> One profile. Better gifts. Less guessing.
+> Better gifts. Less guessing.
 
 ## Problem
 
