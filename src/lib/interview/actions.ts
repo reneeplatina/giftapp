@@ -201,6 +201,11 @@ async function submitAnswer(
   const history = priorRows
     .slice(0, -1) // exclude the answer we just inserted; sent separately below
     .map((row) => ({ role: row.role, content: row.content }));
+  const previousGiftSuggestions = priorRows
+    .map((row) => (row.structured_updates as AssistantTurnEnvelope | null)?.giftSuggestion)
+    .filter((suggestion): suggestion is Record<string, unknown> => Boolean(suggestion))
+    .map((suggestion) => suggestion.name)
+    .filter((name): name is string => typeof name === "string" && name.length > 0);
 
   try {
     const turn = await runInterviewTurn({
@@ -208,6 +213,7 @@ async function submitAnswer(
       model: getAnthropicModel(),
       history,
       latestUserAnswer: answerText,
+      previousGiftSuggestions,
     });
 
     const envelope: AssistantTurnEnvelope = {
