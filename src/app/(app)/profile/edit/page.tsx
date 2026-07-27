@@ -7,14 +7,24 @@ import { ChipListSection } from "@/components/profile-builder/chip-list-section"
 import { MyImagesSection } from "@/components/profile-builder/my-images-section";
 import { getProfileImagesForEditing } from "@/lib/profile-images/dal";
 import {
+  ART_AND_DESIGN_OPTIONS,
+  BOOKS_AND_READING_OPTIONS,
+  CARS_AND_GARAGE_OPTIONS,
+  CLOTHING_AND_SHOES_OPTIONS,
   COLOR_OPTIONS,
   CREATIVITY_OPTIONS,
   DIGITAL_GIFT_OPTIONS,
+  DIY_AND_CRAFTING_OPTIONS,
   EXPERIENCE_OPTIONS,
+  FAITH_AND_VALUES_OPTIONS,
   FITNESS_AND_WELLNESS_OPTIONS,
   FOOD_AND_DRINK_OPTIONS,
+  GIFT_CARDS_AND_SUBSCRIPTIONS_OPTIONS,
   HOME_AND_LIFESTYLE_OPTIONS,
   INTEREST_OPTIONS,
+  MOVIES_AND_SHOWS_OPTIONS,
+  OUTDOORS_AND_GUNS_OPTIONS,
+  SPORTS_AND_COMBAT_OPTIONS,
   STORE_OPTIONS,
   TECH_AND_GAMING_OPTIONS,
 } from "@/lib/mock/profile";
@@ -109,6 +119,78 @@ export default async function ProfileEditPage() {
             profileKey="digitalGifts"
             label="Digital gifts and subscriptions"
             options={DIGITAL_GIFT_OPTIONS}
+          />
+        </AccordionItem>
+        <AccordionItem title="Sports and combat">
+          <ChipListSection
+            profileKey="sportsAndCombat"
+            label="Sports and combat"
+            options={SPORTS_AND_COMBAT_OPTIONS}
+          />
+        </AccordionItem>
+        <AccordionItem title="Outdoors and guns">
+          <ChipListSection
+            profileKey="outdoorsAndGuns"
+            label="Outdoors and guns"
+            options={OUTDOORS_AND_GUNS_OPTIONS}
+          />
+        </AccordionItem>
+        <AccordionItem title="Faith and values">
+          <ChipListSection
+            profileKey="faithAndValues"
+            label="Faith and values"
+            options={FAITH_AND_VALUES_OPTIONS}
+          />
+        </AccordionItem>
+        <AccordionItem title="Clothing and shoes">
+          <ChipListSection
+            profileKey="clothingAndShoes"
+            label="Clothing and shoes"
+            hint="Sizes go in the Sizes section above — this is for styles and brands."
+            options={CLOTHING_AND_SHOES_OPTIONS}
+          />
+        </AccordionItem>
+        <AccordionItem title="Movies and shows">
+          <ChipListSection
+            profileKey="moviesAndShows"
+            label="Movies and shows"
+            options={MOVIES_AND_SHOWS_OPTIONS}
+          />
+        </AccordionItem>
+        <AccordionItem title="Cars and garage">
+          <ChipListSection
+            profileKey="carsAndGarage"
+            label="Cars and garage"
+            options={CARS_AND_GARAGE_OPTIONS}
+          />
+        </AccordionItem>
+        <AccordionItem title="DIY and crafting">
+          <ChipListSection
+            profileKey="diyAndCrafting"
+            label="DIY and crafting"
+            options={DIY_AND_CRAFTING_OPTIONS}
+          />
+        </AccordionItem>
+        <AccordionItem title="Art and design">
+          <ChipListSection
+            profileKey="artAndDesign"
+            label="Art and design"
+            options={ART_AND_DESIGN_OPTIONS}
+          />
+        </AccordionItem>
+        <AccordionItem title="Books and reading">
+          <ChipListSection
+            profileKey="booksAndReading"
+            label="Books and reading"
+            options={BOOKS_AND_READING_OPTIONS}
+          />
+        </AccordionItem>
+        <AccordionItem title="Gift cards and subscriptions">
+          <ChipListSection
+            profileKey="giftCardsAndSubscriptions"
+            label="Gift cards and subscriptions"
+            hint="Pick the ones you'd actually use — mention a preferred amount in your gift style summary or wishlist notes."
+            options={GIFT_CARDS_AND_SUBSCRIPTIONS_OPTIONS}
           />
         </AccordionItem>
         <AccordionItem title="Things to avoid">

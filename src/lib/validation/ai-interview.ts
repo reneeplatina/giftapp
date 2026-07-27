@@ -22,6 +22,16 @@ export const interviewExtractionSchema = z
     experiences: chipList.optional(),
     digitalGifts: chipList.optional(),
     thingsToAvoid: chipList.optional(),
+    sportsAndCombat: chipList.optional(),
+    outdoorsAndGuns: chipList.optional(),
+    faithAndValues: chipList.optional(),
+    clothingAndShoes: chipList.optional(),
+    moviesAndShows: chipList.optional(),
+    carsAndGarage: chipList.optional(),
+    diyAndCrafting: chipList.optional(),
+    artAndDesign: chipList.optional(),
+    booksAndReading: chipList.optional(),
+    giftCardsAndSubscriptions: chipList.optional(),
     sizes: z
       .object({
         shirt: z.string().max(40).optional(),

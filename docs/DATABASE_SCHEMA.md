@@ -54,7 +54,7 @@ One row per profile per content section.
 |---|---|---|
 | `id` | uuid, PK | |
 | `profile_id` | uuid, FK → `profiles.id` | |
-| `section_key` | text | restricted by CHECK to the 12 keys below |
+| `section_key` | text | restricted by CHECK to the 22 keys below |
 | `data` | jsonb | array or object, shape depends on `section_key` |
 | `is_public` | boolean | per-section visibility on the public profile |
 | `sort_order` | integer | |
@@ -63,10 +63,15 @@ One row per profile per content section.
 `section_key` must be one of: `favorite_colors`, `interests`, `sizes`,
 `food_and_drinks`, `favorite_stores`, `tech_and_gaming`,
 `home_and_lifestyle`, `creativity`, `fitness_and_wellness`,
-`experiences`, `digital_gifts`, `things_to_avoid` — matching the section
-keys already used by the Phase 1 mock-data UI (`src/types/profile.ts`),
-so a future phase can map the two 1:1. `UNIQUE (profile_id, section_key)`
-— a profile has at most one row per section.
+`experiences`, `digital_gifts`, `things_to_avoid`, `sports_and_combat`,
+`outdoors_and_guns`, `faith_and_values`, `clothing_and_shoes`,
+`movies_and_shows`, `cars_and_garage`, `diy_and_crafting`,
+`art_and_design`, `books_and_reading`, `gift_cards_and_subscriptions`
+(the last 10 added in `20260727000001_expand_profile_section_categories.sql`)
+— matching the section keys used by the profile-builder UI
+(`src/types/profile.ts`, mapped via `src/lib/profile/section-keys.ts`).
+`UNIQUE (profile_id, section_key)` — a profile has at most one row per
+section.
 
 ### `wishlist_items`
 
