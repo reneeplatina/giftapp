@@ -30,6 +30,7 @@ export const SECTION_KEY_MAP = {
   artAndDesign: "art_and_design",
   booksAndReading: "books_and_reading",
   giftCardsAndSubscriptions: "gift_cards_and_subscriptions",
+  kidsToysAndSensory: "kids_toys_and_sensory",
 } as const;
 
 export type SectionTsKey = keyof typeof SECTION_KEY_MAP;
@@ -53,15 +54,16 @@ export const SECTION_LABELS: Record<SectionTsKey, string> = {
   digitalGifts: "Digital gifts and subscriptions",
   thingsToAvoid: "Things to avoid",
   sportsAndCombat: "Sports and combat",
-  outdoorsAndGuns: "Outdoors and guns",
-  faithAndValues: "Faith and values",
+  outdoorsAndGuns: "Outdoors",
+  faithAndValues: "Faith",
   clothingAndShoes: "Clothing and shoes",
   moviesAndShows: "Movies and shows",
   carsAndGarage: "Cars and garage",
   diyAndCrafting: "DIY and crafting",
   artAndDesign: "Art and design",
-  booksAndReading: "Books and reading",
+  booksAndReading: "Reading",
   giftCardsAndSubscriptions: "Gift cards and subscriptions",
+  kidsToysAndSensory: "Kids toys and sensory",
 };
 
 const DB_TO_TS_KEY = Object.fromEntries(

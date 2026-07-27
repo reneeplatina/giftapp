@@ -8,7 +8,6 @@ import { MyImagesSection } from "@/components/profile-builder/my-images-section"
 import { getProfileImagesForEditing } from "@/lib/profile-images/dal";
 import {
   ART_AND_DESIGN_OPTIONS,
-  BOOKS_AND_READING_OPTIONS,
   CARS_AND_GARAGE_OPTIONS,
   CLOTHING_AND_SHOES_OPTIONS,
   COLOR_OPTIONS,
@@ -16,14 +15,16 @@ import {
   DIGITAL_GIFT_OPTIONS,
   DIY_AND_CRAFTING_OPTIONS,
   EXPERIENCE_OPTIONS,
-  FAITH_AND_VALUES_OPTIONS,
+  FAITH_OPTIONS,
   FITNESS_AND_WELLNESS_OPTIONS,
   FOOD_AND_DRINK_OPTIONS,
   GIFT_CARDS_AND_SUBSCRIPTIONS_OPTIONS,
   HOME_AND_LIFESTYLE_OPTIONS,
   INTEREST_OPTIONS,
+  KIDS_TOYS_AND_SENSORY_OPTIONS,
   MOVIES_AND_SHOWS_OPTIONS,
-  OUTDOORS_AND_GUNS_OPTIONS,
+  OUTDOORS_OPTIONS,
+  READING_OPTIONS,
   SPORTS_AND_COMBAT_OPTIONS,
   STORE_OPTIONS,
   TECH_AND_GAMING_OPTIONS,
@@ -128,18 +129,18 @@ export default async function ProfileEditPage() {
             options={SPORTS_AND_COMBAT_OPTIONS}
           />
         </AccordionItem>
-        <AccordionItem title="Outdoors and guns">
+        <AccordionItem title="Outdoors">
           <ChipListSection
             profileKey="outdoorsAndGuns"
-            label="Outdoors and guns"
-            options={OUTDOORS_AND_GUNS_OPTIONS}
+            label="Outdoors"
+            options={OUTDOORS_OPTIONS}
           />
         </AccordionItem>
-        <AccordionItem title="Faith and values">
+        <AccordionItem title="Faith">
           <ChipListSection
             profileKey="faithAndValues"
-            label="Faith and values"
-            options={FAITH_AND_VALUES_OPTIONS}
+            label="Faith"
+            options={FAITH_OPTIONS}
           />
         </AccordionItem>
         <AccordionItem title="Clothing and shoes">
@@ -178,11 +179,11 @@ export default async function ProfileEditPage() {
             options={ART_AND_DESIGN_OPTIONS}
           />
         </AccordionItem>
-        <AccordionItem title="Books and reading">
+        <AccordionItem title="Reading">
           <ChipListSection
             profileKey="booksAndReading"
-            label="Books and reading"
-            options={BOOKS_AND_READING_OPTIONS}
+            label="Reading"
+            options={READING_OPTIONS}
           />
         </AccordionItem>
         <AccordionItem title="Gift cards and subscriptions">
@@ -191,6 +192,13 @@ export default async function ProfileEditPage() {
             label="Gift cards and subscriptions"
             hint="Pick the ones you'd actually use — mention a preferred amount in your gift style summary or wishlist notes."
             options={GIFT_CARDS_AND_SUBSCRIPTIONS_OPTIONS}
+          />
+        </AccordionItem>
+        <AccordionItem title="Kids toys and sensory">
+          <ChipListSection
+            profileKey="kidsToysAndSensory"
+            label="Kids toys and sensory"
+            options={KIDS_TOYS_AND_SENSORY_OPTIONS}
           />
         </AccordionItem>
         <AccordionItem title="Things to avoid">

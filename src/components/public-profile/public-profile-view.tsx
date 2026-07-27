@@ -182,13 +182,13 @@ export function PublicProfileView({
       )}
 
       {profile.privacy.sectionVisibility.outdoorsAndGuns && (
-        <Section title="Outdoors and guns">
+        <Section title="Outdoors">
           <TagList items={profile.outdoorsAndGuns} />
         </Section>
       )}
 
       {profile.privacy.sectionVisibility.faithAndValues && (
-        <Section title="Faith and values">
+        <Section title="Faith">
           <TagList items={profile.faithAndValues} />
         </Section>
       )}
@@ -224,8 +224,14 @@ export function PublicProfileView({
       )}
 
       {profile.privacy.sectionVisibility.booksAndReading && (
-        <Section title="Books and reading">
+        <Section title="Reading">
           <TagList items={profile.booksAndReading} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.kidsToysAndSensory && (
+        <Section title="Kids toys and sensory">
+          <TagList items={profile.kidsToysAndSensory} />
         </Section>
       )}
 

@@ -40,12 +40,13 @@ const INTERVIEW_TOPICS = [
   "home, lifestyle, fitness, and wellness",
   "experiences they'd enjoy",
   "sports, martial arts, or combat sports they're into",
-  "outdoor activities, hunting, or shooting sports",
-  "faith, religion, or values that matter to them",
+  "outdoor activities like hunting, camping, fishing, or hiking",
+  "faith or religious background, whatever tradition applies to them",
   "movies, shows, and entertainment",
   "cars, garage, or DIY/crafting projects",
-  "art, design, or books and reading",
+  "art, design, or reading (including audiobooks)",
   "gift cards or subscriptions they'd actually use",
+  "if it's for a kid: toys, sensory play, slime, or squishies",
   "things to avoid gifting them",
 ].join(", ");
 
@@ -75,8 +76,9 @@ const GIFT_CATEGORIES = [
   "Cars and garage",
   "DIY and crafting",
   "Art and design",
-  "Books",
+  "Reading",
   "Gift cards",
+  "Kids toys",
 ].join(", ");
 
 const INTERVIEW_SYSTEM_PROMPT = `You are the "AI Gift Builder" — a single combined conversation that both learns someone's gift preferences AND suggests actual gift ideas as it goes, so building a gift profile feels like one easy chat instead of a form to fill out. You're warm and genuinely curious, like a friend catching up, not a checklist. Your only job here is this conversation — you are not a general-purpose assistant.
@@ -158,6 +160,7 @@ const RECORD_TURN_TOOL: Anthropic.Tool = {
           artAndDesign: { type: "array", items: { type: "string" } },
           booksAndReading: { type: "array", items: { type: "string" } },
           giftCardsAndSubscriptions: { type: "array", items: { type: "string" } },
+          kidsToysAndSensory: { type: "array", items: { type: "string" } },
           sizes: {
             type: "object",
             properties: {

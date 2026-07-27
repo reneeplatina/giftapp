@@ -247,32 +247,34 @@ export const SPORTS_AND_COMBAT_OPTIONS = [
   "Weightlifting",
 ];
 
-export const OUTDOORS_AND_GUNS_OPTIONS = [
+export const OUTDOORS_OPTIONS = [
   "Hunting gear",
-  "Range time and ammo",
-  "Concealed carry accessories",
-  "Gun cleaning kits",
-  "Holsters",
   "Camping gear",
   "Fishing gear",
-  "Knives and multitools",
+  "Hiking gear",
+  "Backpacking",
   "Archery",
   "Off-roading and ATVs",
   "Survival gear",
-  "Scopes and optics",
+  "Knives and multitools",
+  "Binoculars and optics",
+  "Kayaking and canoeing",
+  "Birdwatching",
 ];
 
-export const FAITH_AND_VALUES_OPTIONS = [
-  "Catholic devotionals",
-  "Rosaries",
-  "Saint medals",
+export const FAITH_OPTIONS = [
   "Bibles",
-  "Religious art and icons",
-  "Church and parish events",
+  "Qurans",
+  "Torahs",
+  "Prayer beads and rosaries",
+  "Religious jewelry",
+  "Devotionals and prayer books",
   "Faith-based books",
-  "Crosses and crucifixes",
-  "Baptism and confirmation keepsakes",
+  "Religious art and icons",
+  "Meditation and mindfulness",
+  "Church, temple, mosque, or synagogue events",
   "Prayer journals",
+  "Inspirational and spiritual gifts",
 ];
 
 export const CLOTHING_AND_SHOES_OPTIONS = [
@@ -342,7 +344,7 @@ export const ART_AND_DESIGN_OPTIONS = [
   "Custom portraits/commissions",
 ];
 
-export const BOOKS_AND_READING_OPTIONS = [
+export const READING_OPTIONS = [
   "Fiction",
   "Nonfiction",
   "Fantasy",
@@ -352,8 +354,29 @@ export const BOOKS_AND_READING_OPTIONS = [
   "Cookbooks",
   "Comics and graphic novels",
   "Audiobooks",
+  "Audible subscription",
+  "Podcast gear",
   "E-reader accessories",
   "Bookstore gift cards",
+];
+
+export const KIDS_TOYS_AND_SENSORY_OPTIONS = [
+  "Slime making kits",
+  "Squishies",
+  "Kinetic sand",
+  "Play-Doh and modeling clay",
+  "Sensory bins",
+  "Fidget toys",
+  "Building blocks and LEGO",
+  "Stuffed animals and plushies",
+  "Dolls and action figures",
+  "Board games for kids",
+  "Arts and crafts kits",
+  "Remote control toys",
+  "Outdoor play toys",
+  "Educational toys",
+  "Puzzles for kids",
+  "Weighted and calming sensory toys",
 ];
 
 export const GIFT_CARDS_AND_SUBSCRIPTIONS_OPTIONS = [
@@ -388,7 +411,8 @@ export const CATEGORY_OPTIONS = [
   "Cars and garage",
   "DIY and crafting",
   "Art and design",
-  "Books",
+  "Reading",
   "Gift cards",
+  "Kids toys",
 ];
 

@@ -27,6 +27,7 @@ type ChipListKey = Extract<
   | "artAndDesign"
   | "booksAndReading"
   | "giftCardsAndSubscriptions"
+  | "kidsToysAndSensory"
 >;
 
 export function ChipListSection({

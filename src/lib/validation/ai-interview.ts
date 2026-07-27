@@ -32,6 +32,7 @@ export const interviewExtractionSchema = z
     artAndDesign: chipList.optional(),
     booksAndReading: chipList.optional(),
     giftCardsAndSubscriptions: chipList.optional(),
+    kidsToysAndSensory: chipList.optional(),
     sizes: z
       .object({
         shirt: z.string().max(40).optional(),
