@@ -30,14 +30,28 @@ export const THEME_OPTIONS: ThemeOption[] = [
 export const COLOR_OPTIONS = [
   "Black",
   "White",
+  "Gray",
   "Pink",
+  "Red",
+  "Orange",
+  "Yellow",
   "Navy",
+  "Royal blue",
+  "Sky blue",
   "Sage green",
+  "Emerald green",
   "Cream",
+  "Beige",
+  "Brown",
   "Burgundy",
+  "Purple",
   "Gold",
+  "Silver",
+  "Rose gold",
   "Lavender",
+  "Teal",
   "Charcoal",
+  "Camo",
 ];
 
 export const INTEREST_OPTIONS = [
@@ -53,6 +67,21 @@ export const INTEREST_OPTIONS = [
   "Travel",
   "Photography",
   "Cooking",
+  "Baking",
+  "Gardening",
+  "Board games",
+  "Puzzles",
+  "Hiking",
+  "Fishing",
+  "Camping",
+  "Music",
+  "Playing an instrument",
+  "Podcasts",
+  "History",
+  "Astronomy and space",
+  "Collecting things",
+  "Volunteering",
+  "Pets and animals",
 ];
 
 export const FOOD_AND_DRINK_OPTIONS = [
@@ -62,6 +91,20 @@ export const FOOD_AND_DRINK_OPTIONS = [
   "Sparkling water",
   "Good coffee",
   "Sushi",
+  "Craft beer",
+  "Wine",
+  "Cocktails",
+  "BBQ",
+  "Tacos and Mexican food",
+  "Italian food",
+  "Baked goods and desserts",
+  "Cheese and charcuterie",
+  "Hot sauce",
+  "Energy drinks",
+  "Tea",
+  "Snack boxes",
+  "Meal kits",
+  "Grilling and smoking meat",
 ];
 
 export const STORE_OPTIONS = [
@@ -71,6 +114,20 @@ export const STORE_OPTIONS = [
   "Sephora",
   "REI",
   "Muji",
+  "Amazon",
+  "Costco",
+  "Home Depot",
+  "Lowe's",
+  "Bass Pro Shops",
+  "Cabela's",
+  "Dick's Sporting Goods",
+  "Best Buy",
+  "Nike",
+  "Lululemon",
+  "IKEA",
+  "Trader Joe's",
+  "Whole Foods",
+  "Etsy",
 ];
 
 export const TECH_AND_GAMING_OPTIONS = [
@@ -80,6 +137,18 @@ export const TECH_AND_GAMING_OPTIONS = [
   "AI software",
   "Productivity tools",
   "Noise-cancelling audio",
+  "PC gaming gear",
+  "PlayStation games",
+  "Xbox games",
+  "Nintendo Switch games",
+  "VR headsets",
+  "Streaming setup gear",
+  "Drones",
+  "Camera gear",
+  "Smart watches",
+  "Phone accessories",
+  "Board/tabletop games",
+  "Retro gaming",
 ];
 
 export const HOME_AND_LIFESTYLE_OPTIONS = [
@@ -88,6 +157,16 @@ export const HOME_AND_LIFESTYLE_OPTIONS = [
   "Desk organization",
   "Plants",
   "Minimalist decor",
+  "Kitchen gadgets",
+  "Coffee and espresso gear",
+  "Bedding and pillows",
+  "Air fryers and small appliances",
+  "Smart home devices",
+  "Grilling accessories",
+  "Storage and organization",
+  "Wall art and prints",
+  "Rugs and throws",
+  "Garage and tool storage",
 ];
 
 export const CREATIVITY_OPTIONS = [
@@ -96,6 +175,14 @@ export const CREATIVITY_OPTIONS = [
   "Journaling",
   "Photography gear",
   "DIY projects",
+  "Painting",
+  "Calligraphy",
+  "Knitting and crochet",
+  "Sewing",
+  "Pottery",
+  "Scrapbooking",
+  "Woodworking",
+  "Jewelry making",
 ];
 
 export const FITNESS_AND_WELLNESS_OPTIONS = [
@@ -104,6 +191,14 @@ export const FITNESS_AND_WELLNESS_OPTIONS = [
   "Running",
   "Skincare",
   "Meditation apps",
+  "Home gym equipment",
+  "Recovery and massage tools",
+  "Cycling",
+  "Golf",
+  "Hiking gear",
+  "Sleep and recovery",
+  "Supplements and nutrition",
+  "Athletic wear",
 ];
 
 export const EXPERIENCE_OPTIONS = [
@@ -112,6 +207,14 @@ export const EXPERIENCE_OPTIONS = [
   "Cooking classes",
   "Museum visits",
   "Spa days",
+  "Sporting events",
+  "Amusement parks",
+  "Wine or brewery tours",
+  "Escape rooms",
+  "Comedy shows",
+  "Fishing or hunting trips",
+  "Golf outings",
+  "Shooting range time",
 ];
 
 export const DIGITAL_GIFT_OPTIONS = [
@@ -120,6 +223,155 @@ export const DIGITAL_GIFT_OPTIONS = [
   "Cloud storage",
   "App store gift cards",
   "Online course credits",
+  "Audiobook subscriptions",
+  "Ebook credits",
+  "Music streaming",
+  "Gaming subscriptions",
+];
+
+export const SPORTS_AND_COMBAT_OPTIONS = [
+  "Brazilian jiu jitsu",
+  "Wrestling",
+  "Boxing",
+  "Muay Thai",
+  "MMA",
+  "Judo",
+  "Karate",
+  "Gi and rashguards",
+  "Grappling gear",
+  "Football",
+  "Basketball",
+  "Baseball",
+  "Soccer",
+  "Golf gear",
+  "Weightlifting",
+];
+
+export const OUTDOORS_AND_GUNS_OPTIONS = [
+  "Hunting gear",
+  "Range time and ammo",
+  "Concealed carry accessories",
+  "Gun cleaning kits",
+  "Holsters",
+  "Camping gear",
+  "Fishing gear",
+  "Knives and multitools",
+  "Archery",
+  "Off-roading and ATVs",
+  "Survival gear",
+  "Scopes and optics",
+];
+
+export const FAITH_AND_VALUES_OPTIONS = [
+  "Catholic devotionals",
+  "Rosaries",
+  "Saint medals",
+  "Bibles",
+  "Religious art and icons",
+  "Church and parish events",
+  "Faith-based books",
+  "Crosses and crucifixes",
+  "Baptism and confirmation keepsakes",
+  "Prayer journals",
+];
+
+export const CLOTHING_AND_SHOES_OPTIONS = [
+  "Sneakers",
+  "Boots",
+  "Sandals",
+  "Athletic shoes",
+  "Jeans",
+  "Hoodies and sweatshirts",
+  "Jackets and coats",
+  "Dresses",
+  "Activewear",
+  "Pajamas",
+  "Socks",
+  "Accessories (belts, hats, bags)",
+  "Jewelry",
+];
+
+export const MOVIES_AND_SHOWS_OPTIONS = [
+  "Action movies",
+  "Comedies",
+  "Horror movies",
+  "Sci-fi and fantasy",
+  "True crime",
+  "Anime",
+  "Sports documentaries",
+  "Classic films",
+  "Blu-ray/4K collector's editions",
+  "Movie theater trips",
+  "Streaming subscriptions",
+];
+
+export const CARS_AND_GARAGE_OPTIONS = [
+  "Car detailing supplies",
+  "Car accessories",
+  "Tools and toolboxes",
+  "Motorcycle gear",
+  "Car audio",
+  "Dash cams",
+  "Garage organization",
+  "Car shows and events",
+  "Model cars",
+  "Gas cards",
+];
+
+export const DIY_AND_CRAFTING_OPTIONS = [
+  "Woodworking tools",
+  "Power tools",
+  "3D printing",
+  "Home improvement projects",
+  "Building and construction kits",
+  "Model building",
+  "Soldering and electronics",
+  "Upholstery and repair",
+  "Leatherworking",
+];
+
+export const ART_AND_DESIGN_OPTIONS = [
+  "Fine art supplies",
+  "Graphic design software",
+  "Prints and posters",
+  "Sculpture",
+  "Graffiti and street art",
+  "Museum memberships",
+  "Art classes",
+  "Sketchbooks",
+  "Custom portraits/commissions",
+];
+
+export const BOOKS_AND_READING_OPTIONS = [
+  "Fiction",
+  "Nonfiction",
+  "Fantasy",
+  "Mystery and thriller",
+  "Biographies",
+  "Self-help and productivity",
+  "Cookbooks",
+  "Comics and graphic novels",
+  "Audiobooks",
+  "E-reader accessories",
+  "Bookstore gift cards",
+];
+
+export const GIFT_CARDS_AND_SUBSCRIPTIONS_OPTIONS = [
+  "Netflix",
+  "Xbox Game Pass",
+  "PlayStation Plus",
+  "Nintendo eShop",
+  "Amazon",
+  "Gas card",
+  "Restaurant gift card",
+  "Movie theater gift card",
+  "Coffee shop gift card",
+  "Grocery store gift card",
+  "Spa or salon gift card",
+  "Home improvement store gift card",
+  "Clothing store gift card",
+  "Steam (PC games)",
+  "Spotify or Apple Music",
 ];
 
 export const CATEGORY_OPTIONS = [
@@ -129,5 +381,14 @@ export const CATEGORY_OPTIONS = [
   "Fashion",
   "Creativity",
   "Experiences",
+  "Sports and combat",
+  "Outdoors",
+  "Faith",
+  "Movies and shows",
+  "Cars and garage",
+  "DIY and crafting",
+  "Art and design",
+  "Books",
+  "Gift cards",
 ];
 

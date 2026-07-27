@@ -145,6 +145,90 @@ export function PublicProfileView({
         </Section>
       )}
 
+      {profile.privacy.sectionVisibility.techAndGaming && (
+        <Section title="Technology and gaming">
+          <TagList items={profile.techAndGaming} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.homeAndLifestyle && (
+        <Section title="Home and lifestyle">
+          <TagList items={profile.homeAndLifestyle} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.creativity && (
+        <Section title="Creativity">
+          <TagList items={profile.creativity} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.fitnessAndWellness && (
+        <Section title="Fitness and wellness">
+          <TagList items={profile.fitnessAndWellness} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.experiences && (
+        <Section title="Experiences">
+          <TagList items={profile.experiences} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.sportsAndCombat && (
+        <Section title="Sports and combat">
+          <TagList items={profile.sportsAndCombat} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.outdoorsAndGuns && (
+        <Section title="Outdoors and guns">
+          <TagList items={profile.outdoorsAndGuns} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.faithAndValues && (
+        <Section title="Faith and values">
+          <TagList items={profile.faithAndValues} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.clothingAndShoes && (
+        <Section title="Clothing and shoes">
+          <TagList items={profile.clothingAndShoes} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.moviesAndShows && (
+        <Section title="Movies and shows">
+          <TagList items={profile.moviesAndShows} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.carsAndGarage && (
+        <Section title="Cars and garage">
+          <TagList items={profile.carsAndGarage} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.diyAndCrafting && (
+        <Section title="DIY and crafting">
+          <TagList items={profile.diyAndCrafting} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.artAndDesign && (
+        <Section title="Art and design">
+          <TagList items={profile.artAndDesign} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.booksAndReading && (
+        <Section title="Books and reading">
+          <TagList items={profile.booksAndReading} />
+        </Section>
+      )}
+
       {exactWishlistItems.length > 0 && (
         <Section title="Exact wishlist items">
           <div className="grid gap-3 sm:grid-cols-2">
@@ -238,6 +322,12 @@ export function PublicProfileView({
       {profile.privacy.sectionVisibility.digitalGifts && (
         <Section title="Digital gifts">
           <TagList items={profile.digitalGifts} />
+        </Section>
+      )}
+
+      {profile.privacy.sectionVisibility.giftCardsAndSubscriptions && (
+        <Section title="Gift cards and subscriptions">
+          <TagList items={profile.giftCardsAndSubscriptions} />
         </Section>
       )}
 

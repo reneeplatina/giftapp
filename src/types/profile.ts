@@ -53,7 +53,17 @@ export type SectionVisibility = Record<
   | "fitnessAndWellness"
   | "experiences"
   | "digitalGifts"
-  | "thingsToAvoid",
+  | "thingsToAvoid"
+  | "sportsAndCombat"
+  | "outdoorsAndGuns"
+  | "faithAndValues"
+  | "clothingAndShoes"
+  | "moviesAndShows"
+  | "carsAndGarage"
+  | "diyAndCrafting"
+  | "artAndDesign"
+  | "booksAndReading"
+  | "giftCardsAndSubscriptions",
   boolean
 >;
 
@@ -76,6 +86,16 @@ export interface GiftProfile {
   experiences: string[];
   digitalGifts: string[];
   thingsToAvoid: string[];
+  sportsAndCombat: string[];
+  outdoorsAndGuns: string[];
+  faithAndValues: string[];
+  clothingAndShoes: string[];
+  moviesAndShows: string[];
+  carsAndGarage: string[];
+  diyAndCrafting: string[];
+  artAndDesign: string[];
+  booksAndReading: string[];
+  giftCardsAndSubscriptions: string[];
   privacy: PrivacySettings;
 }
 
@@ -93,6 +113,16 @@ export type ProfileSectionKey =
   | "experiences"
   | "digitalGifts"
   | "thingsToAvoid"
+  | "sportsAndCombat"
+  | "outdoorsAndGuns"
+  | "faithAndValues"
+  | "clothingAndShoes"
+  | "moviesAndShows"
+  | "carsAndGarage"
+  | "diyAndCrafting"
+  | "artAndDesign"
+  | "booksAndReading"
+  | "giftCardsAndSubscriptions"
   | "privacy";
 
 export interface WishlistItem {

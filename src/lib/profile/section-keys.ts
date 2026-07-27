@@ -20,6 +20,16 @@ export const SECTION_KEY_MAP = {
   experiences: "experiences",
   digitalGifts: "digital_gifts",
   thingsToAvoid: "things_to_avoid",
+  sportsAndCombat: "sports_and_combat",
+  outdoorsAndGuns: "outdoors_and_guns",
+  faithAndValues: "faith_and_values",
+  clothingAndShoes: "clothing_and_shoes",
+  moviesAndShows: "movies_and_shows",
+  carsAndGarage: "cars_and_garage",
+  diyAndCrafting: "diy_and_crafting",
+  artAndDesign: "art_and_design",
+  booksAndReading: "books_and_reading",
+  giftCardsAndSubscriptions: "gift_cards_and_subscriptions",
 } as const;
 
 export type SectionTsKey = keyof typeof SECTION_KEY_MAP;
@@ -42,6 +52,16 @@ export const SECTION_LABELS: Record<SectionTsKey, string> = {
   experiences: "Experiences",
   digitalGifts: "Digital gifts and subscriptions",
   thingsToAvoid: "Things to avoid",
+  sportsAndCombat: "Sports and combat",
+  outdoorsAndGuns: "Outdoors and guns",
+  faithAndValues: "Faith and values",
+  clothingAndShoes: "Clothing and shoes",
+  moviesAndShows: "Movies and shows",
+  carsAndGarage: "Cars and garage",
+  diyAndCrafting: "DIY and crafting",
+  artAndDesign: "Art and design",
+  booksAndReading: "Books and reading",
+  giftCardsAndSubscriptions: "Gift cards and subscriptions",
 };
 
 const DB_TO_TS_KEY = Object.fromEntries(

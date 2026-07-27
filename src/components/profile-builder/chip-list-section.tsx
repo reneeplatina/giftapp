@@ -17,6 +17,16 @@ type ChipListKey = Extract<
   | "experiences"
   | "digitalGifts"
   | "thingsToAvoid"
+  | "sportsAndCombat"
+  | "outdoorsAndGuns"
+  | "faithAndValues"
+  | "clothingAndShoes"
+  | "moviesAndShows"
+  | "carsAndGarage"
+  | "diyAndCrafting"
+  | "artAndDesign"
+  | "booksAndReading"
+  | "giftCardsAndSubscriptions"
 >;
 
 export function ChipListSection({

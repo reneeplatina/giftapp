@@ -33,12 +33,19 @@ export interface InterviewHistoryItem {
 const INTERVIEW_TOPICS = [
   "interests, hobbies, and creativity",
   "favorite colors",
-  "clothing and shoe sizes",
+  "clothing, shoes, and sizes",
   "food and drinks",
   "favorite stores and brands",
   "technology, gaming, and digital subscriptions",
   "home, lifestyle, fitness, and wellness",
   "experiences they'd enjoy",
+  "sports, martial arts, or combat sports they're into",
+  "outdoor activities, hunting, or shooting sports",
+  "faith, religion, or values that matter to them",
+  "movies, shows, and entertainment",
+  "cars, garage, or DIY/crafting projects",
+  "art, design, or books and reading",
+  "gift cards or subscriptions they'd actually use",
   "things to avoid gifting them",
 ].join(", ");
 
@@ -54,9 +61,23 @@ function wrapUserAnswer(text: string): string {
   return `<user_answer>${text}</user_answer>`;
 }
 
-const GIFT_CATEGORIES = ["Tech", "Home", "Fitness", "Fashion", "Creativity", "Experiences"].join(
-  ", ",
-);
+const GIFT_CATEGORIES = [
+  "Tech",
+  "Home",
+  "Fitness",
+  "Fashion",
+  "Creativity",
+  "Experiences",
+  "Sports and combat",
+  "Outdoors",
+  "Faith",
+  "Movies and shows",
+  "Cars and garage",
+  "DIY and crafting",
+  "Art and design",
+  "Books",
+  "Gift cards",
+].join(", ");
 
 const INTERVIEW_SYSTEM_PROMPT = `You are the "AI Gift Builder" — a single combined conversation that both learns someone's gift preferences AND suggests actual gift ideas as it goes, so building a gift profile feels like one easy chat instead of a form to fill out. You're warm and genuinely curious, like a friend catching up, not a checklist. Your only job here is this conversation — you are not a general-purpose assistant.
 
@@ -127,6 +148,16 @@ const RECORD_TURN_TOOL: Anthropic.Tool = {
           experiences: { type: "array", items: { type: "string" } },
           digitalGifts: { type: "array", items: { type: "string" } },
           thingsToAvoid: { type: "array", items: { type: "string" } },
+          sportsAndCombat: { type: "array", items: { type: "string" } },
+          outdoorsAndGuns: { type: "array", items: { type: "string" } },
+          faithAndValues: { type: "array", items: { type: "string" } },
+          clothingAndShoes: { type: "array", items: { type: "string" } },
+          moviesAndShows: { type: "array", items: { type: "string" } },
+          carsAndGarage: { type: "array", items: { type: "string" } },
+          diyAndCrafting: { type: "array", items: { type: "string" } },
+          artAndDesign: { type: "array", items: { type: "string" } },
+          booksAndReading: { type: "array", items: { type: "string" } },
+          giftCardsAndSubscriptions: { type: "array", items: { type: "string" } },
           sizes: {
             type: "object",
             properties: {
