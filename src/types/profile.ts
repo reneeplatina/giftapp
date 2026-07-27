@@ -63,7 +63,8 @@ export type SectionVisibility = Record<
   | "diyAndCrafting"
   | "artAndDesign"
   | "booksAndReading"
-  | "giftCardsAndSubscriptions",
+  | "giftCardsAndSubscriptions"
+  | "kidsToysAndSensory",
   boolean
 >;
 
@@ -96,6 +97,7 @@ export interface GiftProfile {
   artAndDesign: string[];
   booksAndReading: string[];
   giftCardsAndSubscriptions: string[];
+  kidsToysAndSensory: string[];
   privacy: PrivacySettings;
 }
 
@@ -123,6 +125,7 @@ export type ProfileSectionKey =
   | "artAndDesign"
   | "booksAndReading"
   | "giftCardsAndSubscriptions"
+  | "kidsToysAndSensory"
   | "privacy";
 
 export interface WishlistItem {
