@@ -146,6 +146,16 @@ export function PublicProfileView({
         </div>
       </div>
 
+      <Card className="flex flex-wrap items-center justify-between gap-3 bg-cream">
+        <p className="text-sm font-medium text-neutral-800">
+          Like this? Make your own gift profile — free, no payment or
+          shopping account required.
+        </p>
+        <Button href="/signup" size="sm" className="shrink-0">
+          Create My Free Profile
+        </Button>
+      </Card>
+
       {linkedProfiles.length > 0 && (
         <Section title={`Also gifting for ${profile.basicInfo.displayName}'s family`}>
           <div className="flex flex-wrap gap-3">
@@ -287,21 +297,6 @@ export function PublicProfileView({
           </Accordion>
         </Section>
       )}
-
-      <div className="flex flex-col items-center gap-3 rounded-2xl bg-cream px-6 py-10 text-center">
-        <h2 className="font-display text-2xl font-semibold text-neutral-900">
-          Create Your Own Gift Profile
-        </h2>
-        <p className="max-w-md text-sm text-neutral-600">
-          Make gift-giving easier for the people who care about you. Add your
-          favorites, sizes, interests, and wishlist items, then share your
-          personal link with friends and family.
-        </p>
-        <Button href="/signup">Create My Free Profile</Button>
-        <p className="text-xs text-neutral-500">
-          No payment. No shopping account required.
-        </p>
-      </div>
     </div>
   );
 }
