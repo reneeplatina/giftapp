@@ -1,18 +1,19 @@
 import Link from "next/link";
-import { HeartCrack, Shirt } from "lucide-react";
+import { DollarSign, HeartCrack, Shirt } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { ShareModal } from "@/components/share-modal";
 import { GiftAssistantSection } from "@/components/public-profile/gift-assistant-section";
 import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
 import { TagList } from "@/components/public-profile/tag-list";
-import { GiftsByBudget } from "@/components/public-profile/gifts-by-budget";
-import { THEME_OPTIONS } from "@/lib/mock/profile";
+import { BUDGET_LABELS, THEME_OPTIONS } from "@/lib/mock/profile";
+import { SECTION_LABELS } from "@/lib/profile/section-keys";
 import { THEME_ICONS } from "@/lib/profile/theme-icons";
 import type { PublicLinkedProfile, PublicProfileImage } from "@/lib/profile/public-dal";
-import type { GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
+import type { BudgetLevel, GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
 
 function Section({
   title,
@@ -30,6 +31,48 @@ function Section({
     </section>
   );
 }
+
+const BUDGET_ORDER: BudgetLevel[] = [
+  "under_25",
+  "25_to_75",
+  "75_to_200",
+  "over_200",
+];
+
+/** Chip-list sections grouped the way a gift-giver thinks, so the public
+ * page can tuck them into a few collapsed accordion items instead of a
+ * long stack of always-open sections — everyone can still find every
+ * category, just without scrolling past all of them to reach the parts
+ * that actually matter (the wishlist). */
+const DETAIL_GROUPS: {
+  title: string;
+  keys: Exclude<keyof GiftProfile, "basicInfo" | "sizes" | "thingsToAvoid" | "privacy">[];
+}[] = [
+  { title: "Style", keys: ["favoriteColors", "clothingAndShoes"] },
+  {
+    title: "Interests and hobbies",
+    keys: [
+      "interests",
+      "sportsAndCombat",
+      "outdoorsAndGuns",
+      "fitnessAndWellness",
+      "experiences",
+      "creativity",
+      "artAndDesign",
+      "diyAndCrafting",
+      "booksAndReading",
+      "moviesAndShows",
+      "kidsToysAndSensory",
+    ],
+  },
+  { title: "Food and drinks", keys: ["foodAndDrinks"] },
+  { title: "Home, tech, and cars", keys: ["homeAndLifestyle", "techAndGaming", "carsAndGarage"] },
+  { title: "Faith", keys: ["faithAndValues"] },
+  {
+    title: "Stores and gift cards",
+    keys: ["favoriteStores", "digitalGifts", "giftCardsAndSubscriptions"],
+  },
+];
 
 export function PublicProfileView({
   profile,
@@ -50,18 +93,23 @@ export function PublicProfileView({
 }) {
   const accent = THEME_OPTIONS.find((option) => option.key === theme)?.accent;
   const ThemeIcon = THEME_ICONS[theme];
-  const publicItems = wishlistItems.filter(
-    (item) => item.isPublic && !item.isArchived,
-  );
-  const exactWishlistItems = publicItems.filter(
-    (item) => item.priority !== "dream_gift",
-  );
-  const dreamGifts = publicItems.filter(
-    (item) => item.priority === "dream_gift",
-  );
+  const sortedWishlistItems = wishlistItems
+    .filter((item) => item.isPublic && !item.isArchived)
+    .slice()
+    .sort(
+      (a, b) => BUDGET_ORDER.indexOf(a.budgetLevel) - BUDGET_ORDER.indexOf(b.budgetLevel),
+    );
   const sizeEntries = Object.entries(profile.sizes).filter(
     ([, value]) => value.trim().length > 0,
   );
+  const hasSizes = profile.privacy.sectionVisibility.sizes && sizeEntries.length > 0;
+
+  const visibleGroups = DETAIL_GROUPS.map((group) => ({
+    title: group.title,
+    keys: group.keys.filter(
+      (key) => profile.privacy.sectionVisibility[key] && (profile[key] as string[]).length > 0,
+    ),
+  })).filter((group) => group.keys.length > 0 || (group.title === "Style" && hasSizes));
 
   return (
     <div className="flex flex-col gap-10">
@@ -133,139 +181,25 @@ export function PublicProfileView({
         </Card>
       </Section>
 
-      {profile.privacy.sectionVisibility.favoriteColors && (
-        <Section title="Favorite colors">
-          <TagList items={profile.favoriteColors} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.interests && (
-        <Section title="Interests">
-          <TagList items={profile.interests} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.techAndGaming && (
-        <Section title="Technology and gaming">
-          <TagList items={profile.techAndGaming} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.homeAndLifestyle && (
-        <Section title="Home and lifestyle">
-          <TagList items={profile.homeAndLifestyle} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.creativity && (
-        <Section title="Creativity">
-          <TagList items={profile.creativity} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.fitnessAndWellness && (
-        <Section title="Fitness and wellness">
-          <TagList items={profile.fitnessAndWellness} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.experiences && (
-        <Section title="Experiences">
-          <TagList items={profile.experiences} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.sportsAndCombat && (
-        <Section title="Sports and combat">
-          <TagList items={profile.sportsAndCombat} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.outdoorsAndGuns && (
-        <Section title="Outdoors">
-          <TagList items={profile.outdoorsAndGuns} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.faithAndValues && (
-        <Section title="Faith">
-          <TagList items={profile.faithAndValues} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.clothingAndShoes && (
-        <Section title="Clothing and shoes">
-          <TagList items={profile.clothingAndShoes} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.moviesAndShows && (
-        <Section title="Movies and shows">
-          <TagList items={profile.moviesAndShows} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.carsAndGarage && (
-        <Section title="Cars and garage">
-          <TagList items={profile.carsAndGarage} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.diyAndCrafting && (
-        <Section title="DIY and crafting">
-          <TagList items={profile.diyAndCrafting} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.artAndDesign && (
-        <Section title="Art and design">
-          <TagList items={profile.artAndDesign} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.booksAndReading && (
-        <Section title="Reading">
-          <TagList items={profile.booksAndReading} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.kidsToysAndSensory && (
-        <Section title="Kids toys and sensory">
-          <TagList items={profile.kidsToysAndSensory} />
-        </Section>
-      )}
-
-      {exactWishlistItems.length > 0 && (
-        <Section title="Exact wishlist items">
+      {sortedWishlistItems.length > 0 && (
+        <Section title="Wishlist — cheapest first">
           <div className="grid gap-3 sm:grid-cols-2">
-            {exactWishlistItems.map((item) => (
+            {sortedWishlistItems.map((item) => (
               <Card key={item.id} className="flex flex-col gap-1.5">
                 <p className="font-medium text-neutral-900">{item.name}</p>
                 {item.description && (
                   <p className="text-sm text-neutral-600">{item.description}</p>
                 )}
-                <Badge variant="outline" className="mt-1 w-fit">
-                  {item.category}
-                </Badge>
-                <AmazonSearchLink itemName={item.name} />
-              </Card>
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {dreamGifts.length > 0 && (
-        <Section title="Dream gifts">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {dreamGifts.map((item) => (
-              <Card key={item.id} className="flex flex-col gap-1.5">
-                <p className="font-medium text-neutral-900">{item.name}</p>
-                {item.description && (
-                  <p className="text-sm text-neutral-600">{item.description}</p>
-                )}
-                <Badge variant="neutral" className="mt-1 w-fit">
-                  Dream gift
-                </Badge>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <Badge variant="success" className="font-semibold">
+                    <DollarSign className="h-3 w-3" aria-hidden="true" />
+                    {BUDGET_LABELS[item.budgetLevel]}
+                  </Badge>
+                  {item.category && <Badge variant="outline">{item.category}</Badge>}
+                  {item.priority === "dream_gift" && (
+                    <Badge variant="neutral">Dream gift</Badge>
+                  )}
+                </div>
                 <AmazonSearchLink itemName={item.name} />
               </Card>
             ))}
@@ -295,48 +229,6 @@ export function PublicProfileView({
         </Section>
       )}
 
-      {publicItems.length > 0 && (
-        <Section title="Gifts by budget">
-          <GiftsByBudget items={publicItems} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.sizes && sizeEntries.length > 0 && (
-        <Section title="Sizes">
-          <Card className="flex flex-wrap gap-x-6 gap-y-2">
-            {sizeEntries.map(([label, value]) => (
-              <div key={label} className="flex items-center gap-2">
-                <Shirt className="h-4 w-4 text-neutral-400" aria-hidden="true" />
-                <span className="text-sm text-neutral-600 capitalize">
-                  {label.replace(/([A-Z])/g, " $1").trim()}:
-                </span>
-                <span className="text-sm font-medium text-neutral-900">
-                  {value}
-                </span>
-              </div>
-            ))}
-          </Card>
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.favoriteStores && (
-        <Section title="Favorite stores">
-          <TagList items={profile.favoriteStores} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.digitalGifts && (
-        <Section title="Digital gifts">
-          <TagList items={profile.digitalGifts} />
-        </Section>
-      )}
-
-      {profile.privacy.sectionVisibility.giftCardsAndSubscriptions && (
-        <Section title="Gift cards and subscriptions">
-          <TagList items={profile.giftCardsAndSubscriptions} />
-        </Section>
-      )}
-
       {profile.privacy.sectionVisibility.thingsToAvoid &&
         profile.thingsToAvoid.length > 0 && (
           <Section title="Things to avoid">
@@ -353,6 +245,48 @@ export function PublicProfileView({
             </Card>
           </Section>
         )}
+
+      {visibleGroups.length > 0 && (
+        <Section title={`More about ${profile.basicInfo.displayName}`}>
+          <Accordion>
+            {visibleGroups.map((group) => (
+              <AccordionItem key={group.title} title={group.title}>
+                <div className="flex flex-col gap-4">
+                  {group.title === "Style" && hasSizes && (
+                    <div className="flex flex-col gap-2">
+                      <p className="text-sm font-medium text-neutral-800">Sizes</p>
+                      <div className="flex flex-wrap gap-x-6 gap-y-2">
+                        {sizeEntries.map(([label, value]) => (
+                          <div key={label} className="flex items-center gap-2">
+                            <Shirt
+                              className="h-4 w-4 text-neutral-400"
+                              aria-hidden="true"
+                            />
+                            <span className="text-sm text-neutral-600 capitalize">
+                              {label.replace(/([A-Z])/g, " $1").trim()}:
+                            </span>
+                            <span className="text-sm font-medium text-neutral-900">
+                              {value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {group.keys.map((key) => (
+                    <div key={key} className="flex flex-col gap-2">
+                      <p className="text-sm font-medium text-neutral-800">
+                        {SECTION_LABELS[key]}
+                      </p>
+                      <TagList items={profile[key] as string[]} />
+                    </div>
+                  ))}
+                </div>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </Section>
+      )}
 
       <div className="flex flex-col items-center gap-3 rounded-2xl bg-cream px-6 py-10 text-center">
         <h2 className="font-display text-2xl font-semibold text-neutral-900">
