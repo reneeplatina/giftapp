@@ -42,7 +42,7 @@ export const SECTION_TS_KEYS = Object.keys(
 
 export const SECTION_LABELS: Record<SectionTsKey, string> = {
   favoriteColors: "Favorite colors",
-  interests: "Interests and hobbies",
+  interests: "General interests",
   sizes: "Sizes",
   foodAndDrinks: "Food and drinks",
   favoriteStores: "Favorite stores and brands",
