@@ -358,7 +358,9 @@ export type Database = {
           id: string
           introduction: string
           is_simple_profile: boolean
+          last_nudge_sent_at: string | null
           managed_by_profile_id: string | null
+          nudge_enabled: boolean
           slug: string
           status: Database["public"]["Enums"]["profile_status"]
           updated_at: string
@@ -373,7 +375,9 @@ export type Database = {
           id: string
           introduction?: string
           is_simple_profile?: boolean
+          last_nudge_sent_at?: string | null
           managed_by_profile_id?: string | null
+          nudge_enabled?: boolean
           slug: string
           status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
@@ -388,7 +392,9 @@ export type Database = {
           id?: string
           introduction?: string
           is_simple_profile?: boolean
+          last_nudge_sent_at?: string | null
           managed_by_profile_id?: string | null
+          nudge_enabled?: boolean
           slug?: string
           status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
