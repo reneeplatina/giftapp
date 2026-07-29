@@ -146,15 +146,14 @@ export function PublicProfileView({
         </div>
       </div>
 
-      <Card className="flex flex-wrap items-center justify-between gap-3 bg-cream">
-        <p className="text-sm font-medium text-neutral-800">
-          Like this? Make your own gift profile — free, no payment or
-          shopping account required.
-        </p>
-        <Button href="/signup" size="sm" className="shrink-0">
-          Create My Free Profile
+      <div className="flex justify-center">
+        <Button
+          href="/signup"
+          className="bg-teal-500 text-black hover:bg-teal-400"
+        >
+          CREATE MY GIFTME!
         </Button>
-      </Card>
+      </div>
 
       {linkedProfiles.length > 0 && (
         <Section title={`Also gifting for ${profile.basicInfo.displayName}'s family`}>
