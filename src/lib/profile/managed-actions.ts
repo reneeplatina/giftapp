@@ -29,6 +29,7 @@ export interface ManagedProfileActionResult {
  */
 export async function createManagedProfileAction(
   displayName: string,
+  isSimpleProfile = false,
 ): Promise<ManagedProfileActionResult> {
   const user = await getAuthUser();
   if (!user) return { success: false, error: "Not signed in." };
@@ -61,6 +62,7 @@ export async function createManagedProfileAction(
     display_name: trimmed,
     status: "draft",
     managed_by_profile_id: user.id,
+    is_simple_profile: isSimpleProfile,
   });
 
   if (insertError) {
@@ -78,8 +80,35 @@ export async function createManagedProfileAction(
       slug,
       avatarUrl: null,
       status: "draft",
+      isSimpleProfile,
     },
   };
+}
+
+/**
+ * Flips a managed profile's simple/full mode — e.g. switching a kid's
+ * profile back to the full builder once they're older. Scoped to
+ * profiles the caller manages, same as the other managed-profile actions.
+ */
+export async function setSimpleProfileModeAction(
+  profileId: string,
+  isSimpleProfile: boolean,
+): Promise<ManagedProfileActionResult> {
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Not signed in." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ is_simple_profile: isSimpleProfile })
+    .eq("id", profileId)
+    .eq("managed_by_profile_id", user.id);
+
+  if (error) {
+    return { success: false, error: "Couldn't update that profile. Please try again." };
+  }
+
+  return { success: true };
 }
 
 /**

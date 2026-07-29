@@ -134,9 +134,11 @@ export function PublicProfileView({
             {profile.basicInfo.displayName}
           </h1>
         </div>
-        <p className="max-w-md text-neutral-600">
-          &ldquo;{profile.basicInfo.introduction}&rdquo;
-        </p>
+        {profile.basicInfo.introduction.trim().length > 0 && (
+          <p className="max-w-md text-neutral-600">
+            &ldquo;{profile.basicInfo.introduction}&rdquo;
+          </p>
+        )}
         <div className="flex flex-wrap justify-center gap-2">
           <ShareModal
             url={publicUrl}
@@ -184,11 +186,13 @@ export function PublicProfileView({
         isPreview={isPreview}
       />
 
-      <Section title="My Gift Style">
-        <Card>
-          <p className="text-neutral-700">{profile.basicInfo.giftStyleSummary}</p>
-        </Card>
-      </Section>
+      {profile.basicInfo.giftStyleSummary.trim().length > 0 && (
+        <Section title="My Gift Style">
+          <Card>
+            <p className="text-neutral-700">{profile.basicInfo.giftStyleSummary}</p>
+          </Card>
+        </Section>
+      )}
 
       {sortedWishlistItems.length > 0 && (
         <Section title="Wishlist — cheapest first">

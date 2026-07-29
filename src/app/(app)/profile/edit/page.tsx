@@ -1,11 +1,14 @@
 import { Container } from "@/components/container";
 import { requireAuthUser } from "@/lib/auth/dal";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { BasicInfoSection } from "@/components/profile-builder/basic-info-section";
 import { SizesSection } from "@/components/profile-builder/sizes-section";
 import { ChipListSection } from "@/components/profile-builder/chip-list-section";
 import { MyImagesSection } from "@/components/profile-builder/my-images-section";
 import { getProfileImagesForEditing } from "@/lib/profile-images/dal";
+import { getFullProfileForEditing } from "@/lib/profile/dal";
 import {
   ART_AND_DESIGN_OPTIONS,
   CARS_AND_GARAGE_OPTIONS,
@@ -32,7 +35,42 @@ import {
 
 export default async function ProfileEditPage() {
   await requireAuthUser("/profile/edit");
-  const images = await getProfileImagesForEditing();
+  const [images, loaded] = await Promise.all([
+    getProfileImagesForEditing(),
+    getFullProfileForEditing(),
+  ]);
+
+  if (loaded?.isSimpleProfile) {
+    return (
+      <Container className="flex flex-col gap-6 py-8">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-neutral-900">
+            Edit profile
+          </h1>
+          <p className="mt-1 text-sm text-neutral-600">
+            This is a simple profile — just a name, photo, and wishlist.
+          </p>
+        </div>
+
+        <Card>
+          <BasicInfoSection />
+        </Card>
+
+        <Card className="flex flex-col items-start gap-2">
+          <h2 className="font-display text-lg font-semibold text-neutral-900">
+            Wishlist
+          </h2>
+          <p className="text-sm text-neutral-600">
+            Add the gifts they&apos;d like, with a price range — that&apos;s
+            what shows on their shared page.
+          </p>
+          <Button href="/wishlist" size="sm">
+            Go to wishlist
+          </Button>
+        </Card>
+      </Container>
+    );
+  }
 
   return (
     <Container className="flex flex-col gap-6 py-8">

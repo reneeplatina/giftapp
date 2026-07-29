@@ -357,6 +357,7 @@ export type Database = {
           gift_style_summary: string
           id: string
           introduction: string
+          is_simple_profile: boolean
           managed_by_profile_id: string | null
           slug: string
           status: Database["public"]["Enums"]["profile_status"]
@@ -371,6 +372,7 @@ export type Database = {
           gift_style_summary?: string
           id: string
           introduction?: string
+          is_simple_profile?: boolean
           managed_by_profile_id?: string | null
           slug: string
           status?: Database["public"]["Enums"]["profile_status"]
@@ -385,6 +387,7 @@ export type Database = {
           gift_style_summary?: string
           id?: string
           introduction?: string
+          is_simple_profile?: boolean
           managed_by_profile_id?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["profile_status"]

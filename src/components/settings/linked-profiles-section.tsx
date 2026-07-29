@@ -7,11 +7,14 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Toggle } from "@/components/ui/toggle";
 import { TextField } from "@/components/ui/text-field";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   createManagedProfileAction,
   deleteManagedProfileAction,
+  setSimpleProfileModeAction,
   switchActiveProfileAction,
 } from "@/lib/profile/managed-actions";
 import type { ManagedProfileSummary } from "@/lib/profile/managed-dal";
@@ -29,6 +32,7 @@ export function LinkedProfilesSection({
 }) {
   const [profiles, setProfiles] = useState(initialProfiles);
   const [name, setName] = useState("");
+  const [isSimpleProfile, setIsSimpleProfile] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [removeTarget, setRemoveTarget] = useState<ManagedProfileSummary | null>(null);
   const [removeError, setRemoveError] = useState<string | null>(null);
@@ -43,13 +47,30 @@ export function LinkedProfilesSection({
     }
     setCreateError(null);
     startTransition(async () => {
-      const result = await createManagedProfileAction(trimmed);
+      const result = await createManagedProfileAction(trimmed, isSimpleProfile);
       if (result.success && result.profile) {
         setName("");
+        setIsSimpleProfile(false);
         setProfiles((prev) => [...prev, result.profile!]);
         router.refresh();
       } else {
         setCreateError(result.error ?? "Couldn't create that profile.");
+      }
+    });
+  }
+
+  function handleToggleSimple(profile: ManagedProfileSummary, next: boolean) {
+    setProfiles((prev) =>
+      prev.map((p) => (p.id === profile.id ? { ...p, isSimpleProfile: next } : p)),
+    );
+    startTransition(async () => {
+      const result = await setSimpleProfileModeAction(profile.id, next);
+      if (!result.success) {
+        setProfiles((prev) =>
+          prev.map((p) => (p.id === profile.id ? { ...p, isSimpleProfile: !next } : p)),
+        );
+      } else {
+        router.refresh();
       }
     });
   }
@@ -96,47 +117,60 @@ export function LinkedProfilesSection({
             {profiles.map((profile) => (
               <li
                 key={profile.id}
-                className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0"
+                className="flex flex-col gap-3 py-3 first:pt-0 last:pb-0"
               >
-                <Avatar
-                  name={profile.displayName}
-                  src={profile.avatarUrl ?? undefined}
-                  className="h-10 w-10 shrink-0 text-sm"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-neutral-900">
-                    {profile.displayName}
-                  </p>
-                  <Badge
-                    variant={profile.status === "published" ? "success" : "outline"}
-                    className="mt-0.5"
+                <div className="flex flex-wrap items-center gap-3">
+                  <Avatar
+                    name={profile.displayName}
+                    src={profile.avatarUrl ?? undefined}
+                    className="h-10 w-10 shrink-0 text-sm"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-neutral-900">
+                      {profile.displayName}
+                    </p>
+                    <div className="mt-0.5 flex flex-wrap gap-1.5">
+                      <Badge
+                        variant={profile.status === "published" ? "success" : "outline"}
+                      >
+                        {STATUS_LABEL[profile.status]}
+                      </Badge>
+                      {profile.isSimpleProfile && (
+                        <Badge variant="neutral">Simple profile</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleSwitch(profile.id)}
+                    disabled={pending}
                   >
-                    {STATUS_LABEL[profile.status]}
-                  </Badge>
+                    Switch &amp; edit
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="border-red-300 text-red-700 hover:bg-red-50"
+                    onClick={() => {
+                      setRemoveError(null);
+                      setRemoveTarget(profile);
+                    }}
+                    disabled={pending}
+                  >
+                    <UserRoundX className="h-4 w-4" aria-hidden="true" />
+                    Remove
+                  </Button>
                 </div>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleSwitch(profile.id)}
+                <Toggle
+                  label="Simple profile"
+                  description="Just a name, photo, and wishlist — no interest categories to fill in. Good for kids."
+                  checked={profile.isSimpleProfile}
+                  onChange={(event) => handleToggleSimple(profile, event.target.checked)}
                   disabled={pending}
-                >
-                  Switch &amp; edit
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="border-red-300 text-red-700 hover:bg-red-50"
-                  onClick={() => {
-                    setRemoveError(null);
-                    setRemoveTarget(profile);
-                  }}
-                  disabled={pending}
-                >
-                  <UserRoundX className="h-4 w-4" aria-hidden="true" />
-                  Remove
-                </Button>
+                />
               </li>
             ))}
           </ul>
@@ -145,23 +179,31 @@ export function LinkedProfilesSection({
         <div
           className={
             profiles.length > 0
-              ? "mt-4 flex flex-wrap items-end gap-2 border-t border-neutral-100 pt-4"
-              : "flex flex-wrap items-end gap-2"
+              ? "mt-4 flex flex-col gap-3 border-t border-neutral-100 pt-4"
+              : "flex flex-col gap-3"
           }
         >
-          <div className="min-w-[12rem] flex-1">
-            <TextField
-              label="Add a profile for someone"
-              placeholder="e.g. Emma"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              error={createError ?? undefined}
-            />
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="min-w-[12rem] flex-1">
+              <TextField
+                label="Add a profile for someone"
+                placeholder="e.g. Emma"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                error={createError ?? undefined}
+              />
+            </div>
+            <Button type="button" onClick={handleCreate} disabled={pending}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Add profile
+            </Button>
           </div>
-          <Button type="button" onClick={handleCreate} disabled={pending}>
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            Add profile
-          </Button>
+          <Checkbox
+            label="Simple profile"
+            description="Just a name, photo, and wishlist — no interest categories to fill in. Good for kids."
+            checked={isSimpleProfile}
+            onChange={(event) => setIsSimpleProfile(event.target.checked)}
+          />
         </div>
       </Card>
 
