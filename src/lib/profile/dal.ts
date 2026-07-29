@@ -81,6 +81,7 @@ export async function getFullProfileForEditing(): Promise<{
   profile: GiftProfile;
   theme: ThemeKey;
   status: ProfileStatus;
+  isSimpleProfile: boolean;
 } | null> {
   const profileId = await getActiveProfileId();
   if (!profileId) return null;
@@ -137,5 +138,6 @@ export async function getFullProfileForEditing(): Promise<{
     profile,
     theme: (profileRow?.default_theme as ThemeKey) ?? "general",
     status: profileRow?.status ?? "draft",
+    isSimpleProfile: profileRow?.is_simple_profile ?? false,
   };
 }
