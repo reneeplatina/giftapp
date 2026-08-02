@@ -423,6 +423,8 @@ export type Database = {
           description: string
           estimated_price: number | null
           id: string
+          image_attribution_name: string | null
+          image_attribution_url: string | null
           image_path: string | null
           is_archived: boolean
           is_public: boolean
@@ -449,6 +451,8 @@ export type Database = {
           description?: string
           estimated_price?: number | null
           id?: string
+          image_attribution_name?: string | null
+          image_attribution_url?: string | null
           image_path?: string | null
           is_archived?: boolean
           is_public?: boolean
@@ -475,6 +479,8 @@ export type Database = {
           description?: string
           estimated_price?: number | null
           id?: string
+          image_attribution_name?: string | null
+          image_attribution_url?: string | null
           image_path?: string | null
           is_archived?: boolean
           is_public?: boolean

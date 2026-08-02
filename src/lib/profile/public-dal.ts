@@ -32,6 +32,8 @@ interface PublicProfileRpcResult {
     name: string;
     description: string | null;
     imagePath: string | null;
+    imageAttributionName: string | null;
+    imageAttributionUrl: string | null;
     category: string | null;
     budgetLevel: string | null;
     priority: string;
@@ -127,6 +129,8 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
       isPublic: true,
       isArchived: false,
       imageUrl: await getWishlistImageSignedUrl(supabase, item.imagePath),
+      imageAttributionName: item.imageAttributionName ?? null,
+      imageAttributionUrl: item.imageAttributionUrl ?? null,
     })),
   );
 

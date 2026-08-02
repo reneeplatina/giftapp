@@ -10,11 +10,18 @@ type WishlistItemRow = Database["public"]["Tables"]["wishlist_items"]["Row"];
 
 const WISHLIST_IMAGE_SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 hour
 
+/** True for an auto-fetched Unsplash photo (a full URL); false for our own storage path. */
+export function isExternalImagePath(imagePath: string): boolean {
+  return imagePath.startsWith("http://") || imagePath.startsWith("https://");
+}
+
 export async function getWishlistImageSignedUrl(
   supabase: SupabaseClient<Database>,
   imagePath: string | null,
 ): Promise<string | null> {
   if (!imagePath) return null;
+  if (isExternalImagePath(imagePath)) return imagePath;
+
   const { data } = await supabase.storage
     .from("wishlist-images")
     .createSignedUrl(imagePath, WISHLIST_IMAGE_SIGNED_URL_TTL_SECONDS);
@@ -35,6 +42,8 @@ export async function rowToWishlistItem(
     isPublic: row.is_public,
     isArchived: row.is_archived,
     imageUrl: await getWishlistImageSignedUrl(supabase, row.image_path),
+    imageAttributionName: row.image_attribution_name,
+    imageAttributionUrl: row.image_attribution_url,
   };
 }
 

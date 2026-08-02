@@ -3,12 +3,15 @@
 import { randomUUID } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveProfileId } from "@/lib/profile/active";
-import { rowToWishlistItem } from "@/lib/wishlist/dal";
+import { isExternalImagePath, rowToWishlistItem } from "@/lib/wishlist/dal";
+import { searchUnsplashPhoto, trackUnsplashDownload } from "@/lib/images/unsplash";
 import {
   wishlistItemSchema,
   type WishlistItemValues,
 } from "@/lib/validation/wishlist";
 import type { WishlistItem } from "@/types/profile";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/database";
 
 export interface WishlistActionResult {
   success: boolean;
@@ -21,6 +24,31 @@ const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 async function requireProfileId(): Promise<string | null> {
   return getActiveProfileId();
+}
+
+/**
+ * Best-effort auto-photo for an item that doesn't have one yet. Never
+ * throws and never blocks the save it's attached to — if Unsplash isn't
+ * configured or turns up nothing, the item just keeps its placeholder.
+ */
+async function attachAutoPhoto(
+  supabase: SupabaseClient<Database>,
+  itemId: string,
+  query: string,
+): Promise<void> {
+  const photo = await searchUnsplashPhoto(query);
+  if (!photo) return;
+
+  await supabase
+    .from("wishlist_items")
+    .update({
+      image_path: photo.url,
+      image_attribution_name: photo.attributionName,
+      image_attribution_url: photo.attributionUrl,
+    })
+    .eq("id", itemId);
+
+  void trackUnsplashDownload(photo.downloadLocation);
 }
 
 export async function addWishlistItemAction(
@@ -53,7 +81,15 @@ export async function addWishlistItemAction(
     return { success: false, error: error?.message ?? "Couldn't save item." };
   }
 
-  return { success: true, item: await rowToWishlistItem(supabase, data) };
+  await attachAutoPhoto(supabase, data.id, parsed.data.name);
+
+  const { data: withPhoto } = await supabase
+    .from("wishlist_items")
+    .select("*")
+    .eq("id", data.id)
+    .single();
+
+  return { success: true, item: await rowToWishlistItem(supabase, withPhoto ?? data) };
 }
 
 export async function updateWishlistItemAction(
@@ -88,7 +124,18 @@ export async function updateWishlistItemAction(
     return { success: false, error: error?.message ?? "Couldn't save item." };
   }
 
-  return { success: true, item: await rowToWishlistItem(supabase, data) };
+  let finalRow = data;
+  if (!data.image_path) {
+    await attachAutoPhoto(supabase, data.id, parsed.data.name);
+    const { data: withPhoto } = await supabase
+      .from("wishlist_items")
+      .select("*")
+      .eq("id", data.id)
+      .single();
+    finalRow = withPhoto ?? data;
+  }
+
+  return { success: true, item: await rowToWishlistItem(supabase, finalRow) };
 }
 
 export async function removeWishlistItemAction(
@@ -147,7 +194,11 @@ export async function uploadWishlistItemImageAction(
 
   const { data, error: updateError } = await supabase
     .from("wishlist_items")
-    .update({ image_path: path })
+    .update({
+      image_path: path,
+      image_attribution_name: null,
+      image_attribution_url: null,
+    })
     .eq("id", itemId)
     .eq("profile_id", profileId)
     .select("*")
@@ -158,7 +209,7 @@ export async function uploadWishlistItemImageAction(
     return { success: false, error: updateError?.message ?? "Couldn't save that photo." };
   }
 
-  if (existing.image_path) {
+  if (existing.image_path && !isExternalImagePath(existing.image_path)) {
     await supabase.storage.from("wishlist-images").remove([existing.image_path]).catch(() => {});
   }
 
@@ -185,7 +236,11 @@ export async function removeWishlistItemImageAction(
 
   const { data, error } = await supabase
     .from("wishlist_items")
-    .update({ image_path: null })
+    .update({
+      image_path: null,
+      image_attribution_name: null,
+      image_attribution_url: null,
+    })
     .eq("id", itemId)
     .eq("profile_id", profileId)
     .select("*")
@@ -195,7 +250,9 @@ export async function removeWishlistItemImageAction(
     return { success: false, error: error?.message ?? "Couldn't remove that photo." };
   }
 
-  await supabase.storage.from("wishlist-images").remove([existing.image_path]).catch(() => {});
+  if (!isExternalImagePath(existing.image_path)) {
+    await supabase.storage.from("wishlist-images").remove([existing.image_path]).catch(() => {});
+  }
 
   return { success: true, item: await rowToWishlistItem(supabase, data) };
 }

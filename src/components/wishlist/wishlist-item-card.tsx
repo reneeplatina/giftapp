@@ -56,6 +56,8 @@ export function WishlistItemCard({
           name={item.name}
           category={item.category}
           imageUrl={item.imageUrl}
+          imageAttributionName={item.imageAttributionName}
+          imageAttributionUrl={item.imageAttributionUrl}
         />
         {!item.imageUrl && (
           <button

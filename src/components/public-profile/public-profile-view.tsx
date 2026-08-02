@@ -190,6 +190,8 @@ export function PublicProfileView({
                   name={item.name}
                   category={item.category}
                   imageUrl={item.imageUrl}
+                  imageAttributionName={item.imageAttributionName}
+                  imageAttributionUrl={item.imageAttributionUrl}
                 />
                 <p className="font-medium text-neutral-900">{item.name}</p>
                 {item.description && (

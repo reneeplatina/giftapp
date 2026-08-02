@@ -2,6 +2,7 @@ import { Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const GIFT_CARD_CATEGORY = "Gift cards";
+const UNSPLASH_UTM = "utm_source=giftmeapp&utm_medium=referral";
 
 // Deterministic-per-item palette so a wishlist without photos still reads
 // as varied and intentional rather than a wall of identical gray boxes.
@@ -25,29 +26,59 @@ function colorForText(value: string) {
 }
 
 /**
- * A wishlist item's visual: the uploaded photo if there is one, a
- * high-contrast "Gift Card" placeholder for that category, or the item's
- * name as large text on a color so the card never looks blank.
+ * A wishlist item's visual: an uploaded or auto-fetched photo if there is
+ * one, a high-contrast "Gift Card" placeholder for that category, or the
+ * item's name as large text on a color so the card never looks blank.
+ * Unsplash-sourced photos carry photographer credit, per Unsplash's API
+ * terms, linking back to both the photographer and Unsplash.
  */
 export function WishlistCardVisual({
   name,
   category,
   imageUrl,
+  imageAttributionName,
+  imageAttributionUrl,
   className,
 }: {
   name: string;
   category: string;
   imageUrl: string | null;
+  imageAttributionName?: string | null;
+  imageAttributionUrl?: string | null;
   className?: string;
 }) {
   if (imageUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={imageUrl}
-        alt={name}
-        className={cn("h-32 w-full rounded-lg object-cover", className)}
-      />
+      <div className={cn("relative h-32 w-full", className)}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUrl}
+          alt={name}
+          className="h-full w-full rounded-lg object-cover"
+        />
+        {imageAttributionName && imageAttributionUrl && (
+          <span className="absolute bottom-1 right-1.5 rounded bg-black/50 px-1.5 py-0.5 text-[10px] text-white">
+            Photo:{" "}
+            <a
+              href={`${imageAttributionUrl}?${UNSPLASH_UTM}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              {imageAttributionName}
+            </a>{" "}
+            /{" "}
+            <a
+              href={`https://unsplash.com/?${UNSPLASH_UTM}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              Unsplash
+            </a>
+          </span>
+        )}
+      </div>
     );
   }
 
