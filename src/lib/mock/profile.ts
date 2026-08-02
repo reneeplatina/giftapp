@@ -14,15 +14,15 @@ export const PRIORITY_LABELS: Record<PriorityLevel, string> = {
 };
 
 export const THEME_OPTIONS: ThemeOption[] = [
-  { key: "general", label: "Charcoal", accent: "#1c1917", background: "#fafaf9" },
-  { key: "rose", label: "Rose", accent: "#e11d48", background: "#fef2f2" },
-  { key: "blush", label: "Blush", accent: "#db2777", background: "#fdf2f8" },
-  { key: "amber", label: "Amber", accent: "#c2410c", background: "#fff7ed" },
-  { key: "sage", label: "Sage", accent: "#166534", background: "#f0fdf4" },
-  { key: "teal", label: "Teal", accent: "#0f766e", background: "#f0fdfa" },
-  { key: "sky", label: "Sky", accent: "#1d4ed8", background: "#eff6ff" },
-  { key: "lavender", label: "Lavender", accent: "#9333ea", background: "#faf5ff" },
-  { key: "stone", label: "Stone", accent: "#78716c", background: "#f5f5f4" },
+  { key: "general", label: "Charcoal", accent: "#1c1917", background: "#e7e5e4" },
+  { key: "rose", label: "Rose", accent: "#e11d48", background: "#fecdd3" },
+  { key: "blush", label: "Blush", accent: "#db2777", background: "#fbcfe8" },
+  { key: "amber", label: "Amber", accent: "#c2410c", background: "#fed7aa" },
+  { key: "sage", label: "Sage", accent: "#166534", background: "#bbf7d0" },
+  { key: "teal", label: "Teal", accent: "#0f766e", background: "#99f6e4" },
+  { key: "sky", label: "Sky", accent: "#1d4ed8", background: "#bfdbfe" },
+  { key: "lavender", label: "Lavender", accent: "#9333ea", background: "#e9d5ff" },
+  { key: "stone", label: "Stone", accent: "#78716c", background: "#d6d3d1" },
   {
     key: "rainbow",
     label: "Rainbow",

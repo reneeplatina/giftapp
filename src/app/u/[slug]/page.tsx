@@ -41,9 +41,14 @@ export default async function PublicProfilePage({
 }) {
   const { slug } = await params;
   const loaded = await getPublicProfileBySlug(slug);
-  const background = loaded
-    ? THEME_OPTIONS.find((option) => option.key === loaded.theme)?.background
+  const activeTheme = loaded
+    ? THEME_OPTIONS.find((option) => option.key === loaded.theme)
     : undefined;
+  const backgroundStyle = activeTheme?.gradient
+    ? { backgroundImage: activeTheme.gradient }
+    : activeTheme
+      ? { backgroundColor: activeTheme.background }
+      : undefined;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -58,10 +63,7 @@ export default async function PublicProfilePage({
           </Link>
         </Container>
       </header>
-      <main
-        className="flex-1 py-10"
-        style={background ? { backgroundColor: background } : undefined}
-      >
+      <main className="flex-1 py-10" style={backgroundStyle}>
         <Container>
           {loaded ? (
             <PublicProfileView

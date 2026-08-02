@@ -23,8 +23,12 @@ const STATUS_VARIANT: Record<ProfileStatus, "success" | "warning" | "outline"> =
 
 export function PreviewClient() {
   const { profile, wishlistItems, theme, publicUrl } = useProfile();
-  const background = THEME_OPTIONS.find((option) => option.key === theme)
-    ?.background;
+  const activeTheme = THEME_OPTIONS.find((option) => option.key === theme);
+  const backgroundStyle = activeTheme?.gradient
+    ? { backgroundImage: activeTheme.gradient }
+    : activeTheme
+      ? { backgroundColor: activeTheme.background }
+      : undefined;
 
   return (
     <Container className="flex flex-col gap-6 py-8">
@@ -47,10 +51,7 @@ export function PreviewClient() {
         </div>
       </div>
 
-      <div
-        className="rounded-2xl px-4 py-8 sm:px-8"
-        style={background ? { backgroundColor: background } : undefined}
-      >
+      <div className="rounded-2xl px-4 py-8 sm:px-8" style={backgroundStyle}>
         <PublicProfileView
           profile={profile}
           wishlistItems={wishlistItems}

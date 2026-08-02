@@ -10,7 +10,7 @@ import { GiftAssistantSection } from "@/components/public-profile/gift-assistant
 import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
 import { TagList } from "@/components/public-profile/tag-list";
 import { WishlistCardVisual } from "@/components/wishlist/wishlist-card-visual";
-import { BUDGET_LABELS, THEME_OPTIONS } from "@/lib/mock/profile";
+import { BUDGET_LABELS } from "@/lib/mock/profile";
 import { SECTION_LABELS } from "@/lib/profile/section-keys";
 import type { PublicLinkedProfile, PublicProfileImage } from "@/lib/profile/public-dal";
 import type { BudgetLevel, GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
@@ -77,7 +77,6 @@ const DETAIL_GROUPS: {
 export function PublicProfileView({
   profile,
   wishlistItems,
-  theme,
   publicUrl,
   linkedProfiles = [],
   images = [],
@@ -91,8 +90,6 @@ export function PublicProfileView({
   images?: PublicProfileImage[];
   isPreview?: boolean;
 }) {
-  const activeTheme = THEME_OPTIONS.find((option) => option.key === theme);
-  const accent = activeTheme?.accent;
   const sortedWishlistItems = wishlistItems
     .filter((item) => item.isPublic && !item.isArchived)
     .slice()
@@ -114,15 +111,6 @@ export function PublicProfileView({
   return (
     <div className="flex flex-col gap-10">
       <div className="flex flex-col items-center gap-4 text-center">
-        <span
-          className="h-3 w-16 rounded-full"
-          style={
-            activeTheme?.gradient
-              ? { backgroundImage: activeTheme.gradient }
-              : { backgroundColor: accent ?? "#1c1917" }
-          }
-          aria-hidden="true"
-        />
         <Avatar
           name={profile.basicInfo.displayName}
           src={profile.basicInfo.avatarUrl ?? undefined}
