@@ -4,6 +4,7 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getAvatarSignedUrl } from "@/lib/profile/dal";
 import { getProfileImageSignedUrl } from "@/lib/profile-images/dal";
+import { getWishlistImageSignedUrl } from "@/lib/wishlist/dal";
 import {
   SECTION_TS_KEYS,
   dbKeyToTsKey,
@@ -30,6 +31,7 @@ interface PublicProfileRpcResult {
     id: string;
     name: string;
     description: string | null;
+    imagePath: string | null;
     category: string | null;
     budgetLevel: string | null;
     priority: string;
@@ -114,8 +116,8 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
     },
   };
 
-  const wishlistItems: WishlistItem[] = (result.wishlistItems ?? []).map(
-    (item) => ({
+  const wishlistItems: WishlistItem[] = await Promise.all(
+    (result.wishlistItems ?? []).map(async (item) => ({
       id: item.id,
       name: item.name,
       description: item.description ?? "",
@@ -124,7 +126,8 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
       priority: item.priority as WishlistItem["priority"],
       isPublic: true,
       isArchived: false,
-    }),
+      imageUrl: await getWishlistImageSignedUrl(supabase, item.imagePath),
+    })),
   );
 
   const linkedProfiles: PublicLinkedProfile[] = await Promise.all(

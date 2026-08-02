@@ -37,9 +37,8 @@ export interface ProfileActionResult {
 }
 
 const THEME_KEYS = [
-  "general", "birthday", "christmas", "anniversary", "graduation",
-  "valentines", "mothers_day", "fathers_day", "wedding", "baby_shower",
-  "housewarming",
+  "general", "rose", "blush", "amber", "sage", "teal", "sky",
+  "lavender", "stone", "rainbow",
 ] as const;
 
 const chipListSchema = z.array(z.string().min(1).max(80)).max(60);

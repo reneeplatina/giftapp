@@ -9,9 +9,9 @@ import { ShareModal } from "@/components/share-modal";
 import { GiftAssistantSection } from "@/components/public-profile/gift-assistant-section";
 import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
 import { TagList } from "@/components/public-profile/tag-list";
+import { WishlistCardVisual } from "@/components/wishlist/wishlist-card-visual";
 import { BUDGET_LABELS, THEME_OPTIONS } from "@/lib/mock/profile";
 import { SECTION_LABELS } from "@/lib/profile/section-keys";
-import { THEME_ICONS } from "@/lib/profile/theme-icons";
 import type { PublicLinkedProfile, PublicProfileImage } from "@/lib/profile/public-dal";
 import type { BudgetLevel, GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
 
@@ -91,8 +91,8 @@ export function PublicProfileView({
   images?: PublicProfileImage[];
   isPreview?: boolean;
 }) {
-  const accent = THEME_OPTIONS.find((option) => option.key === theme)?.accent;
-  const ThemeIcon = THEME_ICONS[theme];
+  const activeTheme = THEME_OPTIONS.find((option) => option.key === theme);
+  const accent = activeTheme?.accent;
   const sortedWishlistItems = wishlistItems
     .filter((item) => item.isPublic && !item.isArchived)
     .slice()
@@ -115,15 +115,14 @@ export function PublicProfileView({
     <div className="flex flex-col gap-10">
       <div className="flex flex-col items-center gap-4 text-center">
         <span
-          className="flex h-12 w-12 items-center justify-center rounded-full"
-          style={{ backgroundColor: `${accent ?? "#1c1917"}1a` }}
-        >
-          <ThemeIcon
-            className="h-6 w-6"
-            style={{ color: accent ?? "#1c1917" }}
-            aria-hidden="true"
-          />
-        </span>
+          className="h-3 w-16 rounded-full"
+          style={
+            activeTheme?.gradient
+              ? { backgroundImage: activeTheme.gradient }
+              : { backgroundColor: accent ?? "#1c1917" }
+          }
+          aria-hidden="true"
+        />
         <Avatar
           name={profile.basicInfo.displayName}
           src={profile.basicInfo.avatarUrl ?? undefined}
@@ -199,6 +198,11 @@ export function PublicProfileView({
           <div className="grid gap-3 sm:grid-cols-2">
             {sortedWishlistItems.map((item) => (
               <Card key={item.id} className="flex flex-col gap-1.5">
+                <WishlistCardVisual
+                  name={item.name}
+                  category={item.category}
+                  imageUrl={item.imageUrl}
+                />
                 <p className="font-medium text-neutral-900">{item.name}</p>
                 {item.description && (
                   <p className="text-sm text-neutral-600">{item.description}</p>

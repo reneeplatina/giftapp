@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveProfileId } from "@/lib/profile/active";
 import { rowToWishlistItem } from "@/lib/wishlist/dal";
@@ -14,6 +15,9 @@ export interface WishlistActionResult {
   error?: string;
   item?: WishlistItem;
 }
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 async function requireProfileId(): Promise<string | null> {
   return getActiveProfileId();
@@ -49,7 +53,7 @@ export async function addWishlistItemAction(
     return { success: false, error: error?.message ?? "Couldn't save item." };
   }
 
-  return { success: true, item: rowToWishlistItem(data) };
+  return { success: true, item: await rowToWishlistItem(supabase, data) };
 }
 
 export async function updateWishlistItemAction(
@@ -84,7 +88,7 @@ export async function updateWishlistItemAction(
     return { success: false, error: error?.message ?? "Couldn't save item." };
   }
 
-  return { success: true, item: rowToWishlistItem(data) };
+  return { success: true, item: await rowToWishlistItem(supabase, data) };
 }
 
 export async function removeWishlistItemAction(
@@ -101,4 +105,97 @@ export async function removeWishlistItemAction(
     .eq("profile_id", profileId);
 
   return error ? { success: false, error: error.message } : { success: true };
+}
+
+export async function uploadWishlistItemImageAction(
+  itemId: string,
+  file: File,
+): Promise<WishlistActionResult> {
+  const profileId = await requireProfileId();
+  if (!profileId) return { success: false, error: "Not signed in." };
+
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return { success: false, error: "Use a PNG, JPEG, or WEBP image." };
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    return { success: false, error: "Image must be under 5MB." };
+  }
+
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("wishlist_items")
+    .select("image_path")
+    .eq("id", itemId)
+    .eq("profile_id", profileId)
+    .maybeSingle();
+
+  if (!existing) {
+    return { success: false, error: "Item not found." };
+  }
+
+  const extension =
+    file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+  const path = `${profileId}/${itemId}/${randomUUID()}.${extension}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("wishlist-images")
+    .upload(path, file, { contentType: file.type });
+
+  if (uploadError) {
+    return { success: false, error: uploadError.message };
+  }
+
+  const { data, error: updateError } = await supabase
+    .from("wishlist_items")
+    .update({ image_path: path })
+    .eq("id", itemId)
+    .eq("profile_id", profileId)
+    .select("*")
+    .single();
+
+  if (updateError || !data) {
+    await supabase.storage.from("wishlist-images").remove([path]).catch(() => {});
+    return { success: false, error: updateError?.message ?? "Couldn't save that photo." };
+  }
+
+  if (existing.image_path) {
+    await supabase.storage.from("wishlist-images").remove([existing.image_path]).catch(() => {});
+  }
+
+  return { success: true, item: await rowToWishlistItem(supabase, data) };
+}
+
+export async function removeWishlistItemImageAction(
+  itemId: string,
+): Promise<WishlistActionResult> {
+  const profileId = await requireProfileId();
+  if (!profileId) return { success: false, error: "Not signed in." };
+
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("wishlist_items")
+    .select("image_path")
+    .eq("id", itemId)
+    .eq("profile_id", profileId)
+    .maybeSingle();
+
+  if (!existing || !existing.image_path) {
+    return { success: false, error: "No photo to remove." };
+  }
+
+  const { data, error } = await supabase
+    .from("wishlist_items")
+    .update({ image_path: null })
+    .eq("id", itemId)
+    .eq("profile_id", profileId)
+    .select("*")
+    .single();
+
+  if (error || !data) {
+    return { success: false, error: error?.message ?? "Couldn't remove that photo." };
+  }
+
+  await supabase.storage.from("wishlist-images").remove([existing.image_path]).catch(() => {});
+
+  return { success: true, item: await rowToWishlistItem(supabase, data) };
 }

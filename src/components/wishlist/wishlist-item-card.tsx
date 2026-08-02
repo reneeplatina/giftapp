@@ -1,7 +1,8 @@
-import { Gift, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
+import { WishlistCardVisual } from "@/components/wishlist/wishlist-card-visual";
 import { BUDGET_LABELS, PRIORITY_LABELS } from "@/lib/mock/profile";
 import type { PriorityLevel, WishlistItem } from "@/types/profile";
 
@@ -22,11 +23,13 @@ export function WishlistItemCard({
 }) {
   return (
     <Card className="flex flex-col gap-3">
+      <WishlistCardVisual
+        name={item.name}
+        category={item.category}
+        imageUrl={item.imageUrl}
+      />
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-600">
-            <Gift className="h-4 w-4" aria-hidden="true" />
-          </span>
           <div>
             <p className="font-medium text-neutral-900">{item.name}</p>
             {item.description && (
