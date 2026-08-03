@@ -160,6 +160,31 @@ export function WishlistCardVisual({
   category: string;
   className?: string;
 }) {
+  if (category === "Gift cards") {
+    return (
+      <div
+        className={cn(
+          "flex h-32 w-full flex-col justify-between rounded-lg bg-gradient-to-br from-neutral-800 via-neutral-900 to-black p-3.5 text-white shadow-inner",
+          className,
+        )}
+      >
+        <div className="flex items-start justify-between">
+          <span
+            className="h-5 w-7 rounded-[3px] bg-gradient-to-br from-yellow-200 to-yellow-500"
+            aria-hidden="true"
+          />
+          <Gift className="h-5 w-5 text-white/60" aria-hidden="true" />
+        </div>
+        <div>
+          <p className="line-clamp-2 text-base font-bold leading-tight">{name}</p>
+          <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-white/50">
+            Gift Card
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   let matchedIcon: LucideIcon | null = null;
   const lowerName = name.toLowerCase();
   for (const group of ITEM_ICONS) {
