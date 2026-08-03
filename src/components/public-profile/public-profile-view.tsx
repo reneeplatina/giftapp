@@ -186,14 +186,7 @@ export function PublicProfileView({
           <div className="grid gap-3 sm:grid-cols-2">
             {sortedWishlistItems.map((item) => (
               <Card key={item.id} className="flex flex-col gap-1.5">
-                <WishlistCardVisual
-                  name={item.name}
-                  category={item.category}
-                  imageUrl={item.imageUrl}
-                  imageAttributionName={item.imageAttributionName}
-                  imageAttributionUrl={item.imageAttributionUrl}
-                />
-                <p className="font-medium text-neutral-900">{item.name}</p>
+                <WishlistCardVisual name={item.name} category={item.category} />
                 {item.description && (
                   <p className="text-sm text-neutral-600">{item.description}</p>
                 )}

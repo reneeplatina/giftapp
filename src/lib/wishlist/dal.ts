@@ -1,6 +1,5 @@
 import "server-only";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveProfileId } from "@/lib/profile/active";
 import type { Database } from "@/types/database";
@@ -8,30 +7,7 @@ import type { WishlistItem } from "@/types/profile";
 
 type WishlistItemRow = Database["public"]["Tables"]["wishlist_items"]["Row"];
 
-const WISHLIST_IMAGE_SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 hour
-
-/** True for an auto-fetched Unsplash photo (a full URL); false for our own storage path. */
-export function isExternalImagePath(imagePath: string): boolean {
-  return imagePath.startsWith("http://") || imagePath.startsWith("https://");
-}
-
-export async function getWishlistImageSignedUrl(
-  supabase: SupabaseClient<Database>,
-  imagePath: string | null,
-): Promise<string | null> {
-  if (!imagePath) return null;
-  if (isExternalImagePath(imagePath)) return imagePath;
-
-  const { data } = await supabase.storage
-    .from("wishlist-images")
-    .createSignedUrl(imagePath, WISHLIST_IMAGE_SIGNED_URL_TTL_SECONDS);
-  return data?.signedUrl ?? null;
-}
-
-export async function rowToWishlistItem(
-  supabase: SupabaseClient<Database>,
-  row: WishlistItemRow,
-): Promise<WishlistItem> {
+export function rowToWishlistItem(row: WishlistItemRow): WishlistItem {
   return {
     id: row.id,
     name: row.name,
@@ -41,9 +17,6 @@ export async function rowToWishlistItem(
     priority: row.priority,
     isPublic: row.is_public,
     isArchived: row.is_archived,
-    imageUrl: await getWishlistImageSignedUrl(supabase, row.image_path),
-    imageAttributionName: row.image_attribution_name,
-    imageAttributionUrl: row.image_attribution_url,
   };
 }
 
@@ -65,6 +38,5 @@ export async function getWishlistItemsForEditing(): Promise<WishlistItem[]> {
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
 
-  if (!data) return [];
-  return Promise.all(data.map((row) => rowToWishlistItem(supabase, row)));
+  return (data ?? []).map(rowToWishlistItem);
 }

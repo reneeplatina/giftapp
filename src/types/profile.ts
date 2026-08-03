@@ -138,7 +138,4 @@ export interface WishlistItem {
   priority: PriorityLevel;
   isPublic: boolean;
   isArchived: boolean;
-  imageUrl: string | null;
-  imageAttributionName: string | null;
-  imageAttributionUrl: string | null;
 }
