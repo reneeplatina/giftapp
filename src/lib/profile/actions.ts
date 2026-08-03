@@ -7,8 +7,10 @@ import { getAvatarSignedUrl, getFullProfileForEditing } from "@/lib/profile/dal"
 import { SECTION_TS_KEYS, type SectionTsKey } from "@/lib/profile/section-keys";
 import { upsertSectionRow } from "@/lib/profile/section-writes";
 import {
+  avatarEmojiSchema,
   basicInfoSchema,
   sizesSchema,
+  type AvatarEmojiValues,
   type BasicInfoValues,
   type SizesValues,
 } from "@/lib/validation/profile";
@@ -203,7 +205,7 @@ export async function uploadAvatarAction(
 
   const { error: updateError } = await supabase
     .from("profiles")
-    .update({ avatar_path: path })
+    .update({ avatar_path: path, avatar_emoji: null, avatar_emoji_bg: null })
     .eq("id", profileId);
 
   if (updateError) {
@@ -212,4 +214,46 @@ export async function uploadAvatarAction(
 
   const avatarUrl = await getAvatarSignedUrl(supabase, path);
   return { success: true, avatarUrl: avatarUrl ?? undefined };
+}
+
+export async function setAvatarEmojiAction(
+  values: AvatarEmojiValues,
+): Promise<ProfileActionResult & { emoji?: string; backgroundColor?: string }> {
+  const profileId = await requireProfileId();
+  if (!profileId) return { success: false, error: "Not signed in." };
+
+  const parsed = avatarEmojiSchema.safeParse(values);
+  if (!parsed.success) {
+    return { success: false, error: "Couldn't set that avatar." };
+  }
+
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("avatar_path")
+    .eq("id", profileId)
+    .maybeSingle();
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      avatar_emoji: parsed.data.emoji,
+      avatar_emoji_bg: parsed.data.backgroundColor,
+      avatar_path: null,
+    })
+    .eq("id", profileId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  if (existing?.avatar_path) {
+    await supabase.storage.from("avatars").remove([existing.avatar_path]).catch(() => {});
+  }
+
+  return {
+    success: true,
+    emoji: parsed.data.emoji,
+    backgroundColor: parsed.data.backgroundColor,
+  };
 }

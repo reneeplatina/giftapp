@@ -3,11 +3,12 @@
 import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Check } from "lucide-react";
+import { Check, Smile } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 import { TextAreaField } from "@/components/ui/textarea-field";
+import { EmojiAvatarPicker } from "@/components/profile-builder/emoji-avatar-picker";
 import { useProfile } from "@/context/profile-context";
 import { getSiteUrl } from "@/lib/site-url";
 import {
@@ -16,11 +17,12 @@ import {
 } from "@/lib/validation/profile";
 
 export function BasicInfoSection() {
-  const { profile, updateBasicInfo, uploadAvatar } = useProfile();
+  const { profile, updateBasicInfo, uploadAvatar, setAvatarEmoji } = useProfile();
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     register,
@@ -69,6 +71,8 @@ export function BasicInfoSection() {
         <Avatar
           name={profile.basicInfo.displayName || "Your profile"}
           src={profile.basicInfo.avatarUrl ?? undefined}
+          emoji={profile.basicInfo.avatarEmoji ?? undefined}
+          emojiBg={profile.basicInfo.avatarEmojiBg ?? undefined}
           className="h-16 w-16 text-lg"
         />
         <div className="flex flex-col gap-1">
@@ -79,15 +83,26 @@ export function BasicInfoSection() {
             className="hidden"
             onChange={onAvatarChange}
           />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={avatarUploading}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {avatarUploading ? "Uploading…" : "Change photo"}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={avatarUploading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {avatarUploading ? "Uploading…" : "Change photo"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setEmojiPickerOpen(true)}
+            >
+              <Smile className="h-4 w-4" aria-hidden="true" />
+              Choose emoji
+            </Button>
+          </div>
           {avatarError && (
             <p className="text-xs text-red-600" role="alert">
               {avatarError}
@@ -95,6 +110,17 @@ export function BasicInfoSection() {
           )}
         </div>
       </div>
+      <EmojiAvatarPicker
+        open={emojiPickerOpen}
+        onClose={() => setEmojiPickerOpen(false)}
+        initialColor={profile.basicInfo.avatarEmojiBg}
+        onSelect={async (emoji, color) => {
+          const result = await setAvatarEmoji(emoji, color);
+          if (!result.success) {
+            setAvatarError(result.error ?? "Couldn't set that avatar. Try again.");
+          }
+        }}
+      />
       <TextField
         label="Display name"
         error={errors.displayName?.message}

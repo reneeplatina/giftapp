@@ -101,6 +101,8 @@ export default async function DashboardPage() {
         <Avatar
           name={profile.display_name}
           src={avatarUrl ?? undefined}
+          emoji={profile.avatar_emoji ?? undefined}
+          emojiBg={profile.avatar_emoji_bg ?? undefined}
           className="h-14 w-14 text-lg"
         />
         <div>

@@ -59,6 +59,8 @@ export function buildEmptyProfile(): GiftProfile {
       introduction: "",
       giftStyleSummary: "",
       avatarUrl: null,
+      avatarEmoji: null,
+      avatarEmojiBg: null,
     },
     ...sectionValues,
     privacy: {
@@ -107,6 +109,8 @@ export async function getFullProfileForEditing(): Promise<{
     introduction: profileRow?.introduction ?? "",
     giftStyleSummary: profileRow?.gift_style_summary ?? "",
     avatarUrl,
+    avatarEmoji: profileRow?.avatar_emoji ?? null,
+    avatarEmojiBg: profileRow?.avatar_emoji_bg ?? null,
   };
 
   const sectionVisibility = buildDefaultSectionVisibility();

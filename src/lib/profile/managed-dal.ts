@@ -13,14 +13,26 @@ export interface ManagedProfileSummary {
   displayName: string;
   slug: string;
   avatarUrl: string | null;
+  avatarEmoji: string | null;
+  avatarEmojiBg: string | null;
   status: ProfileStatus;
   isSimpleProfile: boolean;
 }
 
 type ProfileRow = Pick<
   Database["public"]["Tables"]["profiles"]["Row"],
-  "id" | "display_name" | "slug" | "avatar_path" | "status" | "is_simple_profile"
+  | "id"
+  | "display_name"
+  | "slug"
+  | "avatar_path"
+  | "avatar_emoji"
+  | "avatar_emoji_bg"
+  | "status"
+  | "is_simple_profile"
 >;
+
+const PROFILE_SUMMARY_COLUMNS =
+  "id, display_name, slug, avatar_path, avatar_emoji, avatar_emoji_bg, status, is_simple_profile";
 
 async function toSummary(
   supabase: SupabaseClient<Database>,
@@ -31,6 +43,8 @@ async function toSummary(
     displayName: row.display_name,
     slug: row.slug,
     avatarUrl: await getAvatarSignedUrl(supabase, row.avatar_path),
+    avatarEmoji: row.avatar_emoji,
+    avatarEmojiBg: row.avatar_emoji_bg,
     status: row.status,
     isSimpleProfile: row.is_simple_profile,
   };
@@ -49,7 +63,7 @@ export async function getManagedProfiles(): Promise<ManagedProfileSummary[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("id, display_name, slug, avatar_path, status, is_simple_profile")
+    .select(PROFILE_SUMMARY_COLUMNS)
     .eq("managed_by_profile_id", user.id)
     .order("created_at", { ascending: true });
 
@@ -76,12 +90,12 @@ export async function getProfileSwitcherData(): Promise<ProfileSwitcherData> {
   const [{ data: ownRow }, { data: managedRows }, activeProfileId] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, display_name, slug, avatar_path, status, is_simple_profile")
+      .select(PROFILE_SUMMARY_COLUMNS)
       .eq("id", user.id)
       .maybeSingle(),
     supabase
       .from("profiles")
-      .select("id, display_name, slug, avatar_path, status, is_simple_profile")
+      .select(PROFILE_SUMMARY_COLUMNS)
       .eq("managed_by_profile_id", user.id)
       .order("created_at", { ascending: true }),
     getActiveProfileId(),

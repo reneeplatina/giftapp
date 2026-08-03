@@ -123,6 +123,8 @@ export function LinkedProfilesSection({
                   <Avatar
                     name={profile.displayName}
                     src={profile.avatarUrl ?? undefined}
+                    emoji={profile.avatarEmoji ?? undefined}
+                    emojiBg={profile.avatarEmojiBg ?? undefined}
                     className="h-10 w-10 shrink-0 text-sm"
                   />
                   <div className="min-w-0 flex-1">

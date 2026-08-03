@@ -421,3 +421,33 @@ export const CATEGORY_OPTIONS = [
   "Kids toys",
 ];
 
+export const AVATAR_EMOJI_GROUPS: { label: string; emoji: string[] }[] = [
+  {
+    label: "Characters",
+    emoji: ["😀", "😎", "🤠", "🥸", "🤓", "🥳", "🧑‍🚀", "🦸", "🧙", "🤖", "👽", "👻", "🎃", "🥷", "🧛", "🧑‍🎨"],
+  },
+  {
+    label: "Animals",
+    emoji: ["🐶", "🐱", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐵", "🐰", "🐸", "🦄", "🐷", "🐮", "🦉", "🐢"],
+  },
+  {
+    label: "Food",
+    emoji: ["🍕", "🍔", "🌮", "🍩", "🍦", "🍓", "🍉", "🍪", "🧁", "🍎", "🥑", "🍒", "🥕", "🍿", "🍇", "🍰"],
+  },
+  {
+    label: "Sports",
+    emoji: ["⚽", "🏀", "🏈", "⚾", "🎾", "🏐", "🏓", "🏸", "🥎", "🏒", "⛳", "🏄", "🚴", "🎳", "🥊", "🏂"],
+  },
+];
+
+export const AVATAR_BG_COLORS = [
+  "#f43f5e",
+  "#f97316",
+  "#eab308",
+  "#22c55e",
+  "#0ea5e9",
+  "#6366f1",
+  "#a855f7",
+  "#78716c",
+];
+

@@ -114,6 +114,8 @@ export function PublicProfileView({
         <Avatar
           name={profile.basicInfo.displayName}
           src={profile.basicInfo.avatarUrl ?? undefined}
+          emoji={profile.basicInfo.avatarEmoji ?? undefined}
+          emojiBg={profile.basicInfo.avatarEmojiBg ?? undefined}
           className="h-20 w-20 text-2xl"
         />
         <div>
@@ -156,6 +158,8 @@ export function PublicProfileView({
                 <Avatar
                   name={linked.displayName}
                   src={linked.avatarUrl ?? undefined}
+                  emoji={linked.avatarEmoji ?? undefined}
+                  emojiBg={linked.avatarEmojiBg ?? undefined}
                   className="h-10 w-10 text-sm"
                 />
                 <span className="font-medium text-neutral-900">

@@ -46,3 +46,10 @@ export const privacySchema = z.object({
 });
 
 export type PrivacyValues = z.infer<typeof privacySchema>;
+
+export const avatarEmojiSchema = z.object({
+  emoji: z.string().min(1).max(8),
+  backgroundColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid color"),
+});
+
+export type AvatarEmojiValues = z.infer<typeof avatarEmojiSchema>;

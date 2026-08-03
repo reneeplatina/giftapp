@@ -349,6 +349,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_emoji: string | null
+          avatar_emoji_bg: string | null
           avatar_path: string | null
           birthday: string | null
           created_at: string
@@ -366,6 +368,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avatar_emoji?: string | null
+          avatar_emoji_bg?: string | null
           avatar_path?: string | null
           birthday?: string | null
           created_at?: string
@@ -383,6 +387,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avatar_emoji?: string | null
+          avatar_emoji_bg?: string | null
           avatar_path?: string | null
           birthday?: string | null
           created_at?: string

@@ -32,6 +32,8 @@ export interface BasicInfo {
   introduction: string;
   giftStyleSummary: string;
   avatarUrl: string | null;
+  avatarEmoji: string | null;
+  avatarEmojiBg: string | null;
 }
 
 export interface Sizes {
