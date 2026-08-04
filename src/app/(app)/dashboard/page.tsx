@@ -18,7 +18,7 @@ import { getActiveProfileId } from "@/lib/profile/active";
 import { createClient } from "@/lib/supabase/server";
 import { getAvatarSignedUrl } from "@/lib/profile/dal";
 import { getSiteUrl } from "@/lib/site-url";
-import type { ProfileStatus } from "@/types/profile";
+import type { ProfileStatus, ThemeKey } from "@/types/profile";
 
 const STATUS_LABEL: Record<ProfileStatus, string> = {
   draft: "Draft",
@@ -103,6 +103,7 @@ export default async function DashboardPage() {
           src={avatarUrl ?? undefined}
           emoji={profile.avatar_emoji ?? undefined}
           emojiBg={profile.avatar_emoji_bg ?? undefined}
+          theme={profile.default_theme as ThemeKey}
           className="h-14 w-14 text-lg"
         />
         <div>

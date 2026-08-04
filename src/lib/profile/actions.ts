@@ -40,7 +40,7 @@ export interface ProfileActionResult {
 
 const THEME_KEYS = [
   "general", "rose", "blush", "amber", "sage", "teal", "sky",
-  "lavender", "stone", "rainbow",
+  "lavender", "stone", "rainbow", "christmas",
 ] as const;
 
 const chipListSchema = z.array(z.string().min(1).max(80)).max(60);

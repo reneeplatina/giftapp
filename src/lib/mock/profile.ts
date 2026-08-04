@@ -30,6 +30,13 @@ export const THEME_OPTIONS: ThemeOption[] = [
     background: "#fdf4ff",
     gradient: "linear-gradient(135deg, #f43f5e, #f97316, #eab308, #22c55e, #0ea5e9, #8b5cf6)",
   },
+  {
+    key: "christmas",
+    label: "Christmas",
+    accent: "#b91c1c",
+    background: "#f0fdf4",
+    gradient: "linear-gradient(180deg, #14532d 0%, #166534 30%, #f0fdf4 100%)",
+  },
 ];
 
 export const COLOR_OPTIONS = [

@@ -77,6 +77,7 @@ const DETAIL_GROUPS: {
 export function PublicProfileView({
   profile,
   wishlistItems,
+  theme,
   publicUrl,
   linkedProfiles = [],
   images = [],
@@ -111,11 +112,17 @@ export function PublicProfileView({
   return (
     <div className="flex flex-col gap-10">
       <div className="flex flex-col items-center gap-4 text-center">
+        {theme === "christmas" && (
+          <p aria-hidden="true" className="text-lg tracking-widest">
+            🎄 ❄️ 🎁 ❄️ 🎄
+          </p>
+        )}
         <Avatar
           name={profile.basicInfo.displayName}
           src={profile.basicInfo.avatarUrl ?? undefined}
           emoji={profile.basicInfo.avatarEmoji ?? undefined}
           emojiBg={profile.basicInfo.avatarEmojiBg ?? undefined}
+          theme={theme}
           className="h-20 w-20 text-2xl"
         />
         <div>

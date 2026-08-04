@@ -14,7 +14,8 @@ export type ThemeKey =
   | "sky"
   | "lavender"
   | "stone"
-  | "rainbow";
+  | "rainbow"
+  | "christmas";
 
 export interface ThemeOption {
   key: ThemeKey;

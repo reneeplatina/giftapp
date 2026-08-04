@@ -17,7 +17,7 @@ import {
 } from "@/lib/validation/profile";
 
 export function BasicInfoSection() {
-  const { profile, updateBasicInfo, uploadAvatar, setAvatarEmoji } = useProfile();
+  const { profile, theme, updateBasicInfo, uploadAvatar, setAvatarEmoji } = useProfile();
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -73,6 +73,7 @@ export function BasicInfoSection() {
           src={profile.basicInfo.avatarUrl ?? undefined}
           emoji={profile.basicInfo.avatarEmoji ?? undefined}
           emojiBg={profile.basicInfo.avatarEmojiBg ?? undefined}
+          theme={theme}
           className="h-16 w-16 text-lg"
         />
         <div className="flex flex-col gap-1">
