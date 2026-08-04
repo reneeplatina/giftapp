@@ -58,7 +58,7 @@ export const THEME_OPTIONS: ThemeOption[] = [
     label: "Christmas",
     accent: "#b91c1c",
     background: "#f0fdf4",
-    gradient: "linear-gradient(180deg, #14532d 0%, #166534 30%, #f0fdf4 100%)",
+    gradient: "linear-gradient(180deg, #bbf7d0 0%, #dcfce7 40%, #f0fdf4 100%)",
   },
 ];
 

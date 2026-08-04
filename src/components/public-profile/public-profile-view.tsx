@@ -145,13 +145,6 @@ export function PublicProfileView({
             &ldquo;{profile.basicInfo.introduction}&rdquo;
           </p>
         )}
-        <div className="flex flex-wrap justify-center gap-2">
-          <ShareModal
-            url={publicUrl}
-            title={`GIFT ME! 🎁 — ${profile.basicInfo.displayName}'s gift profile`}
-            triggerLabel="Share"
-          />
-        </div>
       </div>
 
       <div className="flex justify-center">
@@ -159,7 +152,7 @@ export function PublicProfileView({
           href="/signup"
           className="bg-teal-500 text-black hover:bg-teal-400"
         >
-          CREATE MY GIFTME!
+          CREATE MY OWN!
         </Button>
       </div>
 
@@ -319,6 +312,14 @@ export function PublicProfileView({
           </Accordion>
         </Section>
       )}
+
+      <div className="flex justify-center">
+        <ShareModal
+          url={publicUrl}
+          title={`GIFT ME! 🎁 — ${profile.basicInfo.displayName}'s gift profile`}
+          triggerLabel="Share"
+        />
+      </div>
     </div>
   );
 }
