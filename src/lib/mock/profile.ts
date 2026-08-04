@@ -1,10 +1,33 @@
 import type { BudgetLevel, PriorityLevel, ThemeOption } from "@/types/profile";
 
 export const BUDGET_LABELS: Record<BudgetLevel, string> = {
-  under_25: "Under $25",
-  "25_to_75": "$25 – $75",
-  "75_to_200": "$75 – $200",
-  over_200: "$200+",
+  under_25: "$ Under $25",
+  "25_to_75": "$$ $25 – $75",
+  "75_to_200": "$$ $75 – $200",
+  over_200: "$$$ $200+",
+};
+
+export type BudgetTier = "cheap" | "middle" | "expensive";
+
+export const BUDGET_TIER_ORDER: BudgetTier[] = ["cheap", "middle", "expensive"];
+
+export const BUDGET_TIER_BY_LEVEL: Record<BudgetLevel, BudgetTier> = {
+  under_25: "cheap",
+  "25_to_75": "middle",
+  "75_to_200": "middle",
+  over_200: "expensive",
+};
+
+export const BUDGET_TIER_SYMBOL: Record<BudgetTier, string> = {
+  cheap: "$",
+  middle: "$$",
+  expensive: "$$$",
+};
+
+export const BUDGET_TIER_LABEL: Record<BudgetTier, string> = {
+  cheap: "Cheap",
+  middle: "Middle",
+  expensive: "Expensive",
 };
 
 export const PRIORITY_LABELS: Record<PriorityLevel, string> = {

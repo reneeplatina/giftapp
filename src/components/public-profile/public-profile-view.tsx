@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DollarSign, HeartCrack, Shirt } from "lucide-react";
+import { HeartCrack, Shirt } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -10,7 +10,12 @@ import { GiftAssistantSection } from "@/components/public-profile/gift-assistant
 import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
 import { TagList } from "@/components/public-profile/tag-list";
 import { WishlistCardVisual } from "@/components/wishlist/wishlist-card-visual";
-import { BUDGET_LABELS } from "@/lib/mock/profile";
+import {
+  BUDGET_TIER_BY_LEVEL,
+  BUDGET_TIER_LABEL,
+  BUDGET_TIER_ORDER,
+  BUDGET_TIER_SYMBOL,
+} from "@/lib/mock/profile";
 import { SECTION_LABELS } from "@/lib/profile/section-keys";
 import type { PublicLinkedProfile, PublicProfileImage } from "@/lib/profile/public-dal";
 import type { BudgetLevel, GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
@@ -91,12 +96,17 @@ export function PublicProfileView({
   images?: PublicProfileImage[];
   isPreview?: boolean;
 }) {
-  const sortedWishlistItems = wishlistItems
-    .filter((item) => item.isPublic && !item.isArchived)
-    .slice()
-    .sort(
-      (a, b) => BUDGET_ORDER.indexOf(a.budgetLevel) - BUDGET_ORDER.indexOf(b.budgetLevel),
-    );
+  const visibleWishlistItems = wishlistItems.filter(
+    (item) => item.isPublic && !item.isArchived,
+  );
+  const wishlistByTier = BUDGET_TIER_ORDER.map((tier) => ({
+    tier,
+    items: visibleWishlistItems
+      .filter((item) => BUDGET_TIER_BY_LEVEL[item.budgetLevel] === tier)
+      .sort(
+        (a, b) => BUDGET_ORDER.indexOf(a.budgetLevel) - BUDGET_ORDER.indexOf(b.budgetLevel),
+      ),
+  })).filter((group) => group.items.length > 0);
   const sizeEntries = Object.entries(profile.sizes).filter(
     ([, value]) => value.trim().length > 0,
   );
@@ -192,27 +202,38 @@ export function PublicProfileView({
         </Section>
       )}
 
-      {sortedWishlistItems.length > 0 && (
-        <Section title="Wishlist — cheapest first">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {sortedWishlistItems.map((item) => (
-              <Card key={item.id} className="flex flex-col gap-1.5">
-                <WishlistCardVisual name={item.name} category={item.category} />
-                {item.description && (
-                  <p className="text-sm text-neutral-600">{item.description}</p>
-                )}
-                <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                  <Badge variant="success" className="font-semibold">
-                    <DollarSign className="h-3 w-3" aria-hidden="true" />
-                    {BUDGET_LABELS[item.budgetLevel]}
-                  </Badge>
-                  {item.category && <Badge variant="outline">{item.category}</Badge>}
-                  {item.priority === "dream_gift" && (
-                    <Badge variant="neutral">Dream gift</Badge>
-                  )}
+      {wishlistByTier.length > 0 && (
+        <Section title="Wishlist">
+          <div className="flex flex-col gap-6">
+            {wishlistByTier.map(({ tier, items }) => (
+              <div key={tier} className="flex flex-col gap-3">
+                <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                  <span aria-hidden="true" className="text-base text-emerald-600">
+                    {BUDGET_TIER_SYMBOL[tier]}
+                  </span>
+                  {BUDGET_TIER_LABEL[tier]}
+                </h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {items.map((item) => (
+                    <Card key={item.id} className="flex flex-col gap-1.5">
+                      <WishlistCardVisual name={item.name} category={item.category} />
+                      {item.description && (
+                        <p className="text-sm text-neutral-600">{item.description}</p>
+                      )}
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                        <Badge variant="success" className="font-semibold">
+                          {BUDGET_TIER_SYMBOL[tier]}
+                        </Badge>
+                        {item.category && <Badge variant="outline">{item.category}</Badge>}
+                        {item.priority === "dream_gift" && (
+                          <Badge variant="neutral">Dream gift</Badge>
+                        )}
+                      </div>
+                      <AmazonSearchLink itemName={item.name} />
+                    </Card>
+                  ))}
                 </div>
-                <AmazonSearchLink itemName={item.name} />
-              </Card>
+              </div>
             ))}
           </div>
         </Section>
