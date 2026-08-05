@@ -3,15 +3,21 @@ import "server-only";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { generateUniqueSlug } from "@/lib/profile/slug";
+import { sendEmail } from "@/lib/notifications/resend";
+import { getSiteUrl } from "@/lib/site-url";
+
+const ADMIN_NOTIFICATION_EMAIL =
+  process.env.ADMIN_NOTIFICATION_EMAIL || "platinarenee@gmail.com";
 
 /**
  * Creates the initial (draft) profile row for a freshly-authenticated
- * user if one doesn't already exist yet, and — if they arrived through
- * a valid gift-exchange link — claims that exchange request. Safe to
- * call more than once (e.g. on every sign-in): it's a no-op once the
- * profile exists.
+ * user if one doesn't already exist yet, emails the app owner that a new
+ * signup happened, and — if they arrived through a valid gift-exchange
+ * link — claims that exchange request. Safe to call more than once (e.g.
+ * on every sign-in): it's a no-op once the profile exists, so the
+ * notification only ever fires for the genuine first-time creation.
  *
- * display_name and exchange_token travel in the user's own
+ * display_name, birthday, and exchange_token travel in the user's own
  * user_metadata (set at signUp time), so this works whether it runs
  * right after signUp() (email confirmation disabled) or later, from the
  * /auth/confirm callback (email confirmation enabled) — either way,
@@ -50,6 +56,17 @@ export async function ensureProfileExists(user: User) {
   if (insertError) {
     throw new Error(`Could not create profile: ${insertError.message}`);
   }
+
+  // Best-effort: this is just an FYI to the app owner, never something
+  // that should block or fail a real signup.
+  await sendEmail({
+    to: ADMIN_NOTIFICATION_EMAIL,
+    subject: "New GiftMe signup",
+    html: `<p><strong>${displayName}</strong> just signed up${
+      user.email ? ` (${user.email})` : ""
+    }.</p>
+<p><a href="${getSiteUrl()}/u/${slug}">View their profile</a></p>`,
+  });
 
   const exchangeToken = user.user_metadata?.exchange_token as
     | string
