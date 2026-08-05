@@ -141,4 +141,5 @@ export interface WishlistItem {
   priority: PriorityLevel;
   isPublic: boolean;
   isArchived: boolean;
+  preferredSize: string | null;
 }

@@ -33,7 +33,7 @@ const CATEGORY_FILTER_OPTIONS = [
 ];
 
 export function WishlistClient() {
-  const { wishlistItems, addWishlistItem, updateWishlistItem, removeWishlistItem } =
+  const { profile, wishlistItems, addWishlistItem, updateWishlistItem, removeWishlistItem } =
     useProfile();
   const [budgetFilter, setBudgetFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -162,6 +162,7 @@ export function WishlistClient() {
         onClose={() => setDialogOpen(false)}
         onSubmit={handleSubmit}
         initialItem={editingItem}
+        sizes={profile.sizes}
       />
 
       <ConfirmDialog

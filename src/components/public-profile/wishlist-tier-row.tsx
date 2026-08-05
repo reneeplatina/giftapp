@@ -83,6 +83,9 @@ export function WishlistTierRow({
                   {symbol}
                 </Badge>
                 {item.category && <Badge variant="outline">{item.category}</Badge>}
+                {item.preferredSize && (
+                  <Badge variant="outline">Size {item.preferredSize}</Badge>
+                )}
                 {item.priority === "dream_gift" && (
                   <Badge variant="neutral">Dream gift</Badge>
                 )}

@@ -41,6 +41,7 @@ export async function addWishlistItemAction(
       budget_level: parsed.data.budgetLevel,
       priority: parsed.data.priority,
       is_public: parsed.data.isPublic,
+      preferred_size: parsed.data.preferredSize.trim() || null,
     })
     .select("*")
     .single();
@@ -74,6 +75,7 @@ export async function updateWishlistItemAction(
       budget_level: parsed.data.budgetLevel,
       priority: parsed.data.priority,
       is_public: parsed.data.isPublic,
+      preferred_size: parsed.data.preferredSize.trim() || null,
     })
     .eq("id", id)
     .eq("profile_id", profileId)

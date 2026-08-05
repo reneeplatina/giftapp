@@ -282,6 +282,7 @@ export function InterviewClient({
       budgetLevel: suggestion.budgetLevel ?? "under_25",
       priority: "would_love",
       isPublic: true,
+      preferredSize: "",
     });
     if (!addResult.success) {
       setPending(false);
