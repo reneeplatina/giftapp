@@ -17,6 +17,7 @@ import {
   setSimpleProfileModeAction,
   switchActiveProfileAction,
 } from "@/lib/profile/managed-actions";
+import { MAX_MANAGED_PROFILES } from "@/lib/profile/managed-profile-limit";
 import type { ManagedProfileSummary } from "@/lib/profile/managed-dal";
 
 const STATUS_LABEL: Record<ManagedProfileSummary["status"], string> = {
@@ -107,7 +108,8 @@ export function LinkedProfilesSection({
         </h2>
         <p className="mt-1 text-sm text-neutral-600">
           Create and manage a gift profile for someone who won&apos;t be
-          signing up themselves — a child, a grandparent, anyone.
+          signing up themselves — a child, a grandparent, anyone. Up to{" "}
+          {MAX_MANAGED_PROFILES} profiles.
         </p>
       </div>
 
@@ -187,27 +189,36 @@ export function LinkedProfilesSection({
               : "flex flex-col gap-3"
           }
         >
-          <div className="flex flex-wrap items-end gap-2">
-            <div className="min-w-[12rem] flex-1">
-              <TextField
-                label="Add a profile for someone"
-                placeholder="e.g. Emma"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                error={createError ?? undefined}
+          {profiles.length >= MAX_MANAGED_PROFILES ? (
+            <p className="text-sm text-neutral-600">
+              You&apos;ve reached the limit of {MAX_MANAGED_PROFILES} linked
+              profiles. Remove one to add another.
+            </p>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-end gap-2">
+                <div className="min-w-[12rem] flex-1">
+                  <TextField
+                    label="Add a profile for someone"
+                    placeholder="e.g. Emma"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    error={createError ?? undefined}
+                  />
+                </div>
+                <Button type="button" onClick={handleCreate} disabled={pending}>
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  Add profile
+                </Button>
+              </div>
+              <Checkbox
+                label="Simple profile"
+                description="Just a name, photo, and wishlist — no interest categories to fill in. Good for kids."
+                checked={isSimpleProfile}
+                onChange={(event) => setIsSimpleProfile(event.target.checked)}
               />
-            </div>
-            <Button type="button" onClick={handleCreate} disabled={pending}>
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              Add profile
-            </Button>
-          </div>
-          <Checkbox
-            label="Simple profile"
-            description="Just a name, photo, and wishlist — no interest categories to fill in. Good for kids."
-            checked={isSimpleProfile}
-            onChange={(event) => setIsSimpleProfile(event.target.checked)}
-          />
+            </>
+          )}
         </div>
       </Card>
 

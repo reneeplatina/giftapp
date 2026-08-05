@@ -8,6 +8,7 @@ import { getAuthUser } from "@/lib/auth/dal";
 import { generateUniqueSlug } from "@/lib/profile/slug";
 import { ACTIVE_PROFILE_COOKIE, activeProfileCookieOptions } from "@/lib/profile/active";
 import { removeAllUnderPrefix } from "@/lib/storage/remove-profile-files";
+import { MAX_MANAGED_PROFILES } from "@/lib/profile/managed-profile-limit";
 import type { ManagedProfileSummary } from "@/lib/profile/managed-dal";
 
 export interface ManagedProfileActionResult {
@@ -37,6 +38,19 @@ export async function createManagedProfileAction(
   const trimmed = displayName.trim();
   if (!trimmed) return { success: false, error: "Enter a name." };
   if (trimmed.length > 60) return { success: false, error: "Keep it under 60 characters." };
+
+  const supabase = await createClient();
+  const { count: existingCount } = await supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("managed_by_profile_id", user.id);
+
+  if ((existingCount ?? 0) >= MAX_MANAGED_PROFILES) {
+    return {
+      success: false,
+      error: `You can create up to ${MAX_MANAGED_PROFILES} linked profiles.`,
+    };
+  }
 
   const serviceClient = createServiceRoleClient();
   if (!serviceClient) {
