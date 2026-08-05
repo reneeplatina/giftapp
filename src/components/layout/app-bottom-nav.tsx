@@ -23,12 +23,14 @@ export function AppBottomNav() {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium",
+              "flex min-w-0 flex-1 flex-col items-center gap-1 px-0.5 py-2.5 text-[11px] font-medium",
               active ? "text-neutral-900" : "text-neutral-500",
             )}
           >
-            <Icon className="h-5 w-5" aria-hidden="true" />
-            {item.label}
+            <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+            <span className="w-full truncate text-center leading-tight">
+              {item.label}
+            </span>
           </Link>
         );
       })}
