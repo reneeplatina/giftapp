@@ -16,6 +16,7 @@ export function WishlistTierRow({
   items: WishlistItem[];
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
   const [canScroll, setCanScroll] = useState(false);
   const [thumb, setThumb] = useState({ width: 100, left: 0 });
 
@@ -34,10 +35,24 @@ export function WishlistTierRow({
     setThumb({ width, left });
   }
 
+  // A finger swipe fires scroll events on every frame — updating React
+  // state that often can visibly stutter the drag on slower phones, so
+  // this coalesces updates to at most one per animation frame.
+  function handleScroll() {
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      updateScrollState();
+    });
+  }
+
   useEffect(() => {
     updateScrollState();
     window.addEventListener("resize", updateScrollState);
-    return () => window.removeEventListener("resize", updateScrollState);
+    return () => {
+      window.removeEventListener("resize", updateScrollState);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, [items]);
 
   function scrollNext() {
@@ -49,7 +64,7 @@ export function WishlistTierRow({
       <div className="relative">
         <div
           ref={scrollRef}
-          onScroll={updateScrollState}
+          onScroll={handleScroll}
           className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item) => (
