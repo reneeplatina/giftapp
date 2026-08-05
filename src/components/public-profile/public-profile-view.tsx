@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DollarSign, HeartCrack, Shirt } from "lucide-react";
+import { HeartCrack, Shirt } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -9,9 +9,14 @@ import { ShareModal } from "@/components/share-modal";
 import { GiftAssistantSection } from "@/components/public-profile/gift-assistant-section";
 import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
 import { TagList } from "@/components/public-profile/tag-list";
-import { BUDGET_LABELS, THEME_OPTIONS } from "@/lib/mock/profile";
+import { WishlistCardVisual } from "@/components/wishlist/wishlist-card-visual";
+import {
+  BUDGET_TIER_BY_LEVEL,
+  BUDGET_TIER_LABEL,
+  BUDGET_TIER_ORDER,
+  BUDGET_TIER_SYMBOL,
+} from "@/lib/mock/profile";
 import { SECTION_LABELS } from "@/lib/profile/section-keys";
-import { THEME_ICONS } from "@/lib/profile/theme-icons";
 import type { PublicLinkedProfile, PublicProfileImage } from "@/lib/profile/public-dal";
 import type { BudgetLevel, GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
 
@@ -91,14 +96,17 @@ export function PublicProfileView({
   images?: PublicProfileImage[];
   isPreview?: boolean;
 }) {
-  const accent = THEME_OPTIONS.find((option) => option.key === theme)?.accent;
-  const ThemeIcon = THEME_ICONS[theme];
-  const sortedWishlistItems = wishlistItems
-    .filter((item) => item.isPublic && !item.isArchived)
-    .slice()
-    .sort(
-      (a, b) => BUDGET_ORDER.indexOf(a.budgetLevel) - BUDGET_ORDER.indexOf(b.budgetLevel),
-    );
+  const visibleWishlistItems = wishlistItems.filter(
+    (item) => item.isPublic && !item.isArchived,
+  );
+  const wishlistByTier = BUDGET_TIER_ORDER.map((tier) => ({
+    tier,
+    items: visibleWishlistItems
+      .filter((item) => BUDGET_TIER_BY_LEVEL[item.budgetLevel] === tier)
+      .sort(
+        (a, b) => BUDGET_ORDER.indexOf(a.budgetLevel) - BUDGET_ORDER.indexOf(b.budgetLevel),
+      ),
+  })).filter((group) => group.items.length > 0);
   const sizeEntries = Object.entries(profile.sizes).filter(
     ([, value]) => value.trim().length > 0,
   );
@@ -114,19 +122,17 @@ export function PublicProfileView({
   return (
     <div className="flex flex-col gap-10">
       <div className="flex flex-col items-center gap-4 text-center">
-        <span
-          className="flex h-12 w-12 items-center justify-center rounded-full"
-          style={{ backgroundColor: `${accent ?? "#1c1917"}1a` }}
-        >
-          <ThemeIcon
-            className="h-6 w-6"
-            style={{ color: accent ?? "#1c1917" }}
-            aria-hidden="true"
-          />
-        </span>
+        {theme === "christmas" && (
+          <p aria-hidden="true" className="text-lg tracking-widest">
+            🎄 ❄️ 🎁 ❄️ 🎄
+          </p>
+        )}
         <Avatar
           name={profile.basicInfo.displayName}
           src={profile.basicInfo.avatarUrl ?? undefined}
+          emoji={profile.basicInfo.avatarEmoji ?? undefined}
+          emojiBg={profile.basicInfo.avatarEmojiBg ?? undefined}
+          theme={theme}
           className="h-20 w-20 text-2xl"
         />
         <div>
@@ -139,13 +145,6 @@ export function PublicProfileView({
             &ldquo;{profile.basicInfo.introduction}&rdquo;
           </p>
         )}
-        <div className="flex flex-wrap justify-center gap-2">
-          <ShareModal
-            url={publicUrl}
-            title={`GIFT ME! 🎁 — ${profile.basicInfo.displayName}'s gift profile`}
-            triggerLabel="Share"
-          />
-        </div>
       </div>
 
       <div className="flex justify-center">
@@ -153,7 +152,7 @@ export function PublicProfileView({
           href="/signup"
           className="bg-teal-500 text-black hover:bg-teal-400"
         >
-          CREATE MY GIFTME!
+          CREATE MY OWN!
         </Button>
       </div>
 
@@ -169,6 +168,8 @@ export function PublicProfileView({
                 <Avatar
                   name={linked.displayName}
                   src={linked.avatarUrl ?? undefined}
+                  emoji={linked.avatarEmoji ?? undefined}
+                  emojiBg={linked.avatarEmojiBg ?? undefined}
                   className="h-10 w-10 text-sm"
                 />
                 <span className="font-medium text-neutral-900">
@@ -194,27 +195,38 @@ export function PublicProfileView({
         </Section>
       )}
 
-      {sortedWishlistItems.length > 0 && (
-        <Section title="Wishlist — cheapest first">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {sortedWishlistItems.map((item) => (
-              <Card key={item.id} className="flex flex-col gap-1.5">
-                <p className="font-medium text-neutral-900">{item.name}</p>
-                {item.description && (
-                  <p className="text-sm text-neutral-600">{item.description}</p>
-                )}
-                <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                  <Badge variant="success" className="font-semibold">
-                    <DollarSign className="h-3 w-3" aria-hidden="true" />
-                    {BUDGET_LABELS[item.budgetLevel]}
-                  </Badge>
-                  {item.category && <Badge variant="outline">{item.category}</Badge>}
-                  {item.priority === "dream_gift" && (
-                    <Badge variant="neutral">Dream gift</Badge>
-                  )}
+      {wishlistByTier.length > 0 && (
+        <Section title="Wishlist">
+          <div className="flex flex-col gap-6">
+            {wishlistByTier.map(({ tier, items }) => (
+              <div key={tier} className="flex flex-col gap-3">
+                <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                  <span aria-hidden="true" className="text-base text-emerald-600">
+                    {BUDGET_TIER_SYMBOL[tier]}
+                  </span>
+                  {BUDGET_TIER_LABEL[tier]}
+                </h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {items.map((item) => (
+                    <Card key={item.id} className="flex flex-col gap-1.5">
+                      <WishlistCardVisual name={item.name} category={item.category} />
+                      {item.description && (
+                        <p className="text-sm text-neutral-600">{item.description}</p>
+                      )}
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                        <Badge variant="success" className="font-semibold">
+                          {BUDGET_TIER_SYMBOL[tier]}
+                        </Badge>
+                        {item.category && <Badge variant="outline">{item.category}</Badge>}
+                        {item.priority === "dream_gift" && (
+                          <Badge variant="neutral">Dream gift</Badge>
+                        )}
+                      </div>
+                      <AmazonSearchLink itemName={item.name} />
+                    </Card>
+                  ))}
                 </div>
-                <AmazonSearchLink itemName={item.name} />
-              </Card>
+              </div>
             ))}
           </div>
         </Section>
@@ -300,6 +312,14 @@ export function PublicProfileView({
           </Accordion>
         </Section>
       )}
+
+      <div className="flex justify-center">
+        <ShareModal
+          url={publicUrl}
+          title={`GIFT ME! 🎁 — ${profile.basicInfo.displayName}'s gift profile`}
+          triggerLabel="Share"
+        />
+      </div>
     </div>
   );
 }

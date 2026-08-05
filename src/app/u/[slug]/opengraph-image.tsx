@@ -77,7 +77,7 @@ export default async function Image({
             marginTop: 20,
           }}
         >
-          {displayName}&apos;s Gift Profile
+          {`${displayName}'s Gift Profile`}
         </div>
       </div>
     ),

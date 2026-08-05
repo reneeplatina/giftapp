@@ -16,12 +16,16 @@ export interface PublicLinkedProfile {
   slug: string;
   displayName: string;
   avatarUrl: string | null;
+  avatarEmoji: string | null;
+  avatarEmojiBg: string | null;
 }
 
 interface PublicProfileRpcResult {
   slug: string;
   displayName: string;
   avatarPath: string | null;
+  avatarEmoji: string | null;
+  avatarEmojiBg: string | null;
   introduction: string;
   giftStyleSummary: string;
   theme: string;
@@ -38,6 +42,8 @@ interface PublicProfileRpcResult {
     slug: string;
     displayName: string;
     avatarPath: string | null;
+    avatarEmoji: string | null;
+    avatarEmojiBg: string | null;
   }[];
   images: {
     id: string;
@@ -79,7 +85,7 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
   if (error || !data) return null;
   const result = data as unknown as PublicProfileRpcResult;
 
-  const avatarUrl = await getAvatarSignedUrl(supabase, result.avatarPath);
+  const avatarUrl = await getAvatarSignedUrl(result.avatarPath);
 
   const sectionValues = Object.fromEntries(
     SECTION_TS_KEYS.map((key) => [key, defaultSectionValue(key)]),
@@ -106,6 +112,8 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
       introduction: result.introduction,
       giftStyleSummary: result.giftStyleSummary,
       avatarUrl,
+      avatarEmoji: result.avatarEmoji ?? null,
+      avatarEmojiBg: result.avatarEmojiBg ?? null,
     },
     ...sectionValues,
     privacy: {
@@ -131,7 +139,9 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
     (result.managedProfiles ?? []).map(async (linked) => ({
       slug: linked.slug,
       displayName: linked.displayName,
-      avatarUrl: await getAvatarSignedUrl(supabase, linked.avatarPath),
+      avatarUrl: await getAvatarSignedUrl(linked.avatarPath),
+      avatarEmoji: linked.avatarEmoji ?? null,
+      avatarEmojiBg: linked.avatarEmojiBg ?? null,
     })),
   );
 

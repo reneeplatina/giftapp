@@ -123,6 +123,8 @@ export function LinkedProfilesSection({
                   <Avatar
                     name={profile.displayName}
                     src={profile.avatarUrl ?? undefined}
+                    emoji={profile.avatarEmoji ?? undefined}
+                    emojiBg={profile.avatarEmojiBg ?? undefined}
                     className="h-10 w-10 shrink-0 text-sm"
                   />
                   <div className="min-w-0 flex-1">
@@ -140,29 +142,31 @@ export function LinkedProfilesSection({
                       )}
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleSwitch(profile.id)}
-                    disabled={pending}
-                  >
-                    Switch &amp; edit
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="border-red-300 text-red-700 hover:bg-red-50"
-                    onClick={() => {
-                      setRemoveError(null);
-                      setRemoveTarget(profile);
-                    }}
-                    disabled={pending}
-                  >
-                    <UserRoundX className="h-4 w-4" aria-hidden="true" />
-                    Remove
-                  </Button>
+                  <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleSwitch(profile.id)}
+                      disabled={pending}
+                    >
+                      Switch &amp; edit
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="border-red-300 text-red-700 hover:bg-red-50"
+                      onClick={() => {
+                        setRemoveError(null);
+                        setRemoveTarget(profile);
+                      }}
+                      disabled={pending}
+                    >
+                      <UserRoundX className="h-4 w-4" aria-hidden="true" />
+                      Remove
+                    </Button>
+                  </div>
                 </div>
                 <Toggle
                   label="Simple profile"

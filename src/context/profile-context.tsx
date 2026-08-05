@@ -18,6 +18,7 @@ import {
   saveSizesAction,
   saveStatusAction,
   saveThemeAction,
+  setAvatarEmojiAction,
   uploadAvatarAction,
   type ProfileActionResult,
 } from "@/lib/profile/actions";
@@ -45,6 +46,7 @@ interface ProfileContextValue {
   updatePrivacy: (values: GiftProfile["privacy"]) => Promise<ProfileActionResult>;
   setTheme: (theme: ThemeKey) => Promise<ProfileActionResult>;
   uploadAvatar: (file: File) => Promise<ProfileActionResult & { avatarUrl?: string }>;
+  setAvatarEmoji: (emoji: string, backgroundColor: string) => Promise<ProfileActionResult>;
   /** Re-reads the profile from the database and replaces local state — for updates made outside this context (e.g. the AI interview). */
   refreshProfile: () => Promise<void>;
   addWishlistItem: (item: WishlistItemValues) => Promise<WishlistActionResult>;
@@ -163,7 +165,28 @@ export function ProfileProvider({
     if (result.success) {
       setProfile((prev) => ({
         ...prev,
-        basicInfo: { ...prev.basicInfo, avatarUrl: result.avatarUrl ?? null },
+        basicInfo: {
+          ...prev.basicInfo,
+          avatarUrl: result.avatarUrl ?? null,
+          avatarEmoji: null,
+          avatarEmojiBg: null,
+        },
+      }));
+    }
+    return result;
+  }, []);
+
+  const setAvatarEmoji = useCallback(async (emoji: string, backgroundColor: string) => {
+    const result = await setAvatarEmojiAction({ emoji, backgroundColor });
+    if (result.success) {
+      setProfile((prev) => ({
+        ...prev,
+        basicInfo: {
+          ...prev.basicInfo,
+          avatarUrl: null,
+          avatarEmoji: result.emoji ?? emoji,
+          avatarEmojiBg: result.backgroundColor ?? backgroundColor,
+        },
       }));
     }
     return result;
@@ -239,6 +262,7 @@ export function ProfileProvider({
     updatePrivacy,
     setTheme,
     uploadAvatar,
+    setAvatarEmoji,
     refreshProfile,
     addWishlistItem,
     updateWishlistItem,

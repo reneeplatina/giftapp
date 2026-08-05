@@ -6,16 +6,16 @@ export type PriorityLevel = "nice_to_have" | "would_love" | "dream_gift";
 
 export type ThemeKey =
   | "general"
-  | "birthday"
-  | "christmas"
-  | "anniversary"
-  | "graduation"
-  | "valentines"
-  | "mothers_day"
-  | "fathers_day"
-  | "wedding"
-  | "baby_shower"
-  | "housewarming";
+  | "rose"
+  | "blush"
+  | "amber"
+  | "sage"
+  | "teal"
+  | "sky"
+  | "lavender"
+  | "stone"
+  | "rainbow"
+  | "christmas";
 
 export interface ThemeOption {
   key: ThemeKey;
@@ -23,6 +23,8 @@ export interface ThemeOption {
   accent: string;
   /** Soft, light background tint for the public profile page/preview. */
   background: string;
+  /** CSS gradient, used instead of a solid accent/background for the "rainbow" option. */
+  gradient?: string;
 }
 
 export interface BasicInfo {
@@ -31,6 +33,8 @@ export interface BasicInfo {
   introduction: string;
   giftStyleSummary: string;
   avatarUrl: string | null;
+  avatarEmoji: string | null;
+  avatarEmojiBg: string | null;
 }
 
 export interface Sizes {

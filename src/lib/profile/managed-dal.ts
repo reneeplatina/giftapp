@@ -1,6 +1,5 @@
 import "server-only";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/auth/dal";
 import { getActiveProfileId } from "@/lib/profile/active";
@@ -13,24 +12,35 @@ export interface ManagedProfileSummary {
   displayName: string;
   slug: string;
   avatarUrl: string | null;
+  avatarEmoji: string | null;
+  avatarEmojiBg: string | null;
   status: ProfileStatus;
   isSimpleProfile: boolean;
 }
 
 type ProfileRow = Pick<
   Database["public"]["Tables"]["profiles"]["Row"],
-  "id" | "display_name" | "slug" | "avatar_path" | "status" | "is_simple_profile"
+  | "id"
+  | "display_name"
+  | "slug"
+  | "avatar_path"
+  | "avatar_emoji"
+  | "avatar_emoji_bg"
+  | "status"
+  | "is_simple_profile"
 >;
 
-async function toSummary(
-  supabase: SupabaseClient<Database>,
-  row: ProfileRow,
-): Promise<ManagedProfileSummary> {
+const PROFILE_SUMMARY_COLUMNS =
+  "id, display_name, slug, avatar_path, avatar_emoji, avatar_emoji_bg, status, is_simple_profile";
+
+async function toSummary(row: ProfileRow): Promise<ManagedProfileSummary> {
   return {
     id: row.id,
     displayName: row.display_name,
     slug: row.slug,
-    avatarUrl: await getAvatarSignedUrl(supabase, row.avatar_path),
+    avatarUrl: await getAvatarSignedUrl(row.avatar_path),
+    avatarEmoji: row.avatar_emoji,
+    avatarEmojiBg: row.avatar_emoji_bg,
     status: row.status,
     isSimpleProfile: row.is_simple_profile,
   };
@@ -49,12 +59,12 @@ export async function getManagedProfiles(): Promise<ManagedProfileSummary[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("id, display_name, slug, avatar_path, status, is_simple_profile")
+    .select(PROFILE_SUMMARY_COLUMNS)
     .eq("managed_by_profile_id", user.id)
     .order("created_at", { ascending: true });
 
   if (!data) return [];
-  return Promise.all(data.map((row) => toSummary(supabase, row)));
+  return Promise.all(data.map((row) => toSummary(row)));
 }
 
 export interface ProfileSwitcherData {
@@ -76,19 +86,21 @@ export async function getProfileSwitcherData(): Promise<ProfileSwitcherData> {
   const [{ data: ownRow }, { data: managedRows }, activeProfileId] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, display_name, slug, avatar_path, status, is_simple_profile")
+      .select(PROFILE_SUMMARY_COLUMNS)
       .eq("id", user.id)
       .maybeSingle(),
     supabase
       .from("profiles")
-      .select("id, display_name, slug, avatar_path, status, is_simple_profile")
+      .select(PROFILE_SUMMARY_COLUMNS)
       .eq("managed_by_profile_id", user.id)
       .order("created_at", { ascending: true }),
     getActiveProfileId(),
   ]);
 
-  const own = ownRow ? await toSummary(supabase, ownRow) : null;
-  const managed = await Promise.all((managedRows ?? []).map((row) => toSummary(supabase, row)));
+  const [own, managed] = await Promise.all([
+    ownRow ? toSummary(ownRow) : Promise.resolve(null),
+    Promise.all((managedRows ?? []).map((row) => toSummary(row))),
+  ]);
 
   return { activeProfileId, own, managed };
 }

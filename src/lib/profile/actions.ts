@@ -7,8 +7,10 @@ import { getAvatarSignedUrl, getFullProfileForEditing } from "@/lib/profile/dal"
 import { SECTION_TS_KEYS, type SectionTsKey } from "@/lib/profile/section-keys";
 import { upsertSectionRow } from "@/lib/profile/section-writes";
 import {
+  avatarEmojiSchema,
   basicInfoSchema,
   sizesSchema,
+  type AvatarEmojiValues,
   type BasicInfoValues,
   type SizesValues,
 } from "@/lib/validation/profile";
@@ -37,9 +39,8 @@ export interface ProfileActionResult {
 }
 
 const THEME_KEYS = [
-  "general", "birthday", "christmas", "anniversary", "graduation",
-  "valentines", "mothers_day", "fathers_day", "wedding", "baby_shower",
-  "housewarming",
+  "general", "rose", "blush", "amber", "sage", "teal", "sky",
+  "lavender", "stone", "rainbow", "christmas",
 ] as const;
 
 const chipListSchema = z.array(z.string().min(1).max(80)).max(60);
@@ -204,13 +205,55 @@ export async function uploadAvatarAction(
 
   const { error: updateError } = await supabase
     .from("profiles")
-    .update({ avatar_path: path })
+    .update({ avatar_path: path, avatar_emoji: null, avatar_emoji_bg: null })
     .eq("id", profileId);
 
   if (updateError) {
     return { success: false, error: updateError.message };
   }
 
-  const avatarUrl = await getAvatarSignedUrl(supabase, path);
+  const avatarUrl = await getAvatarSignedUrl(path);
   return { success: true, avatarUrl: avatarUrl ?? undefined };
+}
+
+export async function setAvatarEmojiAction(
+  values: AvatarEmojiValues,
+): Promise<ProfileActionResult & { emoji?: string; backgroundColor?: string }> {
+  const profileId = await requireProfileId();
+  if (!profileId) return { success: false, error: "Not signed in." };
+
+  const parsed = avatarEmojiSchema.safeParse(values);
+  if (!parsed.success) {
+    return { success: false, error: "Couldn't set that avatar." };
+  }
+
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("avatar_path")
+    .eq("id", profileId)
+    .maybeSingle();
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      avatar_emoji: parsed.data.emoji,
+      avatar_emoji_bg: parsed.data.backgroundColor,
+      avatar_path: null,
+    })
+    .eq("id", profileId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  if (existing?.avatar_path) {
+    await supabase.storage.from("avatars").remove([existing.avatar_path]).catch(() => {});
+  }
+
+  return {
+    success: true,
+    emoji: parsed.data.emoji,
+    backgroundColor: parsed.data.backgroundColor,
+  };
 }

@@ -58,6 +58,8 @@ export function ProfileSwitcher({
         <Avatar
           name={active.displayName}
           src={active.avatarUrl ?? undefined}
+          emoji={active.avatarEmoji ?? undefined}
+          emojiBg={active.avatarEmojiBg ?? undefined}
           className="h-8 w-8 shrink-0 text-xs"
         />
         <span className="min-w-0 flex-1">
@@ -97,6 +99,8 @@ export function ProfileSwitcher({
                 <Avatar
                   name={option.displayName}
                   src={option.avatarUrl ?? undefined}
+                  emoji={option.avatarEmoji ?? undefined}
+                  emojiBg={option.avatarEmojiBg ?? undefined}
                   className="h-8 w-8 shrink-0 text-xs"
                 />
                 <span className="min-w-0 flex-1 truncate font-medium">

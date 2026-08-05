@@ -79,6 +79,8 @@ export async function createManagedProfileAction(
       displayName: trimmed,
       slug,
       avatarUrl: null,
+      avatarEmoji: null,
+      avatarEmojiBg: null,
       status: "draft",
       isSimpleProfile,
     },

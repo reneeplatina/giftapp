@@ -10,7 +10,14 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { SelectField } from "@/components/ui/select-field";
 import { WishlistItemCard } from "@/components/wishlist/wishlist-item-card";
 import { WishlistItemDialog } from "@/components/wishlist/wishlist-item-dialog";
-import { BUDGET_LABELS, CATEGORY_OPTIONS } from "@/lib/mock/profile";
+import {
+  BUDGET_LABELS,
+  BUDGET_TIER_BY_LEVEL,
+  BUDGET_TIER_LABEL,
+  BUDGET_TIER_ORDER,
+  BUDGET_TIER_SYMBOL,
+  CATEGORY_OPTIONS,
+} from "@/lib/mock/profile";
 import { useProfile } from "@/context/profile-context";
 import type { WishlistItem } from "@/types/profile";
 import type { WishlistItemValues } from "@/lib/validation/wishlist";
@@ -42,6 +49,17 @@ export function WishlistClient() {
       return budgetMatch && categoryMatch;
     });
   }, [wishlistItems, budgetFilter, categoryFilter]);
+
+  const itemsByTier = useMemo(
+    () =>
+      BUDGET_TIER_ORDER.map((tier) => ({
+        tier,
+        items: filteredItems.filter(
+          (item) => BUDGET_TIER_BY_LEVEL[item.budgetLevel] === tier,
+        ),
+      })).filter((group) => group.items.length > 0),
+    [filteredItems],
+  );
 
   function openAddDialog() {
     setEditingItem(undefined);
@@ -115,14 +133,26 @@ export function WishlistClient() {
           )}
         </EmptyState>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {filteredItems.map((item) => (
-            <WishlistItemCard
-              key={item.id}
-              item={item}
-              onEdit={() => openEditDialog(item)}
-              onDelete={() => setDeletingItem(item)}
-            />
+        <div className="flex flex-col gap-6">
+          {itemsByTier.map(({ tier, items }) => (
+            <div key={tier} className="flex flex-col gap-3">
+              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                <span aria-hidden="true" className="text-base text-emerald-600">
+                  {BUDGET_TIER_SYMBOL[tier]}
+                </span>
+                {BUDGET_TIER_LABEL[tier]}
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {items.map((item) => (
+                  <WishlistItemCard
+                    key={item.id}
+                    item={item}
+                    onEdit={() => openEditDialog(item)}
+                    onDelete={() => setDeletingItem(item)}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
