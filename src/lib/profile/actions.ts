@@ -68,6 +68,7 @@ export async function saveBasicInfoAction(
       slug: parsed.data.slug,
       introduction: parsed.data.introduction,
       gift_style_summary: parsed.data.giftStyleSummary,
+      birthday: parsed.data.birthday || null,
     })
     .eq("id", profileId);
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HeartCrack, Shirt } from "lucide-react";
+import { Cake, HeartCrack, Shirt } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
   BUDGET_TIER_ORDER,
   BUDGET_TIER_SYMBOL,
 } from "@/lib/mock/profile";
+import { formatBirthdayMonthDay } from "@/lib/format-birthday";
 import { SECTION_LABELS } from "@/lib/profile/section-keys";
 import type { PublicLinkedProfile, PublicProfileImage } from "@/lib/profile/public-dal";
 import type { BudgetLevel, GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
@@ -94,6 +95,9 @@ export function PublicProfileView({
   images?: PublicProfileImage[];
   isPreview?: boolean;
 }) {
+  const birthdayDisplay = profile.basicInfo.birthday
+    ? formatBirthdayMonthDay(profile.basicInfo.birthday)
+    : null;
   const visibleWishlistItems = wishlistItems.filter(
     (item) => item.isPublic && !item.isArchived,
   );
@@ -133,6 +137,12 @@ export function PublicProfileView({
           theme={theme}
           className="h-20 w-20 text-2xl"
         />
+        {birthdayDisplay && (
+          <p className="-mt-2 flex items-center gap-1 text-sm font-medium text-neutral-500">
+            <Cake className="h-4 w-4" aria-hidden="true" />
+            {birthdayDisplay}
+          </p>
+        )}
         <div>
           <h1 className="font-display text-3xl font-semibold text-neutral-900">
             {profile.basicInfo.displayName}

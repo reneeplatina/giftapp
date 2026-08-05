@@ -67,6 +67,7 @@ export function buildEmptyProfile(): GiftProfile {
       avatarUrl: null,
       avatarEmoji: null,
       avatarEmojiBg: null,
+      birthday: null,
     },
     ...sectionValues,
     privacy: {
@@ -114,6 +115,7 @@ export async function getFullProfileForEditing(): Promise<{
     avatarUrl,
     avatarEmoji: profileRow?.avatar_emoji ?? null,
     avatarEmojiBg: profileRow?.avatar_emoji_bg ?? null,
+    birthday: profileRow?.birthday ?? null,
   };
 
   const sectionVisibility = buildDefaultSectionVisibility();

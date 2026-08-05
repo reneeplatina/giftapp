@@ -30,7 +30,7 @@ export function BasicInfoSection() {
     formState: { errors, isDirty },
   } = useForm<BasicInfoValues>({
     resolver: zodResolver(basicInfoSchema),
-    values: profile.basicInfo,
+    values: { ...profile.basicInfo, birthday: profile.basicInfo.birthday ?? "" },
   });
 
   async function onSubmit(values: BasicInfoValues) {
@@ -132,6 +132,13 @@ export function BasicInfoSection() {
         hint={`${getSiteUrl().replace(/^https?:\/\//, "")}/u/your-link`}
         error={errors.slug?.message}
         {...register("slug")}
+      />
+      <TextField
+        label="Birthday"
+        type="date"
+        hint="Shown on your public profile so people know when to send a gift — only the month and day, never the year."
+        error={errors.birthday?.message}
+        {...register("birthday")}
       />
       <TextAreaField
         label="Introduction"

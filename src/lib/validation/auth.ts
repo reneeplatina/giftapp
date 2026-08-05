@@ -6,6 +6,10 @@ export const signupSchema = z
     email: z.string().email("Enter a valid email address"),
     password: z.string().min(8, "Use at least 8 characters"),
     confirmPassword: z.string().min(1, "Confirm your password"),
+    birthday: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Use a valid date")
+      .or(z.literal("")),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",

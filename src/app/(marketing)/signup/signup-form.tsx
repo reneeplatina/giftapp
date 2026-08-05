@@ -116,6 +116,13 @@ export function SignupForm({
             error={state.fieldErrors?.email?.[0]}
           />
           <TextField
+            label="Birthday"
+            name="birthday"
+            type="date"
+            hint="Optional — shown on your public profile so people know when to send a gift."
+            error={state.fieldErrors?.birthday?.[0]}
+          />
+          <TextField
             label="Password"
             name="password"
             type="password"
