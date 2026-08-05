@@ -17,6 +17,7 @@ export function rowToWishlistItem(row: WishlistItemRow): WishlistItem {
     priority: row.priority,
     isPublic: row.is_public,
     isArchived: row.is_archived,
+    preferredSize: row.preferred_size,
   };
 }
 

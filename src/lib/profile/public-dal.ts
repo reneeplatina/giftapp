@@ -37,6 +37,7 @@ interface PublicProfileRpcResult {
     category: string | null;
     budgetLevel: string | null;
     priority: string;
+    preferredSize: string | null;
   }[];
   managedProfiles: {
     slug: string;
@@ -132,6 +133,7 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
       priority: item.priority as WishlistItem["priority"],
       isPublic: true,
       isArchived: false,
+      preferredSize: item.preferredSize,
     }),
   );
 

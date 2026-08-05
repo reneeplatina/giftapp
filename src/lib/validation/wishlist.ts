@@ -7,6 +7,7 @@ export const wishlistItemSchema = z.object({
   budgetLevel: z.enum(["under_25", "25_to_75", "75_to_200", "over_200"]),
   priority: z.enum(["nice_to_have", "would_love", "dream_gift"]),
   isPublic: z.boolean(),
+  preferredSize: z.string().max(40, "Keep it under 40 characters"),
 });
 
 export type WishlistItemValues = z.infer<typeof wishlistItemSchema>;

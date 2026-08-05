@@ -53,6 +53,9 @@ export function WishlistItemCard({
         </Badge>
         <Badge variant="outline">{BUDGET_LABELS[item.budgetLevel]}</Badge>
         <Badge variant="outline">{item.category}</Badge>
+        {item.preferredSize && (
+          <Badge variant="outline">Size {item.preferredSize}</Badge>
+        )}
         {!item.isPublic && <Badge variant="outline">Private</Badge>}
       </div>
       <AmazonSearchLink itemName={item.name} />
