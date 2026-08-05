@@ -85,7 +85,7 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
   if (error || !data) return null;
   const result = data as unknown as PublicProfileRpcResult;
 
-  const avatarUrl = await getAvatarSignedUrl(supabase, result.avatarPath);
+  const avatarUrl = await getAvatarSignedUrl(result.avatarPath);
 
   const sectionValues = Object.fromEntries(
     SECTION_TS_KEYS.map((key) => [key, defaultSectionValue(key)]),
@@ -139,7 +139,7 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
     (result.managedProfiles ?? []).map(async (linked) => ({
       slug: linked.slug,
       displayName: linked.displayName,
-      avatarUrl: await getAvatarSignedUrl(supabase, linked.avatarPath),
+      avatarUrl: await getAvatarSignedUrl(linked.avatarPath),
       avatarEmoji: linked.avatarEmoji ?? null,
       avatarEmojiBg: linked.avatarEmojiBg ?? null,
     })),

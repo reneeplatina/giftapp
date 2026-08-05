@@ -212,7 +212,7 @@ export async function uploadAvatarAction(
     return { success: false, error: updateError.message };
   }
 
-  const avatarUrl = await getAvatarSignedUrl(supabase, path);
+  const avatarUrl = await getAvatarSignedUrl(path);
   return { success: true, avatarUrl: avatarUrl ?? undefined };
 }
 

@@ -13,10 +13,12 @@ import { Card } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { CopyLinkButton } from "@/components/copy-link-button";
 import { ShareModal } from "@/components/share-modal";
+import { DashboardLinkedProfiles } from "@/components/dashboard/linked-profiles-card";
 import { requireAuthUser } from "@/lib/auth/dal";
 import { getActiveProfileId } from "@/lib/profile/active";
 import { createClient } from "@/lib/supabase/server";
 import { getAvatarSignedUrl } from "@/lib/profile/dal";
+import { getManagedProfiles } from "@/lib/profile/managed-dal";
 import { getSiteUrl } from "@/lib/site-url";
 import type { ProfileStatus, ThemeKey } from "@/types/profile";
 
@@ -82,12 +84,13 @@ export default async function DashboardPage() {
     );
   }
 
-  const completionPercent = await getCompletion(
-    profile.id,
-    profile.introduction,
-  );
+  const [completionPercent, avatarUrl, managedProfiles] = await Promise.all([
+    getCompletion(profile.id, profile.introduction),
+    getAvatarSignedUrl(profile.avatar_path),
+    getManagedProfiles(),
+  ]);
+  const otherProfiles = managedProfiles.filter((p) => p.id !== activeProfileId);
   const publicUrl = `${getSiteUrl()}/u/${profile.slug}`;
-  const avatarUrl = await getAvatarSignedUrl(supabase, profile.avatar_path);
 
   return (
     <Container className="flex flex-col gap-6 py-8">
@@ -118,6 +121,8 @@ export default async function DashboardPage() {
           </p>
         </div>
       </div>
+
+      <DashboardLinkedProfiles profiles={otherProfiles} />
 
       <Card className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">

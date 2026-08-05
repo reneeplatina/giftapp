@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveProfileId } from "@/lib/profile/active";
 import {
@@ -10,7 +10,6 @@ import {
   defaultSectionValue,
   type SectionTsKey,
 } from "@/lib/profile/section-keys";
-import type { Database } from "@/types/database";
 import type {
   BasicInfo,
   GiftProfile,
@@ -21,16 +20,23 @@ import type {
 
 const AVATAR_SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 hour
 
-export async function getAvatarSignedUrl(
-  supabase: SupabaseClient<Database>,
-  avatarPath: string | null,
-): Promise<string | null> {
-  if (!avatarPath) return null;
-  const { data } = await supabase.storage
-    .from("avatars")
-    .createSignedUrl(avatarPath, AVATAR_SIGNED_URL_TTL_SECONDS);
-  return data?.signedUrl ?? null;
-}
+/**
+ * Memoized per request with React's cache(): the same avatar can be
+ * signed several times in one page load (layout's profile fetch, the
+ * profile switcher, the page's own fetch), and each call is a real
+ * Supabase Storage round trip — without this they'd all fire
+ * separately instead of sharing one result.
+ */
+export const getAvatarSignedUrl = cache(
+  async (avatarPath: string | null): Promise<string | null> => {
+    if (!avatarPath) return null;
+    const supabase = await createClient();
+    const { data } = await supabase.storage
+      .from("avatars")
+      .createSignedUrl(avatarPath, AVATAR_SIGNED_URL_TTL_SECONDS);
+    return data?.signedUrl ?? null;
+  },
+);
 
 function buildDefaultSectionVisibility(): SectionVisibility {
   return Object.fromEntries(
@@ -98,10 +104,7 @@ export async function getFullProfileForEditing(): Promise<{
       .eq("profile_id", profileId),
   ]);
 
-  const avatarUrl = await getAvatarSignedUrl(
-    supabase,
-    profileRow?.avatar_path ?? null,
-  );
+  const avatarUrl = await getAvatarSignedUrl(profileRow?.avatar_path ?? null);
 
   const basicInfo: BasicInfo = {
     displayName: profileRow?.display_name ?? "",
