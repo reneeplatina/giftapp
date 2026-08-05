@@ -35,6 +35,9 @@ export interface BasicInfo {
   avatarUrl: string | null;
   avatarEmoji: string | null;
   avatarEmojiBg: string | null;
+  /** ISO date (YYYY-MM-DD). The full date is stored, but the app only
+   * ever displays month/day publicly — never the year. */
+  birthday: string | null;
 }
 
 export interface Sizes {

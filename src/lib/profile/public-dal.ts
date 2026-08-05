@@ -28,6 +28,7 @@ interface PublicProfileRpcResult {
   avatarEmojiBg: string | null;
   introduction: string;
   giftStyleSummary: string;
+  birthday: string | null;
   theme: string;
   sections: { sectionKey: string; data: unknown }[];
   wishlistItems: {
@@ -45,6 +46,7 @@ interface PublicProfileRpcResult {
     avatarPath: string | null;
     avatarEmoji: string | null;
     avatarEmojiBg: string | null;
+    birthday: string | null;
   }[];
   images: {
     id: string;
@@ -115,6 +117,7 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
       avatarUrl,
       avatarEmoji: result.avatarEmoji ?? null,
       avatarEmojiBg: result.avatarEmojiBg ?? null,
+      birthday: result.birthday,
     },
     ...sectionValues,
     privacy: {

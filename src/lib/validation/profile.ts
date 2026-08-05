@@ -18,6 +18,10 @@ export const basicInfoSchema = z.object({
     }),
   introduction: z.string().max(280, "Keep it under 280 characters"),
   giftStyleSummary: z.string().max(160, "Keep it under 160 characters"),
+  birthday: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Use a valid date")
+    .or(z.literal("")),
 });
 
 export type BasicInfoValues = z.infer<typeof basicInfoSchema>;

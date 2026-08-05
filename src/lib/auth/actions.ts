@@ -76,6 +76,7 @@ export async function signUpAction(
     email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
+    birthday: formData.get("birthday") || "",
   });
 
   if (!parsed.success) {
@@ -86,7 +87,7 @@ export async function signUpAction(
   }
 
   const exchangeToken = formData.get("exchangeToken");
-  const { displayName, email, password } = parsed.data;
+  const { displayName, email, password, birthday } = parsed.data;
 
   try {
     const supabase = await createClient();
@@ -96,6 +97,7 @@ export async function signUpAction(
       options: {
         data: {
           display_name: displayName,
+          birthday: birthday || null,
           exchange_token:
             typeof exchangeToken === "string" && exchangeToken
               ? exchangeToken

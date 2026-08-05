@@ -37,11 +37,14 @@ export async function ensureProfileExists(user: User) {
 
   const slug = await generateUniqueSlug(supabase, displayName);
 
+  const birthday = (user.user_metadata?.birthday as string | undefined) || null;
+
   const { error: insertError } = await supabase.from("profiles").insert({
     id: user.id,
     slug,
     display_name: displayName,
     status: "draft",
+    birthday,
   });
 
   if (insertError) {

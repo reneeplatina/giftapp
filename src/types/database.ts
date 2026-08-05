@@ -360,6 +360,7 @@ export type Database = {
           id: string
           introduction: string
           is_simple_profile: boolean
+          last_birthday_reminder_sent_at: string | null
           last_nudge_sent_at: string | null
           managed_by_profile_id: string | null
           nudge_enabled: boolean
@@ -379,6 +380,7 @@ export type Database = {
           id: string
           introduction?: string
           is_simple_profile?: boolean
+          last_birthday_reminder_sent_at?: string | null
           last_nudge_sent_at?: string | null
           managed_by_profile_id?: string | null
           nudge_enabled?: boolean
@@ -398,6 +400,7 @@ export type Database = {
           id?: string
           introduction?: string
           is_simple_profile?: boolean
+          last_birthday_reminder_sent_at?: string | null
           last_nudge_sent_at?: string | null
           managed_by_profile_id?: string | null
           nudge_enabled?: boolean

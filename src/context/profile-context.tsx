@@ -93,7 +93,10 @@ export function ProfileProvider({
     async (values: GiftProfile["basicInfo"]) => {
       const previous = profile.basicInfo;
       setProfile((prev) => ({ ...prev, basicInfo: values }));
-      const result = await saveBasicInfoAction(values);
+      const result = await saveBasicInfoAction({
+        ...values,
+        birthday: values.birthday ?? "",
+      });
       if (!result.success) {
         setProfile((prev) => ({ ...prev, basicInfo: previous }));
       }
