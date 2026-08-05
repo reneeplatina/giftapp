@@ -1,15 +1,13 @@
 import Link from "next/link";
 import { HeartCrack, Shirt } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { ShareModal } from "@/components/share-modal";
 import { GiftAssistantSection } from "@/components/public-profile/gift-assistant-section";
-import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
 import { TagList } from "@/components/public-profile/tag-list";
-import { WishlistCardVisual } from "@/components/wishlist/wishlist-card-visual";
+import { WishlistTierRow } from "@/components/public-profile/wishlist-tier-row";
 import {
   BUDGET_TIER_BY_LEVEL,
   BUDGET_TIER_LABEL,
@@ -197,7 +195,7 @@ export function PublicProfileView({
 
       {wishlistByTier.length > 0 && (
         <Section title="Wishlist">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5">
             {wishlistByTier.map(({ tier, items }) => (
               <div key={tier} className="flex flex-col gap-3">
                 <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
@@ -206,26 +204,7 @@ export function PublicProfileView({
                   </span>
                   {BUDGET_TIER_LABEL[tier]}
                 </h3>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {items.map((item) => (
-                    <Card key={item.id} className="flex flex-col gap-1.5">
-                      <WishlistCardVisual name={item.name} category={item.category} />
-                      {item.description && (
-                        <p className="text-sm text-neutral-600">{item.description}</p>
-                      )}
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                        <Badge variant="success" className="font-semibold">
-                          {BUDGET_TIER_SYMBOL[tier]}
-                        </Badge>
-                        {item.category && <Badge variant="outline">{item.category}</Badge>}
-                        {item.priority === "dream_gift" && (
-                          <Badge variant="neutral">Dream gift</Badge>
-                        )}
-                      </div>
-                      <AmazonSearchLink itemName={item.name} />
-                    </Card>
-                  ))}
-                </div>
+                <WishlistTierRow symbol={BUDGET_TIER_SYMBOL[tier]} items={items} />
               </div>
             ))}
           </div>
