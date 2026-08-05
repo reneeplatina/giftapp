@@ -25,9 +25,9 @@ export const BUDGET_TIER_SYMBOL: Record<BudgetTier, string> = {
 };
 
 export const BUDGET_TIER_LABEL: Record<BudgetTier, string> = {
-  cheap: "Cheap",
-  middle: "Middle",
-  expensive: "Expensive",
+  cheap: "Low range",
+  middle: "Mid range",
+  expensive: "High range",
 };
 
 export const PRIORITY_LABELS: Record<PriorityLevel, string> = {
