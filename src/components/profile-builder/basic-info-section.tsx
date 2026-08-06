@@ -7,10 +7,12 @@ import { Check, Smile } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
+import { SelectField } from "@/components/ui/select-field";
 import { TextAreaField } from "@/components/ui/textarea-field";
 import { EmojiAvatarPicker } from "@/components/profile-builder/emoji-avatar-picker";
 import { useProfile } from "@/context/profile-context";
 import { getSiteUrl } from "@/lib/site-url";
+import { DAY_OPTIONS, MONTH_OPTIONS, combineBirthday, splitBirthday } from "@/lib/birthday";
 import {
   basicInfoSchema,
   type BasicInfoValues,
@@ -30,12 +32,19 @@ export function BasicInfoSection() {
     formState: { errors, isDirty },
   } = useForm<BasicInfoValues>({
     resolver: zodResolver(basicInfoSchema),
-    values: { ...profile.basicInfo, birthday: profile.basicInfo.birthday ?? "" },
+    values: { ...profile.basicInfo, ...splitBirthday(profile.basicInfo.birthday) },
   });
 
   async function onSubmit(values: BasicInfoValues) {
     setSaveError(null);
-    const result = await updateBasicInfo({ ...profile.basicInfo, ...values });
+    const result = await updateBasicInfo({
+      ...profile.basicInfo,
+      displayName: values.displayName,
+      slug: values.slug,
+      introduction: values.introduction,
+      giftStyleSummary: values.giftStyleSummary,
+      birthday: combineBirthday(values.birthMonth, values.birthDay),
+    });
     if (!result.success) {
       setSaveError(result.error ?? "Couldn't save. Try again.");
       return;
@@ -133,13 +142,30 @@ export function BasicInfoSection() {
         error={errors.slug?.message}
         {...register("slug")}
       />
-      <TextField
-        label="Birthday"
-        type="date"
-        hint="Shown on your public profile so people know when to send a gift — only the month and day, never the year."
-        error={errors.birthday?.message}
-        {...register("birthday")}
-      />
+      <div className="flex gap-3">
+        <div className="flex-1">
+          <SelectField
+            label="Birth month"
+            options={[{ value: "", label: "Month" }, ...MONTH_OPTIONS]}
+            error={errors.birthMonth?.message}
+            {...register("birthMonth")}
+          />
+        </div>
+        <div className="flex-1">
+          <SelectField
+            label="Birth day"
+            options={[{ value: "", label: "Day" }, ...DAY_OPTIONS]}
+            error={errors.birthDay?.message}
+            {...register("birthDay")}
+          />
+        </div>
+      </div>
+      {!errors.birthMonth && !errors.birthDay && (
+        <p className="-mt-2 text-xs text-neutral-500">
+          Shown on your public profile so people know when to send a gift —
+          only the month and day, never the year.
+        </p>
+      )}
       <TextAreaField
         label="Introduction"
         hint="Shown at the top of your public profile."

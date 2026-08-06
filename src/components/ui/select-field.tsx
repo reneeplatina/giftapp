@@ -6,13 +6,15 @@ interface SelectFieldProps
   extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "className"> {
   label: string;
   error?: string;
+  hint?: string;
   options: { value: string; label: string }[];
 }
 
 export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
-  ({ label, error, options, id, ...props }, ref) => {
+  ({ label, error, hint, options, id, ...props }, ref) => {
     const generatedId = useId();
     const inputId = id ?? generatedId;
+    const hintId = hint ? `${inputId}-hint` : undefined;
     const errorId = error ? `${inputId}-error` : undefined;
 
     return (
@@ -28,7 +30,7 @@ export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
             ref={ref}
             id={inputId}
             aria-invalid={Boolean(error)}
-            aria-describedby={errorId}
+            aria-describedby={cn(hintId, errorId) || undefined}
             className={cn(
               "h-12 w-full appearance-none rounded-xl border bg-white px-4 pr-10 text-base text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900",
               error ? "border-red-400" : "border-neutral-300",
@@ -46,6 +48,11 @@ export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
             className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
           />
         </div>
+        {hint && !error && (
+          <p id={hintId} className="text-xs text-neutral-500">
+            {hint}
+          </p>
+        )}
         {error && (
           <p id={errorId} className="text-xs text-red-600" role="alert">
             {error}

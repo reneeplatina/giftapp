@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ensureProfileExists } from "@/lib/profile/ensure-profile";
 import { getSiteUrl } from "@/lib/site-url";
+import { combineBirthday } from "@/lib/birthday";
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -76,7 +77,8 @@ export async function signUpAction(
     email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
-    birthday: formData.get("birthday") || "",
+    birthMonth: formData.get("birthMonth") || "",
+    birthDay: formData.get("birthDay") || "",
   });
 
   if (!parsed.success) {
@@ -87,7 +89,7 @@ export async function signUpAction(
   }
 
   const exchangeToken = formData.get("exchangeToken");
-  const { displayName, email, password, birthday } = parsed.data;
+  const { displayName, email, password, birthMonth, birthDay } = parsed.data;
 
   try {
     const supabase = await createClient();
@@ -97,7 +99,7 @@ export async function signUpAction(
       options: {
         data: {
           display_name: displayName,
-          birthday: birthday || null,
+          birthday: combineBirthday(birthMonth, birthDay),
           exchange_token:
             typeof exchangeToken === "string" && exchangeToken
               ? exchangeToken
