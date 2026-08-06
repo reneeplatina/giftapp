@@ -135,13 +135,6 @@ export function SignupForm({
               />
             </div>
           </div>
-          {!state.fieldErrors?.birthMonth && !state.fieldErrors?.birthDay && (
-            <p className="-mt-2 text-xs text-neutral-500">
-              Optional — shown on your public profile so people know when to
-              send a gift. We only ask for month and day, never your birth
-              year.
-            </p>
-          )}
           <TextField
             label="Password"
             name="password"
