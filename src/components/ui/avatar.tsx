@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { THEME_OPTIONS } from "@/lib/mock/profile";
 import type { ThemeKey } from "@/types/profile";
@@ -47,14 +48,19 @@ export function Avatar({
 
   if (src && !failed) {
     content = (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={src}
-        alt={`${name}'s profile photo`}
-        onError={() => setFailed(true)}
+      <span
         style={ringStyle}
-        className={cn("rounded-full object-cover", className)}
-      />
+        className={cn("relative block overflow-hidden rounded-full", className)}
+      >
+        <Image
+          src={src}
+          alt={`${name}'s profile photo`}
+          onError={() => setFailed(true)}
+          fill
+          sizes="80px"
+          className="object-cover"
+        />
+      </span>
     );
   } else if (emoji) {
     content = (

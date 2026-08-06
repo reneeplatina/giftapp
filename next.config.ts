@@ -1,6 +1,27 @@
 import type { NextConfig } from "next";
 
+// Avatars and wishlist/profile photos are served from Supabase Storage
+// signed URLs — allow-listing the project's own storage host (derived
+// from the same env var the Supabase client already uses) lets
+// next/image optimize and resize them instead of the browser
+// downloading the original upload (up to 5MB) at whatever size it's
+// displayed at.
+const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+  : undefined;
+
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: supabaseHostname
+      ? [
+          {
+            protocol: "https",
+            hostname: supabaseHostname,
+            pathname: "/storage/v1/object/sign/**",
+          },
+        ]
+      : [],
+  },
   experimental: {
     // Server Actions default to a 1MB request body limit — well under
     // the 5MB avatar/wishlist-image/profile-image uploads this app
