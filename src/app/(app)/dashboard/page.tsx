@@ -1,10 +1,5 @@
-import {
-  Eye,
-  ListChecks,
-  Palette,
-  PencilLine,
-  Sparkles,
-} from "lucide-react";
+import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { Container } from "@/components/container";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +14,7 @@ import { getActiveProfileId } from "@/lib/profile/active";
 import { createClient } from "@/lib/supabase/server";
 import { getAvatarSignedUrl } from "@/lib/profile/dal";
 import { getManagedProfiles } from "@/lib/profile/managed-dal";
+import { SECTION_TS_KEYS } from "@/lib/profile/section-keys";
 import { getSiteUrl } from "@/lib/site-url";
 import type { ProfileStatus, ThemeKey } from "@/types/profile";
 
@@ -34,9 +30,15 @@ const STATUS_VARIANT: Record<ProfileStatus, "success" | "warning" | "outline"> =
   hidden: "outline",
 };
 
-const KNOWN_SECTION_COUNT = 12;
+interface NextStep {
+  label: string;
+  href: string;
+}
 
-async function getCompletion(profileId: string, introduction: string) {
+async function getCompletion(
+  profileId: string,
+  introduction: string,
+): Promise<{ percent: number; nextStep: NextStep | null }> {
   const supabase = await createClient();
   const [{ count: sectionCount }, { count: wishlistCount }] = await Promise.all([
     supabase
@@ -49,13 +51,32 @@ async function getCompletion(profileId: string, introduction: string) {
       .eq("profile_id", profileId),
   ]);
 
+  const hasIntroduction = introduction.trim().length > 0;
+  const hasWishlistItem = (wishlistCount ?? 0) > 0;
+  const filledSectionCount = sectionCount ?? 0;
+
   const checks = [
-    introduction.trim().length > 0,
-    (wishlistCount ?? 0) > 0,
-    ...Array.from({ length: KNOWN_SECTION_COUNT }, (_, i) => i < (sectionCount ?? 0)),
+    hasIntroduction,
+    hasWishlistItem,
+    ...Array.from(
+      { length: SECTION_TS_KEYS.length },
+      (_, i) => i < filledSectionCount,
+    ),
   ];
-  const filled = checks.filter(Boolean).length;
-  return Math.round((filled / checks.length) * 100);
+  const percent = Math.round(
+    (checks.filter(Boolean).length / checks.length) * 100,
+  );
+
+  let nextStep: NextStep | null = null;
+  if (!hasIntroduction) {
+    nextStep = { label: "Write a short introduction", href: "/profile/edit" };
+  } else if (!hasWishlistItem) {
+    nextStep = { label: "Add a wishlist item", href: "/wishlist" };
+  } else if (filledSectionCount === 0) {
+    nextStep = { label: "Pick a few interests", href: "/profile/edit" };
+  }
+
+  return { percent, nextStep };
 }
 
 export default async function DashboardPage() {
@@ -84,11 +105,12 @@ export default async function DashboardPage() {
     );
   }
 
-  const [completionPercent, avatarUrl, managedProfiles] = await Promise.all([
-    getCompletion(profile.id, profile.introduction),
-    getAvatarSignedUrl(profile.avatar_path),
-    getManagedProfiles(),
-  ]);
+  const [{ percent: completionPercent, nextStep }, avatarUrl, managedProfiles] =
+    await Promise.all([
+      getCompletion(profile.id, profile.introduction),
+      getAvatarSignedUrl(profile.avatar_path),
+      getManagedProfiles(),
+    ]);
   const otherProfiles = managedProfiles.filter((p) => p.id !== activeProfileId);
   const publicUrl = `${getSiteUrl()}/u/${profile.slug}`;
 
@@ -135,6 +157,17 @@ export default async function DashboardPage() {
           </div>
         </div>
         <ProgressBar value={completionPercent} label="Profile completeness" />
+        {nextStep && (
+          <p className="text-sm text-neutral-600">
+            Next:{" "}
+            <Link
+              href={nextStep.href}
+              className="font-medium text-neutral-900 underline"
+            >
+              {nextStep.label}
+            </Link>
+          </p>
+        )}
       </Card>
 
       <Card className="flex flex-col items-center gap-3 border-neutral-900 bg-neutral-900 py-8 text-center">
@@ -149,25 +182,6 @@ export default async function DashboardPage() {
           Open AI Gift Builder
         </Button>
       </Card>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Button href="/profile/edit" variant="secondary">
-          <PencilLine className="h-4 w-4" aria-hidden="true" />
-          Edit Profile
-        </Button>
-        <Button href="/wishlist" variant="secondary">
-          <ListChecks className="h-4 w-4" aria-hidden="true" />
-          Manage Wishlist
-        </Button>
-        <Button href="/themes" variant="secondary">
-          <Palette className="h-4 w-4" aria-hidden="true" />
-          Choose Theme
-        </Button>
-        <Button href="/preview" variant="secondary">
-          <Eye className="h-4 w-4" aria-hidden="true" />
-          Preview Profile
-        </Button>
-      </div>
     </Container>
   );
 }

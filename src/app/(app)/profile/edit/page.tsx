@@ -1,3 +1,4 @@
+import { Eye, Palette } from "lucide-react";
 import { Container } from "@/components/container";
 import { requireAuthUser } from "@/lib/auth/dal";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
@@ -35,6 +36,19 @@ export default async function ProfileEditPage() {
   await requireAuthUser("/profile/edit");
   const loaded = await getFullProfileForEditing();
 
+  const headerActions = (
+    <div className="flex flex-wrap gap-2">
+      <Button href="/preview" variant="outline" size="sm">
+        <Eye className="h-4 w-4" aria-hidden="true" />
+        Preview profile
+      </Button>
+      <Button href="/themes" variant="outline" size="sm">
+        <Palette className="h-4 w-4" aria-hidden="true" />
+        Change theme
+      </Button>
+    </div>
+  );
+
   if (loaded?.isSimpleProfile) {
     return (
       <Container className="flex flex-col gap-6 py-8">
@@ -46,6 +60,8 @@ export default async function ProfileEditPage() {
             This is a simple profile — just a name, photo, and wishlist.
           </p>
         </div>
+
+        {headerActions}
 
         <Card>
           <BasicInfoSection />
@@ -77,6 +93,8 @@ export default async function ProfileEditPage() {
           Fill in as much or as little as you like — changes save as you go.
         </p>
       </div>
+
+      {headerActions}
 
       <Accordion>
         <AccordionItem title="Basic information" defaultOpen>
