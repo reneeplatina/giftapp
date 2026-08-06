@@ -1,28 +1,29 @@
 import { z } from "zod";
 import { RESERVED_SLUGS } from "@/lib/profile/reserved-slugs";
+import { birthDayField, birthMonthField, checkBirthdayFields } from "@/lib/birthday";
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-export const basicInfoSchema = z.object({
-  displayName: z.string().min(1, "Enter a display name").max(60),
-  slug: z
-    .string()
-    .min(3, "Use at least 3 characters")
-    .max(40)
-    .regex(
-      slugPattern,
-      "Use lowercase letters, numbers, and hyphens only",
-    )
-    .refine((value) => !(RESERVED_SLUGS as readonly string[]).includes(value), {
-      message: "This link is reserved — choose another",
-    }),
-  introduction: z.string().max(280, "Keep it under 280 characters"),
-  giftStyleSummary: z.string().max(160, "Keep it under 160 characters"),
-  birthday: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Use a valid date")
-    .or(z.literal("")),
-});
+export const basicInfoSchema = z
+  .object({
+    displayName: z.string().min(1, "Enter a display name").max(60),
+    slug: z
+      .string()
+      .min(3, "Use at least 3 characters")
+      .max(40)
+      .regex(
+        slugPattern,
+        "Use lowercase letters, numbers, and hyphens only",
+      )
+      .refine((value) => !(RESERVED_SLUGS as readonly string[]).includes(value), {
+        message: "This link is reserved — choose another",
+      }),
+    introduction: z.string().max(280, "Keep it under 280 characters"),
+    giftStyleSummary: z.string().max(160, "Keep it under 160 characters"),
+    birthMonth: birthMonthField,
+    birthDay: birthDayField,
+  })
+  .superRefine(checkBirthdayFields);
 
 export type BasicInfoValues = z.infer<typeof basicInfoSchema>;
 

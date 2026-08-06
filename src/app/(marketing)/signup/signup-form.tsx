@@ -7,6 +7,7 @@ import { Container } from "@/components/container";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TextField } from "@/components/ui/text-field";
+import { SelectField } from "@/components/ui/select-field";
 import { OtpVerifyForm } from "@/components/auth/otp-verify-form";
 import {
   resendConfirmationAction,
@@ -14,6 +15,7 @@ import {
   verifySignupOtpAction,
   type AuthActionState,
 } from "@/lib/auth/actions";
+import { DAY_OPTIONS, MONTH_OPTIONS } from "@/lib/birthday";
 
 const initialState: AuthActionState = { status: "idle" };
 
@@ -115,13 +117,31 @@ export function SignupForm({
             autoComplete="email"
             error={state.fieldErrors?.email?.[0]}
           />
-          <TextField
-            label="Birthday"
-            name="birthday"
-            type="date"
-            hint="Optional — shown on your public profile so people know when to send a gift."
-            error={state.fieldErrors?.birthday?.[0]}
-          />
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <SelectField
+                label="Birth month"
+                name="birthMonth"
+                options={[{ value: "", label: "Month" }, ...MONTH_OPTIONS]}
+                error={state.fieldErrors?.birthMonth?.[0]}
+              />
+            </div>
+            <div className="flex-1">
+              <SelectField
+                label="Birth day"
+                name="birthDay"
+                options={[{ value: "", label: "Day" }, ...DAY_OPTIONS]}
+                error={state.fieldErrors?.birthDay?.[0]}
+              />
+            </div>
+          </div>
+          {!state.fieldErrors?.birthMonth && !state.fieldErrors?.birthDay && (
+            <p className="-mt-2 text-xs text-neutral-500">
+              Optional — shown on your public profile so people know when to
+              send a gift. We only ask for month and day, never your birth
+              year.
+            </p>
+          )}
           <TextField
             label="Password"
             name="password"

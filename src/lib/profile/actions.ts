@@ -6,6 +6,7 @@ import { getActiveProfileId } from "@/lib/profile/active";
 import { getAvatarSignedUrl, getFullProfileForEditing } from "@/lib/profile/dal";
 import { SECTION_TS_KEYS, type SectionTsKey } from "@/lib/profile/section-keys";
 import { upsertSectionRow } from "@/lib/profile/section-writes";
+import { combineBirthday } from "@/lib/birthday";
 import {
   avatarEmojiSchema,
   basicInfoSchema,
@@ -68,7 +69,7 @@ export async function saveBasicInfoAction(
       slug: parsed.data.slug,
       introduction: parsed.data.introduction,
       gift_style_summary: parsed.data.giftStyleSummary,
-      birthday: parsed.data.birthday || null,
+      birthday: combineBirthday(parsed.data.birthMonth, parsed.data.birthDay),
     })
     .eq("id", profileId);
 

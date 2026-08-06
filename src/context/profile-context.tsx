@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { getSiteUrl } from "@/lib/site-url";
+import { splitBirthday } from "@/lib/birthday";
 import { SECTION_TS_KEYS, type SectionTsKey } from "@/lib/profile/section-keys";
 import {
   getProfileSnapshotAction,
@@ -94,8 +95,11 @@ export function ProfileProvider({
       const previous = profile.basicInfo;
       setProfile((prev) => ({ ...prev, basicInfo: values }));
       const result = await saveBasicInfoAction({
-        ...values,
-        birthday: values.birthday ?? "",
+        displayName: values.displayName,
+        slug: values.slug,
+        introduction: values.introduction,
+        giftStyleSummary: values.giftStyleSummary,
+        ...splitBirthday(values.birthday),
       });
       if (!result.success) {
         setProfile((prev) => ({ ...prev, basicInfo: previous }));
