@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Image from "next/image";
 import { Eye, EyeOff, ImagePlus, Loader2, X } from "lucide-react";
 import {
   deleteProfileImageAction,
@@ -90,11 +91,12 @@ export function MyImagesSection({
             className="group relative aspect-square overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100"
           >
             {image.imageUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={image.imageUrl}
                 alt={`Uploaded photo, ${image.isPublic ? "public" : "private"}`}
-                className="h-full w-full object-cover"
+                fill
+                sizes="(min-width: 640px) 33vw, 50vw"
+                className="object-cover"
               />
             )}
             <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/60 to-transparent p-1.5">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Cake, HeartCrack, Shirt } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
@@ -227,14 +228,15 @@ export function PublicProfileView({
             {images.map((image) => (
               <div
                 key={image.id}
-                className="aspect-square overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100"
+                className="relative aspect-square overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100"
               >
                 {image.imageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={image.imageUrl}
                     alt={image.caption || "Gift idea photo"}
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="(min-width: 640px) 33vw, 50vw"
+                    className="object-cover"
                   />
                 )}
               </div>

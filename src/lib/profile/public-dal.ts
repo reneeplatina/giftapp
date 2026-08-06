@@ -88,8 +88,6 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
   if (error || !data) return null;
   const result = data as unknown as PublicProfileRpcResult;
 
-  const avatarUrl = await getAvatarSignedUrl(result.avatarPath);
-
   const sectionValues = Object.fromEntries(
     SECTION_TS_KEYS.map((key) => [key, defaultSectionValue(key)]),
   ) as Pick<GiftProfile, (typeof SECTION_TS_KEYS)[number]>;
@@ -108,6 +106,44 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
     sectionVisibility[tsKey] = true;
   }
 
+  const wishlistItems: WishlistItem[] = (result.wishlistItems ?? []).map(
+    (item) => ({
+      id: item.id,
+      name: item.name,
+      description: item.description ?? "",
+      category: item.category ?? "",
+      budgetLevel: (item.budgetLevel as WishlistItem["budgetLevel"]) ?? "under_25",
+      priority: item.priority as WishlistItem["priority"],
+      isPublic: true,
+      isArchived: false,
+      preferredSize: item.preferredSize,
+    }),
+  );
+
+  // These three each make their own Supabase Storage round trip to sign
+  // an image URL — independent of each other, so running them together
+  // instead of one after another cuts the wait to whichever is slowest
+  // instead of the sum of all three.
+  const [avatarUrl, linkedProfiles, images] = await Promise.all([
+    getAvatarSignedUrl(result.avatarPath),
+    Promise.all(
+      (result.managedProfiles ?? []).map(async (linked) => ({
+        slug: linked.slug,
+        displayName: linked.displayName,
+        avatarUrl: await getAvatarSignedUrl(linked.avatarPath),
+        avatarEmoji: linked.avatarEmoji ?? null,
+        avatarEmojiBg: linked.avatarEmojiBg ?? null,
+      })),
+    ),
+    Promise.all(
+      (result.images ?? []).map(async (image) => ({
+        id: image.id,
+        imageUrl: await getProfileImageSignedUrl(supabase, image.imagePath),
+        caption: image.caption ?? "",
+      })),
+    ),
+  ]);
+
   const profile: GiftProfile = {
     basicInfo: {
       displayName: result.displayName,
@@ -125,38 +161,6 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
       sectionVisibility,
     },
   };
-
-  const wishlistItems: WishlistItem[] = (result.wishlistItems ?? []).map(
-    (item) => ({
-      id: item.id,
-      name: item.name,
-      description: item.description ?? "",
-      category: item.category ?? "",
-      budgetLevel: (item.budgetLevel as WishlistItem["budgetLevel"]) ?? "under_25",
-      priority: item.priority as WishlistItem["priority"],
-      isPublic: true,
-      isArchived: false,
-      preferredSize: item.preferredSize,
-    }),
-  );
-
-  const linkedProfiles: PublicLinkedProfile[] = await Promise.all(
-    (result.managedProfiles ?? []).map(async (linked) => ({
-      slug: linked.slug,
-      displayName: linked.displayName,
-      avatarUrl: await getAvatarSignedUrl(linked.avatarPath),
-      avatarEmoji: linked.avatarEmoji ?? null,
-      avatarEmojiBg: linked.avatarEmojiBg ?? null,
-    })),
-  );
-
-  const images: PublicProfileImage[] = await Promise.all(
-    (result.images ?? []).map(async (image) => ({
-      id: image.id,
-      imageUrl: await getProfileImageSignedUrl(supabase, image.imagePath),
-      caption: image.caption ?? "",
-    })),
-  );
 
   return {
     profile,
