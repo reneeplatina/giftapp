@@ -56,9 +56,6 @@ export function SignupForm({
         <h1 className="font-display text-2xl font-semibold text-neutral-900">
           Create your gift profile
         </h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          It&apos;s free — no payment or shopping account required.
-        </p>
 
         {exchangeToken && exchangeInfo?.valid && (
           <div className="mt-4 flex items-start gap-2 rounded-xl bg-cream px-4 py-3">
@@ -135,13 +132,6 @@ export function SignupForm({
               />
             </div>
           </div>
-          {!state.fieldErrors?.birthMonth && !state.fieldErrors?.birthDay && (
-            <p className="-mt-2 text-xs text-neutral-500">
-              Optional — shown on your public profile so people know when to
-              send a gift. We only ask for month and day, never your birth
-              year.
-            </p>
-          )}
           <TextField
             label="Password"
             name="password"
