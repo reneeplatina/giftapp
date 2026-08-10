@@ -16,7 +16,9 @@ export function WishlistTierRow({
   items: WishlistItem[];
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
+  const draggingRef = useRef(false);
   const [canScroll, setCanScroll] = useState(false);
   const [thumb, setThumb] = useState({ width: 100, left: 0 });
 
@@ -57,6 +59,42 @@ export function WishlistTierRow({
 
   function scrollNext() {
     scrollRef.current?.scrollBy({ left: 240, behavior: "smooth" });
+  }
+
+  // Lets people drag the bar under the cards directly, with a finger or
+  // a mouse, instead of only being able to swipe the cards themselves.
+  // Setting scrollLeft here fires the row's own "scroll" event, so the
+  // thumb keeps tracking through the same handleScroll path a normal
+  // swipe already uses.
+  function scrollToPointer(clientX: number) {
+    const track = trackRef.current;
+    const el = scrollRef.current;
+    if (!track || !el) return;
+    const rect = track.getBoundingClientRect();
+    const ratio = rect.width > 0 ? (clientX - rect.left) / rect.width : 0;
+    const clampedRatio = Math.min(Math.max(ratio, 0), 1);
+    el.scrollLeft = clampedRatio * (el.scrollWidth - el.clientWidth);
+  }
+
+  function handleTrackPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    if (!canScroll) return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    event.preventDefault();
+    draggingRef.current = true;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    scrollToPointer(event.clientX);
+  }
+
+  function handleTrackPointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    if (!draggingRef.current) return;
+    scrollToPointer(event.clientX);
+  }
+
+  function handleTrackPointerUp(event: React.PointerEvent<HTMLDivElement>) {
+    draggingRef.current = false;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
   }
 
   return (
@@ -107,13 +145,21 @@ export function WishlistTierRow({
       </div>
       {canScroll && (
         <div
+          ref={trackRef}
           role="presentation"
-          className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200"
+          aria-hidden="true"
+          onPointerDown={handleTrackPointerDown}
+          onPointerMove={handleTrackPointerMove}
+          onPointerUp={handleTrackPointerUp}
+          onPointerCancel={handleTrackPointerUp}
+          className="flex touch-none items-center py-2 cursor-grab active:cursor-grabbing"
         >
-          <div
-            className="h-full rounded-full bg-neutral-900"
-            style={{ width: `${thumb.width}%`, marginLeft: `${thumb.left}%` }}
-          />
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200">
+            <div
+              className="h-full rounded-full bg-neutral-900"
+              style={{ width: `${thumb.width}%`, marginLeft: `${thumb.left}%` }}
+            />
+          </div>
         </div>
       )}
     </div>
