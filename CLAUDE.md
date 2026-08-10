@@ -10,6 +10,13 @@ current one.
 
 See `docs/PRODUCT_SPEC.md` for the full product definition.
 
+## Communication with Renee
+
+- After any work session, include a short, plain-English summary with no
+  jargon: what (if anything) went wrong or conflicted, how it was fixed,
+  what was checked/verified, and what was actually built. Keep it brief —
+  a few lines, not a report.
+
 ## Before making changes
 
 - Read the existing product documentation before making changes:
