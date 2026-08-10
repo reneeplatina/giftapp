@@ -6,6 +6,7 @@ import { Sparkles, TriangleAlert } from "lucide-react";
 import { Container } from "@/components/container";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { HowItWorks } from "@/components/how-it-works";
 import { TextField } from "@/components/ui/text-field";
 import { SelectField } from "@/components/ui/select-field";
 import { OtpVerifyForm } from "@/components/auth/otp-verify-form";
@@ -52,7 +53,12 @@ export function SignupForm({
 
   return (
     <Container className="flex flex-1 flex-col justify-center py-12 sm:py-20">
-      <Card className="mx-auto w-full max-w-md p-6 sm:p-8">
+      <div className="mx-auto w-full max-w-md">
+        <div className="mb-4 rounded-2xl bg-cream px-4 py-3">
+          <p className="text-sm font-semibold text-neutral-900">How it works</p>
+          <HowItWorks className="mt-2" />
+        </div>
+        <Card className="p-6 sm:p-8">
         <h1 className="font-display text-2xl font-semibold text-neutral-900">
           Create your gift profile
         </h1>
@@ -162,7 +168,8 @@ export function SignupForm({
             Sign in
           </Link>
         </p>
-      </Card>
+        </Card>
+      </div>
     </Container>
   );
 }

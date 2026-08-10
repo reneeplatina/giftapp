@@ -167,6 +167,35 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          profile_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gift_exchange_requests: {
         Row: {
           completed_at: string | null

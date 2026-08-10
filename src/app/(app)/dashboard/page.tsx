@@ -9,6 +9,7 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { CopyLinkButton } from "@/components/copy-link-button";
 import { ShareModal } from "@/components/share-modal";
 import { DashboardLinkedProfiles } from "@/components/dashboard/linked-profiles-card";
+import { HowItWorks } from "@/components/how-it-works";
 import { requireAuthUser } from "@/lib/auth/dal";
 import { getActiveProfileId } from "@/lib/profile/active";
 import { createClient } from "@/lib/supabase/server";
@@ -16,6 +17,7 @@ import { getAvatarSignedUrl } from "@/lib/profile/dal";
 import { getManagedProfiles } from "@/lib/profile/managed-dal";
 import { SECTION_TS_KEYS } from "@/lib/profile/section-keys";
 import { getSiteUrl } from "@/lib/site-url";
+import { isAdminEmail } from "@/lib/admin";
 import type { ProfileStatus, ThemeKey } from "@/types/profile";
 
 const STATUS_LABEL: Record<ProfileStatus, string> = {
@@ -143,6 +145,24 @@ export default async function DashboardPage() {
           </p>
         </div>
       </div>
+
+      {isAdminEmail(user.email) && (
+        <Link
+          href="/admin"
+          className="self-start text-sm font-medium text-neutral-600 underline"
+        >
+          View signups &amp; feedback →
+        </Link>
+      )}
+
+      {nextStep && (
+        <Card className="flex flex-col gap-2">
+          <p className="text-sm font-semibold text-neutral-900">
+            How GiftMe works
+          </p>
+          <HowItWorks />
+        </Card>
+      )}
 
       <DashboardLinkedProfiles profiles={otherProfiles} />
 
