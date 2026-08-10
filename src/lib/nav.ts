@@ -3,6 +3,7 @@ import {
   Images,
   LayoutDashboard,
   ListChecks,
+  MessageCircle,
   PencilLine,
   Settings,
   Sparkles,
@@ -26,5 +27,6 @@ export const APP_NAV_ITEMS: NavItem[] = [
   { href: "/wishlist", label: "Wishlist", icon: ListChecks },
   { href: "/images", label: "My Images", icon: Images },
   { href: "/interview", label: "AI Gift Builder", icon: Sparkles },
+  { href: "/feedback", label: "Feedback", icon: MessageCircle },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

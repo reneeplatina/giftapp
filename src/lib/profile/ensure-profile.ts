@@ -5,9 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { generateUniqueSlug } from "@/lib/profile/slug";
 import { sendEmail } from "@/lib/notifications/resend";
 import { getSiteUrl } from "@/lib/site-url";
-
-const ADMIN_NOTIFICATION_EMAIL =
-  process.env.ADMIN_NOTIFICATION_EMAIL || "platinarenee@gmail.com";
+import { ADMIN_EMAIL } from "@/lib/admin";
 
 /**
  * Creates the initial (draft) profile row for a freshly-authenticated
@@ -60,7 +58,7 @@ export async function ensureProfileExists(user: User) {
   // Best-effort: this is just an FYI to the app owner, never something
   // that should block or fail a real signup.
   await sendEmail({
-    to: ADMIN_NOTIFICATION_EMAIL,
+    to: ADMIN_EMAIL,
     subject: "New GiftMe signup",
     html: `<p><strong>${displayName}</strong> just signed up${
       user.email ? ` (${user.email})` : ""
