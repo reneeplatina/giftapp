@@ -149,12 +149,14 @@ export function WishlistClient() {
         </EmptyState>
       ) : (
         <Accordion>
-          {itemsByTier.map(({ tier, items }) => (
+          {itemsByTier.map(({ tier, items }, index) => (
             <AccordionItem
               // The key only changes for the tier that was just saved
-              // into, so only that section remounts (and thus re-opens).
-              key={`${tier}-${saveCountByTier[tier] ?? 0}`}
-              defaultOpen={(saveCountByTier[tier] ?? 0) > 0}
+              // into (or when filtering reshuffles which tier is first),
+              // so only that section remounts and thus re-opens. Every
+              // other section keeps whatever the reader toggled.
+              key={`${tier}-${index}-${saveCountByTier[tier] ?? 0}`}
+              defaultOpen={index === 0 || (saveCountByTier[tier] ?? 0) > 0}
               title={
                 <span className="flex items-center gap-2">
                   <span aria-hidden="true" className="text-emerald-600">
