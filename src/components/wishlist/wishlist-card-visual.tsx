@@ -150,33 +150,53 @@ function colorForText(value: string) {
  * recognized (a "bogg bag" gets a bag icon, "pens" gets a pencil icon),
  * falling back to a generic icon for its category, plus the item's name
  * as large text, on a color — no photos.
+ *
+ * `compact` shrinks the whole thing (height, icon, and text together)
+ * for the horizontally-scrolling rows on the public profile, where the
+ * goal is fitting more cards on screen rather than filling the width.
  */
 export function WishlistCardVisual({
   name,
   category,
+  compact = false,
   className,
 }: {
   name: string;
   category: string;
+  compact?: boolean;
   className?: string;
 }) {
   if (category === "Gift cards") {
     return (
       <div
         className={cn(
-          "flex h-32 w-full flex-col justify-between rounded-lg bg-gradient-to-br from-neutral-800 via-neutral-900 to-black p-3.5 text-white shadow-inner",
+          "flex w-full flex-col justify-between rounded-lg bg-gradient-to-br from-neutral-800 via-neutral-900 to-black text-white shadow-inner",
+          compact ? "h-24 p-2.5" : "h-32 p-3.5",
           className,
         )}
       >
         <div className="flex items-start justify-between">
           <span
-            className="h-5 w-7 rounded-[3px] bg-gradient-to-br from-yellow-200 to-yellow-500"
+            className={cn(
+              "rounded-[3px] bg-gradient-to-br from-yellow-200 to-yellow-500",
+              compact ? "h-4 w-6" : "h-5 w-7",
+            )}
             aria-hidden="true"
           />
-          <Gift className="h-5 w-5 text-white/60" aria-hidden="true" />
+          <Gift
+            className={cn("text-white/60", compact ? "h-4 w-4" : "h-5 w-5")}
+            aria-hidden="true"
+          />
         </div>
         <div>
-          <p className="line-clamp-2 text-base font-bold leading-tight">{name}</p>
+          <p
+            className={cn(
+              "line-clamp-2 font-bold leading-tight",
+              compact ? "text-sm" : "text-base",
+            )}
+          >
+            {name}
+          </p>
           <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-white/50">
             Gift Card
           </p>
@@ -199,14 +219,22 @@ export function WishlistCardVisual({
   return (
     <div
       className={cn(
-        "flex h-32 w-full flex-col items-center justify-center gap-2 rounded-lg p-3",
+        "flex w-full flex-col items-center justify-center rounded-lg",
+        compact ? "h-24 gap-1.5 p-2.5" : "h-32 gap-2 p-3",
         className,
       )}
       style={{ backgroundColor: bg }}
     >
-      <Icon className="h-6 w-6" style={{ color: text }} aria-hidden="true" />
+      <Icon
+        className={compact ? "h-5 w-5" : "h-6 w-6"}
+        style={{ color: text }}
+        aria-hidden="true"
+      />
       <span
-        className="line-clamp-2 text-center text-lg font-bold leading-tight"
+        className={cn(
+          "line-clamp-2 text-center font-bold leading-tight",
+          compact ? "text-sm" : "text-lg",
+        )}
         style={{ color: text }}
       >
         {name}

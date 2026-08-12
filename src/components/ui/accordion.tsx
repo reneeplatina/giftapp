@@ -27,7 +27,7 @@ export function AccordionItem({
   defaultOpen = false,
   children,
 }: {
-  title: string;
+  title: ReactNode;
   description?: string;
   defaultOpen?: boolean;
   children: ReactNode;

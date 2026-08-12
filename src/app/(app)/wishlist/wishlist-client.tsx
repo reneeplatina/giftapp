@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { ListChecks } from "lucide-react";
 import { Container } from "@/components/container";
+import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -40,6 +41,15 @@ export function WishlistClient() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<WishlistItem | undefined>();
   const [deletingItem, setDeletingItem] = useState<WishlistItem | undefined>();
+  // Tiers start collapsed to keep this page short, which would otherwise
+  // mean a just-saved item silently lands inside a closed section and
+  // looks like it didn't save. Bumping a per-tier counter on save changes
+  // that section's key, remounting just it in the open state — every other
+  // section keeps whatever the reader had toggled, and saving twice into
+  // the same tier re-opens it each time.
+  const [saveCountByTier, setSaveCountByTier] = useState<Record<string, number>>(
+    {},
+  );
 
   const filteredItems = useMemo(() => {
     return wishlistItems.filter((item) => {
@@ -77,6 +87,11 @@ export function WishlistClient() {
     } else {
       await addWishlistItem(values);
     }
+    const savedTier = BUDGET_TIER_BY_LEVEL[values.budgetLevel];
+    setSaveCountByTier((prev) => ({
+      ...prev,
+      [savedTier]: (prev[savedTier] ?? 0) + 1,
+    }));
   }
 
   return (
@@ -133,15 +148,25 @@ export function WishlistClient() {
           )}
         </EmptyState>
       ) : (
-        <div className="flex flex-col gap-6">
+        <Accordion>
           {itemsByTier.map(({ tier, items }) => (
-            <div key={tier} className="flex flex-col gap-3">
-              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
-                <span aria-hidden="true" className="text-base text-emerald-600">
-                  {BUDGET_TIER_SYMBOL[tier]}
+            <AccordionItem
+              // The key only changes for the tier that was just saved
+              // into, so only that section remounts (and thus re-opens).
+              key={`${tier}-${saveCountByTier[tier] ?? 0}`}
+              defaultOpen={(saveCountByTier[tier] ?? 0) > 0}
+              title={
+                <span className="flex items-center gap-2">
+                  <span aria-hidden="true" className="text-emerald-600">
+                    {BUDGET_TIER_SYMBOL[tier]}
+                  </span>
+                  {BUDGET_TIER_LABEL[tier]}
+                  <span className="text-sm font-normal text-neutral-500">
+                    ({items.length})
+                  </span>
                 </span>
-                {BUDGET_TIER_LABEL[tier]}
-              </h2>
+              }
+            >
               <div className="grid gap-4 sm:grid-cols-2">
                 {items.map((item) => (
                   <WishlistItemCard
@@ -152,9 +177,9 @@ export function WishlistClient() {
                   />
                 ))}
               </div>
-            </div>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       )}
 
       <WishlistItemDialog
