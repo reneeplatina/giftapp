@@ -19,9 +19,20 @@ body {
   dialog {
     margin: auto;
     max-height: none;
+    /* Modern browsers fade/scale <dialog> open+close by default (via
+       @starting-style in their UA stylesheet). That's invisible here —
+       no component sets it — but it's exactly what makes every "+" /
+       "Add" button in the app feel laggy: the dialog exists instantly,
+       it just doesn't look like it. Every dialog in the app goes
+       through this one element, so killing the animation here fixes
+       all of them at once. */
+    transition: none;
+    animation: none;
   }
 
   dialog::backdrop {
     background: rgb(28 25 23 / 0.5);
+    transition: none;
+    animation: none;
   }
 }

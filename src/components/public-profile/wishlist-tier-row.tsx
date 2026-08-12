@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { AmazonSearchLink } from "@/components/public-profile/amazon-search-link";
+import { ProductSearchLinks } from "@/components/public-profile/product-search-links";
 import { WishlistCardVisual } from "@/components/wishlist/wishlist-card-visual";
 import type { WishlistItem } from "@/types/profile";
 
@@ -128,7 +128,7 @@ export function WishlistTierRow({
                   <Badge variant="neutral">Dream gift</Badge>
                 )}
               </div>
-              <AmazonSearchLink itemName={item.name} />
+              <ProductSearchLinks itemName={item.name} category={item.category} />
             </Card>
           ))}
         </div>
