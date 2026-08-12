@@ -58,7 +58,7 @@ export function WishlistItemCard({
         )}
         {!item.isPublic && <Badge variant="outline">Private</Badge>}
       </div>
-      <ProductSearchLinks itemName={item.name} />
+      <ProductSearchLinks itemName={item.name} category={item.category} />
     </Card>
   );
 }

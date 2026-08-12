@@ -128,7 +128,7 @@ export function WishlistTierRow({
                   <Badge variant="neutral">Dream gift</Badge>
                 )}
               </div>
-              <ProductSearchLinks itemName={item.name} />
+              <ProductSearchLinks itemName={item.name} category={item.category} />
             </Card>
           ))}
         </div>
