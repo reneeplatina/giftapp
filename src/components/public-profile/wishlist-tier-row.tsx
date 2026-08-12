@@ -57,8 +57,15 @@ export function WishlistTierRow({
     };
   }, [items]);
 
+  // Advance by exactly one card rather than a hardcoded pixel amount, so
+  // the arrow keeps landing cleanly on a snap point if the card size ever
+  // changes again.
   function scrollNext() {
-    scrollRef.current?.scrollBy({ left: 240, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    const firstCard = el.firstElementChild as HTMLElement | null;
+    const step = firstCard ? firstCard.offsetWidth + 12 : el.clientWidth;
+    el.scrollBy({ left: step, behavior: "smooth" });
   }
 
   // Lets people drag the bar under the cards directly, with a finger or
@@ -108,9 +115,13 @@ export function WishlistTierRow({
           {items.map((item) => (
             <Card
               key={item.id}
-              className="flex w-[190px] shrink-0 snap-start flex-col gap-1.5"
+              className="flex w-[160px] shrink-0 snap-start flex-col gap-1.5 p-4"
             >
-              <WishlistCardVisual name={item.name} category={item.category} />
+              <WishlistCardVisual
+                name={item.name}
+                category={item.category}
+                compact
+              />
               {item.description && (
                 <p className="line-clamp-2 text-sm text-neutral-600">
                   {item.description}
