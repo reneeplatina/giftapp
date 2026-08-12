@@ -120,6 +120,7 @@ export function WishlistTierRow({
               <WishlistCardVisual
                 name={item.name}
                 category={item.category}
+                imageUrl={item.imageUrl}
                 compact
               />
               {item.description && (

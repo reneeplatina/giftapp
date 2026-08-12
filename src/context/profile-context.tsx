@@ -26,7 +26,9 @@ import {
 import {
   addWishlistItemAction,
   removeWishlistItemAction,
+  removeWishlistItemImageAction,
   updateWishlistItemAction,
+  uploadWishlistItemImageAction,
   type WishlistActionResult,
 } from "@/lib/wishlist/actions";
 import type { GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
@@ -56,6 +58,11 @@ interface ProfileContextValue {
     item: WishlistItemValues,
   ) => Promise<WishlistActionResult>;
   removeWishlistItem: (id: string) => Promise<WishlistActionResult>;
+  uploadWishlistItemImage: (
+    id: string,
+    file: File,
+  ) => Promise<WishlistActionResult>;
+  removeWishlistItemImage: (id: string) => Promise<WishlistActionResult>;
 }
 
 const ProfileContext = createContext<ProfileContextValue | null>(null);
@@ -221,6 +228,14 @@ export function ProfileProvider({
       const result = await updateWishlistItemAction(id, item);
       if (!result.success) {
         setWishlistItems(previous);
+      } else if (result.item) {
+        // The optimistic merge above was built from raw form values;
+        // swap in the saved row so the photo URL and anything else the
+        // server normalised is what the list actually holds.
+        const saved = result.item;
+        setWishlistItems((prev) =>
+          prev.map((existing) => (existing.id === id ? saved : existing)),
+        );
       }
       return result;
     },
@@ -239,6 +254,31 @@ export function ProfileProvider({
     },
     [wishlistItems],
   );
+
+  // Both photo actions return the freshly-saved row, so the list swaps in
+  // the server's version (including the new signed photo URL) rather than
+  // guessing at it locally.
+  const uploadWishlistItemImage = useCallback(async (id: string, file: File) => {
+    const result = await uploadWishlistItemImageAction(id, file);
+    if (result.success && result.item) {
+      const saved = result.item;
+      setWishlistItems((prev) =>
+        prev.map((item) => (item.id === id ? saved : item)),
+      );
+    }
+    return result;
+  }, []);
+
+  const removeWishlistItemImage = useCallback(async (id: string) => {
+    const result = await removeWishlistItemImageAction(id);
+    if (result.success && result.item) {
+      const saved = result.item;
+      setWishlistItems((prev) =>
+        prev.map((item) => (item.id === id ? saved : item)),
+      );
+    }
+    return result;
+  }, []);
 
   const refreshProfile = useCallback(async () => {
     const result = await getProfileSnapshotAction();
@@ -274,6 +314,8 @@ export function ProfileProvider({
     addWishlistItem,
     updateWishlistItem,
     removeWishlistItem,
+    uploadWishlistItemImage,
+    removeWishlistItemImage,
   };
 
   return (

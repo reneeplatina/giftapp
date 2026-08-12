@@ -52,6 +52,7 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -158,14 +159,38 @@ function colorForText(value: string) {
 export function WishlistCardVisual({
   name,
   category,
+  imageUrl,
   compact = false,
   className,
 }: {
   name: string;
   category: string;
+  imageUrl?: string | null;
   compact?: boolean;
   className?: string;
 }) {
+  // An owner-uploaded photo wins over every generated visual — they
+  // picked it precisely because it shows the actual thing they want.
+  if (imageUrl) {
+    return (
+      <div
+        className={cn(
+          "relative w-full overflow-hidden rounded-lg bg-neutral-100",
+          compact ? "h-24" : "h-32",
+          className,
+        )}
+      >
+        <Image
+          src={imageUrl}
+          alt={name}
+          fill
+          sizes={compact ? "160px" : "(min-width: 640px) 50vw, 100vw"}
+          className="object-cover"
+        />
+      </div>
+    );
+  }
+
   if (category === "Gift cards") {
     return (
       <div

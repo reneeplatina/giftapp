@@ -4,6 +4,7 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getAvatarSignedUrl } from "@/lib/profile/dal";
 import { getProfileImageSignedUrl } from "@/lib/profile-images/dal";
+import { getWishlistImageSignedUrl } from "@/lib/wishlist/dal";
 import {
   SECTION_TS_KEYS,
   dbKeyToTsKey,
@@ -39,6 +40,7 @@ interface PublicProfileRpcResult {
     budgetLevel: string | null;
     priority: string;
     preferredSize: string | null;
+    imagePath: string | null;
   }[];
   managedProfiles: {
     slug: string;
@@ -106,25 +108,11 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
     sectionVisibility[tsKey] = true;
   }
 
-  const wishlistItems: WishlistItem[] = (result.wishlistItems ?? []).map(
-    (item) => ({
-      id: item.id,
-      name: item.name,
-      description: item.description ?? "",
-      category: item.category ?? "",
-      budgetLevel: (item.budgetLevel as WishlistItem["budgetLevel"]) ?? "under_25",
-      priority: item.priority as WishlistItem["priority"],
-      isPublic: true,
-      isArchived: false,
-      preferredSize: item.preferredSize,
-    }),
-  );
-
-  // These three each make their own Supabase Storage round trip to sign
-  // an image URL — independent of each other, so running them together
+  // These each make their own Supabase Storage round trip to sign an
+  // image URL — independent of each other, so running them together
   // instead of one after another cuts the wait to whichever is slowest
-  // instead of the sum of all three.
-  const [avatarUrl, linkedProfiles, images] = await Promise.all([
+  // instead of the sum of all of them.
+  const [avatarUrl, linkedProfiles, images, wishlistItems] = await Promise.all([
     getAvatarSignedUrl(result.avatarPath),
     Promise.all(
       (result.managedProfiles ?? []).map(async (linked) => ({
@@ -141,6 +129,23 @@ export const getPublicProfileBySlug = cache(async (slug: string): Promise<{
         imageUrl: await getProfileImageSignedUrl(supabase, image.imagePath),
         caption: image.caption ?? "",
       })),
+    ),
+    Promise.all(
+      (result.wishlistItems ?? []).map(
+        async (item): Promise<WishlistItem> => ({
+          id: item.id,
+          name: item.name,
+          description: item.description ?? "",
+          category: item.category ?? "",
+          budgetLevel:
+            (item.budgetLevel as WishlistItem["budgetLevel"]) ?? "under_25",
+          priority: item.priority as WishlistItem["priority"],
+          isPublic: true,
+          isArchived: false,
+          preferredSize: item.preferredSize,
+          imageUrl: await getWishlistImageSignedUrl(supabase, item.imagePath),
+        }),
+      ),
     ),
   ]);
 

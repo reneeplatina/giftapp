@@ -82,16 +82,19 @@ export function WishlistClient() {
   }
 
   async function handleSubmit(values: WishlistItemValues) {
-    if (editingItem) {
-      await updateWishlistItem(editingItem.id, values);
-    } else {
-      await addWishlistItem(values);
-    }
+    const result = editingItem
+      ? await updateWishlistItem(editingItem.id, values)
+      : await addWishlistItem(values);
+
+    if (!result.success) return null;
+
     const savedTier = BUDGET_TIER_BY_LEVEL[values.budgetLevel];
     setSaveCountByTier((prev) => ({
       ...prev,
       [savedTier]: (prev[savedTier] ?? 0) + 1,
     }));
+    // Handed back so the dialog can attach a photo picked while adding.
+    return result.item ?? null;
   }
 
   return (

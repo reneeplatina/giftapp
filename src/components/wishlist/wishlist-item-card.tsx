@@ -24,7 +24,11 @@ export function WishlistItemCard({
   return (
     <Card className="flex flex-col gap-3">
       <div className="relative">
-        <WishlistCardVisual name={item.name} category={item.category} />
+        <WishlistCardVisual
+          name={item.name}
+          category={item.category}
+          imageUrl={item.imageUrl}
+        />
         <div className="absolute right-1.5 top-1.5 flex gap-1">
           <button
             type="button"

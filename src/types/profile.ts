@@ -145,4 +145,8 @@ export interface WishlistItem {
   isPublic: boolean;
   isArchived: boolean;
   preferredSize: string | null;
+  /** Signed URL for an owner-uploaded photo, or null to fall back to the
+   * category icon. Photos are only ever uploaded by hand — nothing is
+   * fetched automatically from the web. */
+  imageUrl: string | null;
 }
