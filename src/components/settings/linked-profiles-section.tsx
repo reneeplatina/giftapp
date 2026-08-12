@@ -101,7 +101,10 @@ export function LinkedProfilesSection({
   }
 
   return (
-    <section className="flex flex-col gap-3">
+    // The onboarding page links straight here with #linked-profiles, so
+    // "Set up a kids profile" lands on this section rather than the top
+    // of Settings. scroll-mt keeps the heading clear of the sticky bar.
+    <section id="linked-profiles" className="flex scroll-mt-20 flex-col gap-3">
       <div>
         <h2 className="font-display text-lg font-semibold text-neutral-900">
           Linked profiles
