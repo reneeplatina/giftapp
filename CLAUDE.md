@@ -61,6 +61,9 @@ See `docs/PRODUCT_SPEC.md` for the full product definition.
 - Keep components accessible (semantic HTML, labels, keyboard navigation,
   sufficient color contrast) and mobile-first.
 - Run typecheck, lint, and tests after every phase.
+- Before calling any change done, actually read back over the diff looking
+  for bugs — not just "the automated checks passed." Passing typecheck/
+  lint/tests catches syntax and type errors, not logic mistakes.
 - Stop after completing the requested phase. Do not start the next phase
   unless asked.
 
