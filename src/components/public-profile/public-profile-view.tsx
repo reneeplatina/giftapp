@@ -304,13 +304,18 @@ export function PublicProfileView({
         </Section>
       )}
 
-      <div className="flex justify-center">
-        <ShareModal
-          url={publicUrl}
-          title={`GIFT ME! 🎁 — ${profile.basicInfo.displayName}'s gift profile`}
-          triggerLabel="Share"
-        />
-      </div>
+      {/* Only for real visitors. In preview the profile may still be a
+          draft, and this link would copy fine but open to nothing — the
+          preview header carries a status-aware control instead. */}
+      {!isPreview && (
+        <div className="flex justify-center">
+          <ShareModal
+            url={publicUrl}
+            title={`GIFT ME! 🎁 — ${profile.basicInfo.displayName}'s gift profile`}
+            triggerLabel="Share"
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -31,7 +31,12 @@ import {
   uploadWishlistItemImageAction,
   type WishlistActionResult,
 } from "@/lib/wishlist/actions";
-import type { GiftProfile, ThemeKey, WishlistItem } from "@/types/profile";
+import type {
+  GiftProfile,
+  ProfileStatus,
+  ThemeKey,
+  WishlistItem,
+} from "@/types/profile";
 import type { WishlistItemValues } from "@/lib/validation/wishlist";
 
 interface ProfileContextValue {
@@ -47,6 +52,7 @@ interface ProfileContextValue {
     items: string[],
   ) => Promise<ProfileActionResult>;
   updatePrivacy: (values: GiftProfile["privacy"]) => Promise<ProfileActionResult>;
+  setStatus: (next: ProfileStatus) => Promise<ProfileActionResult>;
   setTheme: (theme: ThemeKey) => Promise<ProfileActionResult>;
   uploadAvatar: (file: File) => Promise<ProfileActionResult & { avatarUrl?: string }>;
   setAvatarEmoji: (emoji: string, backgroundColor: string) => Promise<ProfileActionResult>;
@@ -159,6 +165,27 @@ export function ProfileProvider({
       return result;
     },
     [profile.privacy],
+  );
+
+  // Just the published/draft/hidden switch on its own, for the share
+  // controls — they have no reason to rewrite section visibility too.
+  const setStatus = useCallback(
+    async (next: ProfileStatus) => {
+      const previous = profile.privacy.status;
+      setProfile((prev) => ({
+        ...prev,
+        privacy: { ...prev.privacy, status: next },
+      }));
+      const result = await saveStatusAction(next);
+      if (!result.success) {
+        setProfile((prev) => ({
+          ...prev,
+          privacy: { ...prev.privacy, status: previous },
+        }));
+      }
+      return result;
+    },
+    [profile.privacy.status],
   );
 
   const setTheme = useCallback(
@@ -307,6 +334,7 @@ export function ProfileProvider({
     updateSizes,
     updateStringList,
     updatePrivacy,
+    setStatus,
     setTheme,
     uploadAvatar,
     setAvatarEmoji,

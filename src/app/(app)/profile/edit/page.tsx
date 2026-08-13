@@ -4,6 +4,7 @@ import { requireAuthUser } from "@/lib/auth/dal";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ShareRow } from "@/components/share-row";
 import { BasicInfoSection } from "@/components/profile-builder/basic-info-section";
 import { SizesSection } from "@/components/profile-builder/sizes-section";
 import { ChipListSection } from "@/components/profile-builder/chip-list-section";
@@ -62,6 +63,12 @@ export default async function ProfileEditPage() {
         </div>
 
         {headerActions}
+
+        {/* A simple profile has no Privacy accordion to hide this in, so
+            without it there'd be no way to publish one from here at all. */}
+        <Card>
+          <ShareRow isManagedProfile />
+        </Card>
 
         <Card>
           <BasicInfoSection />

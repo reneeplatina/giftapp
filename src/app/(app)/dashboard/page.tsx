@@ -2,12 +2,10 @@ import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { Container } from "@/components/container";
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { CopyLinkButton } from "@/components/copy-link-button";
-import { ShareModal } from "@/components/share-modal";
+import { ShareRow } from "@/components/share-row";
 import { DashboardLinkedProfiles } from "@/components/dashboard/linked-profiles-card";
 import { HowItWorks } from "@/components/how-it-works";
 import { requireAuthUser } from "@/lib/auth/dal";
@@ -18,19 +16,7 @@ import { getManagedProfiles } from "@/lib/profile/managed-dal";
 import { SECTION_TS_KEYS } from "@/lib/profile/section-keys";
 import { getSiteUrl } from "@/lib/site-url";
 import { isAdminEmail } from "@/lib/admin";
-import type { ProfileStatus, ThemeKey } from "@/types/profile";
-
-const STATUS_LABEL: Record<ProfileStatus, string> = {
-  draft: "Draft",
-  published: "Published",
-  hidden: "Hidden",
-};
-
-const STATUS_VARIANT: Record<ProfileStatus, "success" | "warning" | "outline"> = {
-  draft: "warning",
-  published: "success",
-  hidden: "outline",
-};
+import type { ThemeKey } from "@/types/profile";
 
 interface NextStep {
   label: string;
@@ -167,15 +153,11 @@ export default async function DashboardPage() {
       <DashboardLinkedProfiles profiles={otherProfiles} />
 
       <Card className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Badge variant={STATUS_VARIANT[profile.status]}>
-            {STATUS_LABEL[profile.status]}
-          </Badge>
-          <div className="flex flex-wrap gap-2">
-            <CopyLinkButton url={publicUrl} />
-            <ShareModal url={publicUrl} title={`GIFT ME! 🎁 — ${profile.display_name}'s gift profile`} />
-          </div>
-        </div>
+        <ShareRow
+          url={publicUrl}
+          displayName={profile.display_name}
+          isManagedProfile={isManagedProfileActive}
+        />
         <ProgressBar value={completionPercent} label="Profile completeness" />
         {nextStep && (
           <p className="text-sm text-neutral-600">
